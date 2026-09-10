@@ -3,17 +3,20 @@ import {
   StoryboardScene,
   Shot,
   ShotType,
+  ReferenceType,
   Episode,
   Character,
   CharacterVersion,
   GlobalStyleVersion,
 } from '../types';
 import { StorageService } from './storageService';
+import { CharacterReferenceService } from './characterReferenceService';
 
 export interface PromptPreviewResult {
   fullPrompt: string;
   styleDna: string;
   charactersDna: string[];
+  referenceAssets: string[];
   environment: string;
   cameraAndLighting: string;
   actionAndEmotion: string;
@@ -65,7 +68,8 @@ export class StoryboardService {
 
   public getAllStoryboards(): Storyboard[] {
     const db = this.storage.getDatabase();
-    return db.storyboards || [];
+    const storyboards = db.storyboards || [];
+    return storyboards.map((sb) => this.enrichStoryboard(sb));
   }
 
   public getStoryboardById(id: string): Storyboard | undefined {
@@ -74,6 +78,82 @@ export class StoryboardService {
 
   public getStoryboardByEpisodeId(episodeId: string): Storyboard | undefined {
     return this.getAllStoryboards().find((sb) => sb.episodeId === episodeId);
+  }
+
+  /**
+   * Resolves reference assets for a shot strictly using its locked character versions.
+   */
+  public resolveCharacterReferenceAssets(
+    characterIds: string[],
+    lockedCharacterSnapshots: Record<string, string>,
+  ): {
+    characterReferenceAssetIds: Record<string, string[]>;
+    characterPrimaryReferenceAssets: Record<string, string>;
+  } {
+    const db = this.storage.getDatabase();
+    const allRefs = db.characterReferences || [];
+    const referenceAssetIds: Record<string, string[]> = {};
+    const primaryAssets: Record<string, string> = {};
+
+    characterIds.forEach((charId) => {
+      const verId = lockedCharacterSnapshots[charId];
+      if (verId) {
+        const verRefs = allRefs.filter(
+          (r) => r.characterId === charId && r.characterVersionId === verId,
+        );
+        referenceAssetIds[charId] = verRefs.map((r) => r.id);
+        const primary = verRefs.find((r) => r.isPrimary) || verRefs[0];
+        if (primary) {
+          primaryAssets[charId] = primary.id;
+        }
+      }
+    });
+
+    return {
+      characterReferenceAssetIds: referenceAssetIds,
+      characterPrimaryReferenceAssets: primaryAssets,
+    };
+  }
+
+  /**
+   * Enriches shot with resolved reference assets from locked Character DNA.
+   */
+  public enrichShotWithReferences(shot: Shot): Shot {
+    if (
+      shot.characterReferenceAssetIds &&
+      Object.keys(shot.characterReferenceAssetIds).length > 0 &&
+      shot.characterPrimaryReferenceAssets &&
+      Object.keys(shot.characterPrimaryReferenceAssets).length > 0
+    ) {
+      return shot;
+    }
+
+    const { characterReferenceAssetIds, characterPrimaryReferenceAssets } =
+      this.resolveCharacterReferenceAssets(
+        shot.characterIds,
+        shot.characterDnaReferences,
+      );
+
+    return {
+      ...shot,
+      characterReferenceAssetIds,
+      characterPrimaryReferenceAssets,
+    };
+  }
+
+  /**
+   * Enriches storyboard scenes and shots with reference asset inheritance.
+   */
+  public enrichStoryboard(storyboard: Storyboard): Storyboard {
+    const scenes = (storyboard.scenes || []).map((scene) => ({
+      ...scene,
+      shots: (scene.shots || []).map((shot) => this.enrichShotWithReferences(shot)),
+    }));
+
+    return {
+      ...storyboard,
+      scenes,
+    };
   }
 
   public saveStoryboard(storyboard: Storyboard): void {
@@ -387,7 +467,7 @@ export class StoryboardService {
       generationStatus: 'Not Generated',
     });
 
-    return shots;
+    return shots.map((s) => this.enrichShotWithReferences(s));
   }
 
   /**
@@ -516,11 +596,13 @@ export class StoryboardService {
       updatedAt: new Date().toISOString(),
     };
 
+    const enrichedShot = this.enrichShotWithReferences(newShot);
+
     const updatedScenes = sb.scenes.map((scene) => {
       if (scene.id !== sceneId) return scene;
       return {
         ...scene,
-        shots: [...scene.shots, newShot],
+        shots: [...scene.shots, enrichedShot],
       };
     });
 
@@ -584,14 +666,33 @@ export class StoryboardService {
       ? `[Style DNA: Version ${styleVersion.version} - ${styleVersion.characterRendering || '3D CGI Pixar-Disney family feature animation'}, ${styleVersion.colorPalette || 'Warm vibrant tones'}, ${styleVersion.lighting || 'Cinematic warm illumination'}]`
       : `[Style DNA: 3D CGI Family Animation, Pixar/Disney inspired, warm golden hour lighting]`;
 
-    // 2. Character DNA (resolved strictly via shot.characterDnaReferences)
+    // 2. Character DNA & Reference Image Assets (resolved strictly via shot.characterDnaReferences)
     const charactersDna: string[] = [];
+    const referenceAssets: string[] = [];
+
+    const enrichedShot = this.enrichShotWithReferences(shot);
+    if (enrichedShot.characterPrimaryReferenceAssets) {
+      Object.entries(enrichedShot.characterPrimaryReferenceAssets).forEach(([charId, refId]) => {
+        const char = db.characters.find((c) => c.id === charId);
+        const ref = db.characterReferences.find((r) => r.id === refId);
+        if (ref) {
+          referenceAssets.push(
+            `[Reference Asset: ${char?.displayName || charId} (${ref.characterVersionId}) -> "${ref.storagePath}" | Type: ${ref.type} | ID: ${ref.id}]`
+          );
+        }
+      });
+    }
+
     shot.characterIds.forEach((charId) => {
       const versionId = shot.characterDnaReferences[charId];
       const character = db.characters.find((c) => c.id === charId);
       const version = db.characterVersions.find((v) => v.id === versionId);
 
       if (character && version) {
+        const primaryRefId = enrichedShot.characterPrimaryReferenceAssets?.[charId];
+        const primaryRef = primaryRefId
+          ? db.characterReferences.find((r) => r.id === primaryRefId)
+          : undefined;
         const traits = [
           `${character.displayName} (${character.vietnameseName || ''})`,
           `DNA Snapshot: Version ${version.version} (${version.id})`,
@@ -601,6 +702,7 @@ export class StoryboardService {
           `Costume: ${version.clothing || ''}`,
           `Hair/Feature: ${version.hair || ''}`,
           `Proportions: ${version.bodyProportions || 'Canonical'}`,
+          primaryRef ? `Reference Image Path: ${primaryRef.storagePath}` : '',
         ]
           .filter(Boolean)
           .join(' | ');
@@ -610,6 +712,10 @@ export class StoryboardService {
         charactersDna.push(`[Character: ${character.displayName} - Version Ref: ${versionId || 'Canonical'}]`);
       }
     });
+
+    const referenceSection = referenceAssets.length > 0
+      ? `[Stored Reference Conditioning (Image/Video Generation Input):\n${referenceAssets.join('\n')}]`
+      : '';
 
     // 3. Environment & Staging
     const environment = `[Environment & Staging: ${shot.location}, Time of Day: ${shot.timeOfDay}]`;
@@ -629,20 +735,24 @@ export class StoryboardService {
       ? `[Dialogue Cue: ${shot.speakerCharacterName ? `${shot.speakerCharacterName}: ` : ''}"${shot.dialogue}"]`
       : `[Dialogue Cue: None / Ambient Action]`;
 
-    const fullPrompt = [
+    const promptParts = [
       styleDna,
+      referenceSection,
       ...charactersDna,
       environment,
       cameraAndLighting,
       actionAndEmotion,
       continuity,
       dialogueCue,
-    ].join('\n\n');
+    ].filter(Boolean);
+
+    const fullPrompt = promptParts.join('\n\n');
 
     return {
       fullPrompt,
       styleDna,
       charactersDna,
+      referenceAssets,
       environment,
       cameraAndLighting,
       actionAndEmotion,

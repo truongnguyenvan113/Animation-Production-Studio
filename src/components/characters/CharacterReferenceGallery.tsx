@@ -222,19 +222,35 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
                   </div>
 
                   {/* Visual Preview */}
-                  <ReferenceCardPreview characterId={ref.characterId} type={ref.type} />
+                  <ReferenceCardPreview
+                    characterId={ref.characterId}
+                    type={ref.type}
+                    image={ref.image}
+                    storagePath={ref.storagePath}
+                    isPrimary={ref.isPrimary}
+                  />
 
-                  {/* Description note */}
+                  {/* Description note & Canonical Storage */}
                   <p className="text-xs text-slate-300 mt-3 line-clamp-2 leading-relaxed">
                     {ref.description}
                   </p>
+                  {ref.storagePath && (
+                    <p className="text-[10px] font-mono text-sky-400/80 truncate mt-1 bg-slate-950 p-1.5 rounded border border-slate-800/60">
+                      {ref.storagePath}
+                    </p>
+                  )}
                 </div>
 
                 {/* Footer actions */}
                 <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80 text-[11px] text-slate-400">
-                  <span className="font-mono text-amber-400/90">
-                    #{ref.type.toUpperCase()}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-mono text-amber-400/90">
+                      #{ref.type.toUpperCase()}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                      {ref.characterVersionId}
+                    </span>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     <button

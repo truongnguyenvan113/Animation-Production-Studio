@@ -8,6 +8,7 @@ import {
 import { CharacterVersionService } from '../../services/characterVersionService';
 import { CharacterService } from '../../services/characterService';
 import { CharacterAvatar } from '../shared/CharacterAvatar';
+import { CharacterVersionReferenceLibrary } from './CharacterVersionReferenceLibrary';
 import {
   Dna,
   Save,
@@ -22,6 +23,7 @@ import {
   Layers,
   Copy,
   Info,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface CharacterDNAEditorProps {
@@ -52,7 +54,7 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
     const initId = initialVersionId || character?.activeVersionId || (versions[0]?.id ?? '');
     return CharacterVersionService.getVersionById(initId) || null;
   });
-  const [activeTab, setActiveTab] = useState<'physical' | 'facial' | 'attire' | 'personality' | 'prompts'>('physical');
+  const [activeTab, setActiveTab] = useState<'physical' | 'facial' | 'attire' | 'personality' | 'prompts' | 'references'>('physical');
   const [isNewVersionModalOpen, setIsNewVersionModalOpen] = useState(false);
   const [newVersionTag, setNewVersionTag] = useState('v1.1');
   const [newVersionNotes, setNewVersionNotes] = useState('');
@@ -308,6 +310,22 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
           }`}
         >
           5. {formatLabel('Visual Keywords & AI Prompts', 'Từ khóa & Prompts')}
+        </button>
+        <button
+          onClick={() => setActiveTab('references')}
+          className={`px-4 py-2 rounded-t-lg transition-colors border-b-2 flex items-center gap-1.5 ${
+            activeTab === 'references'
+              ? 'border-amber-400 text-amber-400 bg-slate-900 font-bold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+          }`}
+        >
+          <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+          <span>6. {formatLabel('Upload Reference Images & Library', 'Tải lên ảnh tham chiếu & Thư viện')}</span>
+          {formData.referenceAssetIds && formData.referenceAssetIds.length > 0 && (
+            <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-300 font-mono">
+              {formData.referenceAssetIds.length}
+            </span>
+          )}
         </button>
       </div>
 
@@ -722,6 +740,23 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 text-xs font-mono text-rose-300 focus:border-amber-500 focus:outline-none"
             />
           </div>
+        </div>
+      )}
+
+      {/* Tab 6: Reference Images & Isolated Version Library */}
+      {activeTab === 'references' && (
+        <div className="space-y-4">
+          <CharacterVersionReferenceLibrary
+            characterId={character.id}
+            characterVersionId={formData.id}
+            language={language}
+            onAssetChanged={() => {
+              const updated = CharacterVersionService.getVersionById(formData.id);
+              if (updated) {
+                setFormData({ ...updated });
+              }
+            }}
+          />
         </div>
       )}
 

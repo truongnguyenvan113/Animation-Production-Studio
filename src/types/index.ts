@@ -1,12 +1,19 @@
 export type ReferenceType =
+  | 'front'
+  | '3/4'
+  | 'side'
+  | 'expressions'
+  | 'full-body'
+  | 'custom'
   | 'Front'
   | 'Side'
-  | '3/4'
   | 'Full Body'
   | 'Face'
   | 'Expression'
+  | 'Expressions'
   | 'Clothing'
   | 'Pose'
+  | 'Custom'
   | 'Other';
 
 export type CharacterStatus = 'Active' | 'Draft' | 'Archived' | 'Deprecated';
@@ -89,19 +96,27 @@ export interface CharacterVersion {
   characterPrompt: string;
   negativePrompt: string;
   status: CharacterStatus;
+  primaryReferenceAssetId?: string; // Canonical primary reference asset ID
+  referenceAssetIds?: string[]; // IDs of reference assets attached to this version
   createdAt: string;
 }
 
 export interface CharacterReference {
-  id: string;
-  characterVersionId: string;
-  characterId: string;
-  type: ReferenceType;
-  image: string;
+  id: string; // Persistent unique asset ID e.g. "ref_pi_v1_front_01"
+  characterId: string; // Canonical Character ID
+  characterVersionId: string; // Canonical Character Version ID
+  storagePath: string; // Canonical path: "characters/{characterId}/{versionId}/{id}.png"
+  type: ReferenceType; // front, 3/4, side, expressions, full-body, custom
+  image: string; // Data URL, file path, or image URL
   thumbnail?: string;
   description: string;
+  isPrimary: boolean; // Primary reference flag
   active: boolean;
   createdAt: string;
+  fileSize?: number; // File size in bytes
+  mimeType?: string;
+  width?: number;
+  height?: number;
 }
 
 export interface GlobalStyle {
@@ -288,6 +303,9 @@ export interface Shot {
   characterDnaReferences: Record<string, string>;
   // INHERITED FROM EPISODE SNAPSHOT - IMMUTABLE PER SHOT
   styleVersionSnapshotId: string;
+  // INHERITED LOCKED REFERENCE ASSETS PER CHARACTER (maps characterId -> reference asset IDs)
+  characterReferenceAssetIds?: Record<string, string[]>;
+  characterPrimaryReferenceAssets?: Record<string, string>;
   location: string;
   timeOfDay: string;
   lighting: string;

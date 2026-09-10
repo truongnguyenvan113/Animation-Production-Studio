@@ -1,6 +1,7 @@
 import { CharacterVersion } from '../types';
 import { storageService } from './storageService';
 import { CharacterService } from './characterService';
+import { CharacterReferenceService } from './characterReferenceService';
 
 export class CharacterVersionService {
   public static getAllVersions(): CharacterVersion[] {
@@ -74,11 +75,20 @@ export class CharacterVersionService {
       version: newVersionLabel,
       changeNotes,
       status: 'Active',
+      primaryReferenceAssetId: undefined,
+      referenceAssetIds: [],
       createdAt: new Date().toISOString(),
     };
 
     const updatedVersions = [newVersion, ...db.characterVersions];
     storageService.saveDatabase({ characterVersions: updatedVersions });
+
+    // Clone isolated reference assets strictly under characters/{characterId}/{newVersionId}/
+    CharacterReferenceService.cloneReferencesForNewVersion(
+      baseVersionId,
+      characterId,
+      newVersionId,
+    );
 
     if (setAsActive) {
       CharacterService.updateCharacter(characterId, {
@@ -86,7 +96,7 @@ export class CharacterVersionService {
       });
     }
 
-    return newVersion;
+    return this.getVersionById(newVersionId) || newVersion;
   }
 
   public static setActiveVersion(characterId: string, versionId: string): void {

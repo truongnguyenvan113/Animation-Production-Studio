@@ -1,5 +1,6 @@
-import { Character, CharacterReference } from '../types';
+import { Character, CharacterReference, ReferenceType } from '../types';
 import { storageService } from './storageService';
+import { CharacterReferenceService } from './characterReferenceService';
 
 export class CharacterService {
   public static getAllCharacters(): Character[] {
@@ -38,38 +39,62 @@ export class CharacterService {
   }
 
   public static getAllReferences(): CharacterReference[] {
-    return storageService.getDatabase().characterReferences;
+    return CharacterReferenceService.getAllReferences();
   }
 
   public static getReferencesForVersion(versionId: string): CharacterReference[] {
-    return storageService.getDatabase().characterReferences.filter(
-      (r) => r.characterVersionId === versionId,
-    );
+    return CharacterReferenceService.getReferencesForVersion(versionId);
   }
 
   public static getReferencesForCharacter(characterId: string): CharacterReference[] {
-    return storageService.getDatabase().characterReferences.filter(
+    return CharacterReferenceService.getAllReferences().filter(
       (r) => r.characterId === characterId,
     );
   }
 
-  public static addReference(
-    ref: Omit<CharacterReference, 'id' | 'createdAt'>,
-  ): CharacterReference {
-    const newRef: CharacterReference = {
-      ...ref,
-      id: `ref_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
-      createdAt: new Date().toISOString(),
-    };
+  public static getReferencesForCharacterAndVersion(
+    characterId: string,
+    versionId: string,
+  ): CharacterReference[] {
+    return CharacterReferenceService.getReferencesForCharacterAndVersion(
+      characterId,
+      versionId,
+    );
+  }
 
-    const refs = storageService.getDatabase().characterReferences;
-    storageService.saveDatabase({ characterReferences: [newRef, ...refs] });
-    return newRef;
+  public static getPrimaryReference(versionId: string): CharacterReference | undefined {
+    return CharacterReferenceService.getPrimaryReference(versionId);
+  }
+
+  public static addReference(
+    ref: Partial<CharacterReference> & {
+      characterId: string;
+      characterVersionId: string;
+      type: ReferenceType;
+      image: string;
+      description?: string;
+    },
+  ): CharacterReference {
+    return CharacterReferenceService.addReference({
+      characterId: ref.characterId,
+      characterVersionId: ref.characterVersionId,
+      type: ref.type,
+      image: ref.image,
+      description: ref.description || '',
+      isPrimary: ref.isPrimary,
+      fileSize: ref.fileSize,
+      mimeType: ref.mimeType,
+      width: ref.width,
+      height: ref.height,
+    });
+  }
+
+  public static setPrimaryReference(refId: string): void {
+    CharacterReferenceService.setPrimaryReference(refId);
   }
 
   public static deleteReference(refId: string): void {
-    const refs = storageService.getDatabase().characterReferences.filter((r) => r.id !== refId);
-    storageService.saveDatabase({ characterReferences: refs });
+    CharacterReferenceService.deleteReference(refId);
   }
 
   public static toggleReferenceActive(refId: string): void {
