@@ -19,7 +19,7 @@ import {
   SEED_EPISODES,
 } from './seedData';
 
-const STORAGE_KEY = 'pikem_animation_studio_v1';
+const STORAGE_KEY = 'pikem_animation_studio_v2';
 
 export interface StudioDatabase {
   project: Project;
@@ -55,7 +55,15 @@ export class StorageService {
       if (data) {
         const parsed = JSON.parse(data);
         if (parsed.project && parsed.characters && parsed.characterVersions) {
-          return parsed;
+          // Verify canonical character compliance
+          const ethanVer = parsed.characterVersions.find((v: CharacterVersion) => v.characterId === 'char_ethan');
+          const mochiVer = parsed.characterVersions.find((v: CharacterVersion) => v.characterId === 'char_mochi');
+          const isEthanValid = ethanVer?.occupation?.includes('Programmer') || ethanVer?.occupation?.includes('Software');
+          const isMochiPuppy = mochiVer?.species?.toLowerCase().includes('puppy') || mochiVer?.visualIdentity?.toLowerCase().includes('puppy');
+          
+          if (isEthanValid && isMochiPuppy) {
+            return parsed;
+          }
         }
       }
     } catch (e) {

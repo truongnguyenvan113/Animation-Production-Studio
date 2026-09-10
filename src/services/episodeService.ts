@@ -144,7 +144,7 @@ export class EpisodeService {
     }
 
     const db = storageService.getDatabase();
-    const characterSnapshots = Object.entries(ep.characterVersionSnapshots).map(
+    const characterSnapshots = Object.entries(ep.characterVersionSnapshots || {}).map(
       ([charId, verId]) => {
         const char = db.characters.find((c) => c.id === charId);
         const ver = db.characterVersions.find((v) => v.id === verId);

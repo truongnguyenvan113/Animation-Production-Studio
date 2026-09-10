@@ -48,7 +48,10 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
     initialVersionId || character?.activeVersionId || (versions[0]?.id ?? ''),
   );
 
-  const [formData, setFormData] = useState<CharacterVersion | null>(null);
+  const [formData, setFormData] = useState<CharacterVersion | null>(() => {
+    const initId = initialVersionId || character?.activeVersionId || (versions[0]?.id ?? '');
+    return CharacterVersionService.getVersionById(initId) || null;
+  });
   const [activeTab, setActiveTab] = useState<'physical' | 'facial' | 'attire' | 'personality' | 'prompts'>('physical');
   const [isNewVersionModalOpen, setIsNewVersionModalOpen] = useState(false);
   const [newVersionTag, setNewVersionTag] = useState('v1.1');
@@ -310,65 +313,131 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
 
       {/* Tab 1: Physical & Proportions */}
       {activeTab === 'physical' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-900/90 border border-slate-800 p-6 rounded-2xl">
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {formatLabel('Age Range', 'Độ tuổi')}
-            </label>
-            <input
-              type="text"
-              value={formData.age}
-              onChange={(e) => handleFieldChange('age', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
-            />
+        <div className="space-y-4 bg-slate-900/90 border border-slate-800 p-6 rounded-2xl">
+          {/* Canonical Bible Core Specification */}
+          <div className="p-4 rounded-xl bg-slate-950 border border-amber-500/20 space-y-3">
+            <div className="flex items-center gap-2 text-amber-400 text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-4 h-4" />
+              <span>{formatLabel('Canonical Character Bible Attributes', 'Thuộc Tính Chuẩn Hóa Theo Kinh Thánh Nhân Vật')}</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {formatLabel('Canonical Occupation / Role Description', 'Nghề nghiệp / Mô tả vai trò')}
+                </label>
+                <input
+                  type="text"
+                  value={formData.occupation || ''}
+                  placeholder="e.g. Programmer / Software Developer or Career Consultant"
+                  onChange={(e) => handleFieldChange('occupation', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {formatLabel('Likes & Hobbies', 'Sở thích & Niềm đam mê')}
+                </label>
+                <input
+                  type="text"
+                  value={formData.likes || ''}
+                  placeholder="e.g. Sports, football, travelling, dancing, etc."
+                  onChange={(e) => handleFieldChange('likes', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  {formatLabel('Visual Identity Mandate', 'Quy chuẩn nhận diện thị giác')}
+                </label>
+                <input
+                  type="text"
+                  value={formData.visualIdentity || ''}
+                  placeholder="e.g. Must be represented as a father in a warm family-oriented 3D children's animation universe."
+                  onChange={(e) => handleFieldChange('visualIdentity', e.target.value)}
+                  className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                />
+              </div>
+
+              {character.isSupporting && (
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    {formatLabel('Species & Character Type (e.g. Dog, NOT a cat)', 'Loài & Phân loại nhân vật (Cún con, không phải mèo)')}
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.species || ''}
+                    placeholder="Small fluffy cream-colored puppy (Dog)"
+                    onChange={(e) => handleFieldChange('species', e.target.value)}
+                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {formatLabel('Gender', 'Giới tính')}
-            </label>
-            <input
-              type="text"
-              value={formData.gender}
-              onChange={(e) => handleFieldChange('gender', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {formatLabel('Age Range', 'Độ tuổi')}
+              </label>
+              <input
+                type="text"
+                value={formData.age}
+                onChange={(e) => handleFieldChange('age', e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {formatLabel('Height & Scale', 'Chiều cao & Tỷ lệ cơ thể')}
-            </label>
-            <input
-              type="text"
-              value={formData.height}
-              onChange={(e) => handleFieldChange('height', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
-            />
-          </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {formatLabel('Gender', 'Giới tính')}
+              </label>
+              <input
+                type="text"
+                value={formData.gender}
+                onChange={(e) => handleFieldChange('gender', e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {formatLabel('Body Proportions (Stylized CGI)', 'Tỷ lệ thân hình (Heads scale)')}
-            </label>
-            <input
-              type="text"
-              value={formData.bodyProportions}
-              onChange={(e) => handleFieldChange('bodyProportions', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
-            />
-          </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {formatLabel('Height & Scale', 'Chiều cao & Tỷ lệ cơ thể')}
+              </label>
+              <input
+                type="text"
+                value={formData.height}
+                onChange={(e) => handleFieldChange('height', e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
 
-          <div className="md:col-span-2">
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              {formatLabel('Skin Tone & Subsurface Scattering', 'Màu da & Ánh sáng xuyên da')}
-            </label>
-            <input
-              type="text"
-              value={formData.skinTone}
-              onChange={(e) => handleFieldChange('skinTone', e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
-            />
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {formatLabel('Body Proportions (Stylized CGI)', 'Tỷ lệ thân hình (Heads scale)')}
+              </label>
+              <input
+                type="text"
+                value={formData.bodyProportions}
+                onChange={(e) => handleFieldChange('bodyProportions', e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                {formatLabel('Skin Tone & Subsurface Scattering', 'Màu da & Ánh sáng xuyên da')}
+              </label>
+              <input
+                type="text"
+                value={formData.skinTone}
+                onChange={(e) => handleFieldChange('skinTone', e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
       )}

@@ -61,6 +61,10 @@ export interface CharacterVersion {
   characterId: string;
   version: string; // e.g. "v1.0", "v1.1", "v2.0"
   changeNotes?: string;
+  occupation?: string; // Canonical occupation
+  likes?: string; // Canonical hobbies / likes
+  species?: string; // e.g. Small fluffy cream-colored puppy (Dog)
+  visualIdentity?: string; // Canonical visual identity statement
   age: string;
   gender: string;
   height: string;

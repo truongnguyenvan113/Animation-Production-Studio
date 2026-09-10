@@ -28,7 +28,10 @@ export const GlobalStyleView: React.FC<GlobalStyleViewProps> = ({ language }) =>
     style.activeVersionId || versions[0]?.id || '',
   );
 
-  const [formData, setFormData] = useState<GlobalStyleVersion | null>(null);
+  const [formData, setFormData] = useState<GlobalStyleVersion | null>(() => {
+    const initId = style.activeVersionId || versions[0]?.id || '';
+    return StyleService.getStyleVersionById(initId) || null;
+  });
   const [isNewVersionModalOpen, setIsNewVersionModalOpen] = useState(false);
   const [newVersionTag, setNewVersionTag] = useState('v1.2');
   const [newVersionNotes, setNewVersionNotes] = useState('');

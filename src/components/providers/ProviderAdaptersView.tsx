@@ -46,8 +46,8 @@ export const ProviderAdaptersView: React.FC<ProviderAdaptersViewProps> = ({
             </div>
             <p className="text-xs text-slate-400">
               {formatLabel(
-                'Creative truth (Character DNA & Style) is permanently decoupled from specific video AI engines.',
-                'Dữ liệu sáng tạo (DNA & Style) hoàn toàn độc lập với các công cụ video AI như Runway, Kling, Luma, Sora.',
+                'Creative truth (Character DNA & Style) is permanently decoupled from specific video AI engines (Google Flow, Veo, Runway, Luma, Kling).',
+                'Dữ liệu sáng tạo (DNA & Style) hoàn toàn độc lập với các công cụ video AI như Google Flow, Veo, Runway, Luma, Kling.',
               )}
             </p>
           </div>
@@ -62,8 +62,8 @@ export const ProviderAdaptersView: React.FC<ProviderAdaptersViewProps> = ({
         </div>
         <p className="leading-relaxed">
           {formatLabel(
-            'AI video generation models evolve rapidly. By storing universal Character DNA and Style as vendor-neutral specifications, you can route Episode 9 shots to Kling for realistic child interactions, Runway Gen-3 for fluid camera pans, or Luma for dynamic lighting, without corrupting your character identity truth.',
-            'Các mô hình video AI thay đổi liên tục. Bằng cách chuẩn hóa dữ liệu sáng tạo độc lập, xưởng phim có thể chuyển đổi linh hoạt giữa Kling, Runway Gen-3, Luma hay Sora tùy theo thế mạnh từng cảnh mà không sợ bị sai lệch danh tính nhân vật.',
+            'AI video generation models evolve rapidly. By storing universal Character DNA and Style as vendor-neutral specifications, you can route Episode 9 shots to Kling for energetic toddler motion, Runway Gen-3 for fluid camera pans, Luma for dynamic lighting, Veo for high-fidelity physics, or Google Flow for manual camera choreography, without corrupting your character identity truth.',
+            'Các mô hình video AI thay đổi liên tục. Bằng cách chuẩn hóa dữ liệu sáng tạo độc lập, xưởng phim có thể chuyển đổi linh hoạt giữa Google Flow, Veo, Runway, Luma hay Kling tùy theo thế mạnh từng cảnh mà không sợ bị sai lệch danh tính nhân vật.',
           )}
         </p>
       </div>

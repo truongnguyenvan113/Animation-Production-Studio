@@ -1,52 +1,47 @@
-import React from 'react';
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import React, { useState } from 'react';
 import {
   LayoutDashboard,
   Users,
   Dna,
   Image as ImageIcon,
-  HeartHandshake,
   Palette,
   CalendarDays,
   Clapperboard,
-  BookOpen,
-  Layers,
-  FileCode,
   Video,
-  ListOrdered,
-  Mic2,
-  Scissors,
-  History,
-  Share2,
   ChevronDown,
   ChevronRight,
   ShieldCheck,
+  Info,
+  Layers,
   Sparkles,
+  ExternalLink,
 } from 'lucide-react';
-import { NavigationId } from './NavigationTypes';
-import { LanguageMode } from '../../types';
+import { Character, LanguageMode } from '../../types';
 
 interface SidebarProps {
-  currentNav: NavigationId;
-  onNavigate: (nav: NavigationId) => void;
+  currentView: string;
+  onNavigate: (view: string, id?: string) => void;
+  characters?: Character[];
+  selectedCharacterId?: string;
   language: LanguageMode;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  currentNav,
+  currentView,
   onNavigate,
+  characters = [],
+  selectedCharacterId,
   language,
 }) => {
-  const [expandedSections, setExpandedSections] = React.useState<Record<string, boolean>>({
-    characters: true,
-    visualStyle: true,
-    storyboard: false,
-    videoProduction: true,
-    audio: false,
-  });
-
-  const toggleSection = (key: string) => {
-    setExpandedSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
+  const [charactersOpen, setCharactersOpen] = useState(true);
+  const [seasonsOpen, setSeasonsOpen] = useState(true);
+  const [pipelineRoadmapOpen, setPipelineRoadmapOpen] = useState(false);
+  const [showArchModal, setShowArchModal] = useState(false);
 
   const formatLabel = (en: string, vi: string) => {
     if (language === 'vi') return vi;
@@ -54,489 +49,334 @@ export const Sidebar: React.FC<SidebarProps> = ({
     return `${en} (${vi})`;
   };
 
-  const isActive = (id: NavigationId) => currentNav === id;
+  const isActive = (view: string) => currentView === view;
 
   return (
-    <aside className="w-72 bg-slate-950 border-r border-slate-800/80 flex flex-col h-screen select-none shrink-0 overflow-hidden">
-      {/* Brand Studio Header */}
-      <div className="p-4 border-b border-slate-800/80 flex items-center gap-3 bg-gradient-to-b from-slate-900 to-slate-950">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20 text-white font-bold text-lg ring-1 ring-white/20">
-          P&K
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <h1 className="font-bold text-sm tracking-tight text-white truncate">
-              Pi & Kem Studio
-            </h1>
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+    <>
+      <aside className="w-72 bg-slate-950 border-r border-slate-800/80 flex flex-col h-screen select-none shrink-0 overflow-hidden text-slate-200">
+        {/* Studio Branding */}
+        <div className="p-4 border-b border-slate-800/80 flex items-center gap-3 bg-gradient-to-b from-slate-900 to-slate-950">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-orange-500 to-pink-500 flex items-center justify-center shadow-lg shadow-orange-500/20 text-white font-extrabold text-base ring-1 ring-white/20 shrink-0">
+            P&K
           </div>
-          <p className="text-[11px] text-slate-400 truncate">
-            {language === 'vi'
-              ? 'Hệ thống Quản lý Sản xuất 3D'
-              : '3D Animation Production Pipeline'}
-          </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h1 className="font-bold text-sm tracking-tight text-white truncate">
+                Pi & Kem Studio
+              </h1>
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Production System Active" />
+            </div>
+            <p className="text-xs text-slate-400 truncate">
+              {language === 'vi' ? 'Studio Sản Xuất Hoạt Hình' : 'Animation Production Studio'}
+            </p>
+          </div>
         </div>
-      </div>
 
-      {/* Core Principle Callout Banner */}
-      <div className="mx-3 mt-3 px-3 py-2 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-xs text-indigo-200 flex items-center gap-2">
-        <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0" />
-        <div className="text-[11px] leading-tight">
-          <strong className="text-amber-300 block font-semibold uppercase tracking-wider text-[10px]">
-            Core Architecture Rule
-          </strong>
-          {language === 'vi'
-            ? 'Character DNA là nguồn chân lý bất biến'
-            : 'Character DNA is the Source of Truth'}
+        {/* Core Architecture Principle Pill (With Interactive Modal Trigger) */}
+        <div className="mx-3 mt-3">
+          <button
+            onClick={() => setShowArchModal(true)}
+            className="w-full px-3 py-2 rounded-xl bg-amber-950/30 hover:bg-amber-950/50 border border-amber-500/30 text-amber-200 flex items-center justify-between gap-2 transition-all text-left group"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0 group-hover:scale-110 transition-transform" />
+              <div className="min-w-0">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                  {language === 'vi' ? 'Nguyên tắc cốt lõi' : 'Core Rule'}
+                </span>
+                <span className="block text-xs font-semibold text-slate-200 truncate">
+                  Character DNA as Truth
+                </span>
+              </div>
+            </div>
+            <Info className="w-3.5 h-3.5 text-amber-400/70 shrink-0" />
+          </button>
         </div>
-      </div>
 
-      {/* Navigation Links Scrollable */}
-      <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 text-sm font-medium">
-        {/* Dashboard */}
-        <button
-          onClick={() => onNavigate('dashboard')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('dashboard')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-          }`}
-        >
-          <LayoutDashboard className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="truncate">{formatLabel('Dashboard', 'Tổng quan')}</span>
-        </button>
+        {/* Primary Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1.5 custom-scrollbar text-sm">
+          {/* Dashboard */}
+          <button
+            onClick={() => onNavigate('dashboard')}
+            className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left font-medium transition-all ${
+              isActive('dashboard')
+                ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm font-semibold'
+                : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+            }`}
+          >
+            <LayoutDashboard className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="truncate">{formatLabel('Dashboard', 'Tổng quan')}</span>
+          </button>
 
-        {/* Characters (With sub-items) */}
-        <div className="pt-1">
-          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>{formatLabel('Characters', 'Nhân vật')}</span>
+          {/* Characters Section */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between px-2 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>{formatLabel('Characters', 'Nhân vật')}</span>
+              <button
+                onClick={() => setCharactersOpen(!charactersOpen)}
+                className="p-1 text-slate-400 hover:text-white rounded"
+              >
+                {charactersOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+
+            {charactersOpen && (
+              <div className="space-y-1 mt-1 pl-1">
+                <button
+                  onClick={() => onNavigate('characters')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('characters')
+                      ? 'bg-slate-800 text-amber-300 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Users className="w-4 h-4 text-blue-400 shrink-0" />
+                  <span className="truncate">{formatLabel('All Characters', 'Tất cả nhân vật')}</span>
+                  <span className="ml-auto text-xs bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">
+                    5
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('character-dna')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('character-dna')
+                      ? 'bg-slate-800 text-amber-300 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Dna className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Character DNA', 'Nhận diện DNA')}</span>
+                  <span className="ml-auto text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded font-mono">
+                    v1.0
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('references')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('references')
+                      ? 'bg-slate-800 text-amber-300 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <ImageIcon className="w-4 h-4 text-pink-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Model References', 'Ảnh tham chiếu 3D')}</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Visual Style */}
+          <div className="pt-2">
             <button
-              onClick={() => toggleSection('characters')}
-              className="p-1 text-slate-400 hover:text-white"
+              onClick={() => onNavigate('style')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left font-medium transition-all ${
+                isActive('style')
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm font-semibold'
+                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+              }`}
             >
-              {expandedSections.characters ? (
-                <ChevronDown className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
-              )}
+              <Palette className="w-4 h-4 text-indigo-400 shrink-0" />
+              <span className="truncate">{formatLabel('Global 3D Style', 'Phong cách 3D chung')}</span>
+              <span className="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded font-mono">
+                v1.0
+              </span>
             </button>
           </div>
 
-          {expandedSections.characters && (
-            <div className="space-y-0.5 mt-0.5 pl-1">
+          {/* Seasons & Episodes */}
+          <div className="pt-2">
+            <div className="flex items-center justify-between px-2 py-1 text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>{formatLabel('Production Pipeline', 'Sản xuất phim')}</span>
               <button
-                onClick={() => onNavigate('characters')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('characters')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
+                onClick={() => setSeasonsOpen(!seasonsOpen)}
+                className="p-1 text-slate-400 hover:text-white rounded"
               >
-                <Users className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span className="truncate">{formatLabel('All Characters', 'Tất cả nhân vật')}</span>
-                <span className="ml-auto text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded font-mono">
-                  4+1
-                </span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('character-dna')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('character-dna')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Dna className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="truncate">{formatLabel('Character DNA', 'Bản chất & nhận diện')}</span>
-                <span className="ml-auto text-[9px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-1 py-0.2 rounded">
-                  v1.0
-                </span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('character-references')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('character-references')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5 text-pink-400 shrink-0" />
-                <span className="truncate">{formatLabel('Character References', 'Ảnh tham chiếu')}</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('supporting-characters')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('supporting-characters')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <HeartHandshake className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
-                <span className="truncate">{formatLabel('Supporting Characters', 'Nhân vật phụ')}</span>
-                <span className="ml-auto text-[10px] text-amber-400 font-mono">Mochi</span>
+                {seasonsOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
               </button>
             </div>
-          )}
-        </div>
 
-        {/* Visual Style (Global Style) */}
-        <div className="pt-1">
-          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>{formatLabel('Visual Style', 'Phong cách')}</span>
+            {seasonsOpen && (
+              <div className="space-y-1 mt-1 pl-1">
+                <button
+                  onClick={() => onNavigate('seasons')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('seasons')
+                      ? 'bg-slate-800 text-amber-300 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <CalendarDays className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Seasons', 'Mùa phim')}</span>
+                  <span className="ml-auto text-xs bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded font-mono">
+                    Season 1
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('episodes')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('episodes')
+                      ? 'bg-slate-800 text-amber-300 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Clapperboard className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Episodes & Snapshots', 'Tập phim & Snapshot')}</span>
+                  <span className="ml-auto text-xs bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded font-mono">
+                    Tập 9
+                  </span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Providers Architecture */}
+          <div className="pt-2">
             <button
-              onClick={() => toggleSection('visualStyle')}
-              className="p-1 text-slate-400 hover:text-white"
+              onClick={() => onNavigate('providers')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left font-medium transition-all ${
+                isActive('providers')
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm font-semibold'
+                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+              }`}
             >
-              {expandedSections.visualStyle ? (
-                <ChevronDown className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
-              )}
+              <Video className="w-4 h-4 text-orange-400 shrink-0" />
+              <div className="truncate">
+                <span className="block truncate">{formatLabel('Video Providers', 'Nhà cấp video')}</span>
+              </div>
+              <span className="ml-auto text-[10px] bg-orange-500/20 text-orange-300 border border-orange-500/30 px-1.5 py-0.5 rounded font-mono">
+                Decoupled
+              </span>
             </button>
           </div>
 
-          {expandedSections.visualStyle && (
-            <div className="space-y-0.5 mt-0.5 pl-1">
-              <button
-                onClick={() => onNavigate('visual-style')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('visual-style')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Palette className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                <span className="truncate">{formatLabel('Global Style', 'Phong cách chung')}</span>
-                <span className="ml-auto text-[9px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1 py-0.2 rounded font-mono">
-                  v1.0
-                </span>
-              </button>
-            </div>
-          )}
-        </div>
+          {/* Upcoming Pipeline Roadmap (Collapsible preview without cluttering current phase) */}
+          <div className="pt-3 border-t border-slate-800/80 mt-3">
+            <button
+              onClick={() => setPipelineRoadmapOpen(!pipelineRoadmapOpen)}
+              className="w-full flex items-center justify-between px-2 py-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <Layers className="w-3.5 h-3.5 text-slate-400" />
+                <span>{formatLabel('Next Pipeline Stages', 'Các giai đoạn tiếp theo')}</span>
+              </div>
+              {pipelineRoadmapOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            </button>
 
-        {/* Seasons */}
-        <button
-          onClick={() => onNavigate('seasons')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('seasons')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-          }`}
-        >
-          <CalendarDays className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="truncate">{formatLabel('Seasons', 'Mùa phim')}</span>
-          <span className="ml-auto text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-mono">
-            Season 1
+            {pipelineRoadmapOpen && (
+              <div className="mt-2 p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-slate-600" />
+                  <span>Stage 2: Story Generator & Script</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-slate-600" />
+                  <span>Stage 3: Storyboard & Panels</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-slate-600" />
+                  <span>Stage 4: Video Generation Jobs</span>
+                </div>
+                <div className="flex items-center gap-2 text-slate-300">
+                  <span className="w-2 h-2 rounded-full bg-slate-600" />
+                  <span>Stage 5: Audio & Video Editor</span>
+                </div>
+                <p className="text-[11px] text-amber-400/80 italic pt-1">
+                  {language === 'vi'
+                    ? 'Đang ở Giai đoạn Nền tảng 1: Chuẩn hóa Character DNA.'
+                    : 'Currently in Stage 1 Foundation: Character DNA is Source of Truth.'}
+                </p>
+              </div>
+            )}
+          </div>
+        </nav>
+
+        {/* Footer Info */}
+        <div className="p-3.5 border-t border-slate-800/80 bg-slate-900/50 text-xs text-slate-400 flex items-center justify-between">
+          <span className="font-medium text-slate-300">Pi & Kem Studio</span>
+          <span className="text-amber-400 font-mono text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+            Phase 1 Foundation
           </span>
-        </button>
+        </div>
+      </aside>
 
-        {/* Episodes */}
-        <button
-          onClick={() => onNavigate('episodes')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('episodes')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-          }`}
-        >
-          <Clapperboard className="w-4 h-4 text-rose-400 shrink-0" />
-          <span className="truncate">{formatLabel('Episodes', 'Tập phim')}</span>
-          <span className="ml-auto text-[10px] bg-rose-500/20 text-rose-300 px-1.5 py-0.5 rounded font-mono">
-            Ep 9 Seed
-          </span>
-        </button>
-
-        {/* Story Generator */}
-        <button
-          onClick={() => onNavigate('story-generator')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('story-generator')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <BookOpen className="w-4 h-4 text-amber-400 shrink-0" />
-          <span className="truncate">{formatLabel('Story Generator', 'Trình phát triển truyện')}</span>
-          <span className="ml-auto text-[9px] text-slate-400 font-mono">Stage 2</span>
-        </button>
-
-        {/* Storyboard */}
-        <div className="pt-1">
-          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>{formatLabel('Storyboard', 'Bảng phân cảnh')}</span>
-            <button
-              onClick={() => toggleSection('storyboard')}
-              className="p-1 text-slate-400 hover:text-white"
-            >
-              {expandedSections.storyboard ? (
-                <ChevronDown className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
-              )}
-            </button>
-          </div>
-
-          {expandedSections.storyboard && (
-            <div className="space-y-0.5 mt-0.5 pl-1">
+      {/* Interactive Architecture Principles Detail Modal */}
+      {showArchModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-2xl bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl p-6 space-y-5 text-slate-200">
+            <div className="flex items-start justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">
+                    {formatLabel('Core Architecture Principles', 'Nguyên Tắc Kiến Trúc Cốt Lõi')}
+                  </h3>
+                  <p className="text-xs text-amber-400 font-semibold">
+                    CHARACTER DNA IS THE SOURCE OF TRUTH
+                  </p>
+                </div>
+              </div>
               <button
-                onClick={() => onNavigate('storyboard')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('storyboard')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
+                onClick={() => setShowArchModal(false)}
+                className="text-slate-400 hover:text-white text-lg font-bold p-1"
               >
-                <Layers className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                <span className="truncate">{formatLabel('Storyboard Panels', 'Khung cảnh')}</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('storyboard-images')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('storyboard-images')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                <span className="truncate">{formatLabel('Storyboard Images', 'Ảnh phân cảnh')}</span>
+                ✕
               </button>
             </div>
-          )}
-        </div>
 
-        {/* Master Prompts */}
-        <button
-          onClick={() => onNavigate('master-prompts')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('master-prompts')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <FileCode className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="truncate">{formatLabel('Master Prompts', 'Prompt tổng')}</span>
-          <span className="ml-auto text-[9px] text-slate-400 font-mono">Stage 2</span>
-        </button>
+            <div className="space-y-4 text-xs sm:text-sm text-slate-300">
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+                <h4 className="font-bold text-amber-300">
+                  1. {formatLabel('Provider-Independent Creative Layer', 'Tầng Dữ Liệu Sáng Tạo Độc Lập')}
+                </h4>
+                <p className="text-slate-300 leading-relaxed text-xs">
+                  {formatLabel(
+                    'Character DNA, Global Styles, and Storyboards are stored independently. They never bind permanently to any single AI video tool (Google Flow, Veo, Runway, Luma, Kling).',
+                    'Dữ liệu nhân vật, DNA, phong cách và kịch bản được lưu trữ tách biệt hoàn toàn khỏi các nhà cung cấp video AI.',
+                  )}
+                </p>
+              </div>
 
-        {/* Video Production (Decoupled Provider Architecture) */}
-        <div className="pt-1">
-          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>{formatLabel('Video Production', 'Sản xuất video')}</span>
-            <button
-              onClick={() => toggleSection('videoProduction')}
-              className="p-1 text-slate-400 hover:text-white"
-            >
-              {expandedSections.videoProduction ? (
-                <ChevronDown className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
-              )}
-            </button>
-          </div>
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+                <h4 className="font-bold text-amber-300">
+                  2. {formatLabel('Historical Version Snapshots Guarantee', 'Quy Tắc Đóng Băng Snapshot Lịch Sử')}
+                </h4>
+                <p className="text-slate-300 leading-relaxed text-xs">
+                  {formatLabel(
+                    'Episodes bind immutable snapshots of Character DNA and Styles. When Pi upgrades to DNA v2.0 in future episodes, Episode 1 continues using Pi v1.0.',
+                    'Mỗi tập phim liên kết với snapshot cố định. Khi nhân vật đổi sang phiên bản mới, các tập cũ vĩnh viễn không bị ghi đè.',
+                  )}
+                </p>
+              </div>
 
-          {expandedSections.videoProduction && (
-            <div className="space-y-0.5 mt-0.5 pl-1">
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+                <h4 className="font-bold text-amber-300">
+                  3. {formatLabel('Decoupled Video Engines & Manual Flow', 'Tách Biệt Động Cơ & Quy Trình Thủ Công')}
+                </h4>
+                <p className="text-slate-300 leading-relaxed text-xs">
+                  {formatLabel(
+                    'Google Flow remains a manual workflow specification unless a real supported API is available. No fake video generation or simulated endpoints are allowed.',
+                    'Google Flow duy trì dưới dạng quy trình làm việc thủ công trừ khi có API chính thức. Tuyệt đối không tạo API ảo.',
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
               <button
-                onClick={() => onNavigate('video-production')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('video-production')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`}
+                onClick={() => setShowArchModal(false)}
+                className="px-5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors"
               >
-                <Video className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                <span className="truncate">{formatLabel('Provider Architecture', 'Kiến trúc nhà cấp')}</span>
-                <span className="ml-auto text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1 py-0.2 rounded">
-                  Decoupled
-                </span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('video-production-google-flow')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('video-production-google-flow')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                <span className="truncate">Google Flow</span>
-                <span className="ml-auto text-[9px] text-slate-400 font-mono">Adapter</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('video-production-veo-api')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('video-production-veo-api')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="truncate">Veo API</span>
-                <span className="ml-auto text-[9px] text-slate-400 font-mono">Adapter</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('video-production-runway')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('video-production-runway')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                <span className="truncate">Runway</span>
-                <span className="ml-auto text-[9px] text-slate-400 font-mono">Adapter</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('video-production-luma')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('video-production-luma')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-yellow-400 shrink-0" />
-                <span className="truncate">Luma</span>
-                <span className="ml-auto text-[9px] text-slate-400 font-mono">Adapter</span>
-              </button>
-
-              <button
-                onClick={() => onNavigate('video-production-kling')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('video-production-kling')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                <span className="truncate">Kling</span>
-                <span className="ml-auto text-[9px] text-slate-400 font-mono">Adapter</span>
+                {formatLabel('Close', 'Đóng')}
               </button>
             </div>
-          )}
-        </div>
-
-        {/* Production Queue */}
-        <button
-          onClick={() => onNavigate('production-queue')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('production-queue')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <ListOrdered className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="truncate">{formatLabel('Production Queue', 'Hàng đợi sản xuất')}</span>
-        </button>
-
-        {/* Audio */}
-        <div className="pt-1">
-          <div className="flex items-center justify-between px-2 py-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-            <span>{formatLabel('Audio', 'Âm thanh')}</span>
-            <button
-              onClick={() => toggleSection('audio')}
-              className="p-1 text-slate-400 hover:text-white"
-            >
-              {expandedSections.audio ? (
-                <ChevronDown className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
-              )}
-            </button>
           </div>
-
-          {expandedSections.audio && (
-            <div className="space-y-0.5 mt-0.5 pl-1">
-              <button
-                onClick={() => onNavigate('audio-voice')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('audio-voice')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Mic2 className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                <span className="truncate">{formatLabel('Voice', 'Giọng nói')}</span>
-              </button>
-              <button
-                onClick={() => onNavigate('audio-music')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('audio-music')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Mic2 className="w-3.5 h-3.5 text-pink-400 shrink-0" />
-                <span className="truncate">{formatLabel('Music', 'Âm nhạc')}</span>
-              </button>
-              <button
-                onClick={() => onNavigate('audio-sfx')}
-                className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-md text-xs text-left transition-colors ${
-                  isActive('audio-sfx')
-                    ? 'bg-slate-800 text-amber-300 font-semibold'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                }`}
-              >
-                <Mic2 className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                <span className="truncate">{formatLabel('Sound Effects', 'Hiệu ứng âm thanh')}</span>
-              </button>
-            </div>
-          )}
         </div>
-
-        {/* Video Editor */}
-        <button
-          onClick={() => onNavigate('video-editor')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('video-editor')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <Scissors className="w-4 h-4 text-purple-400 shrink-0" />
-          <span className="truncate">{formatLabel('Video Editor', 'Trình chỉnh sửa')}</span>
-        </button>
-
-        {/* Render History */}
-        <button
-          onClick={() => onNavigate('render-history')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('render-history')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <History className="w-4 h-4 text-sky-400 shrink-0" />
-          <span className="truncate">{formatLabel('Render History', 'Lịch sử render')}</span>
-        </button>
-
-        {/* Export & Publish */}
-        <button
-          onClick={() => onNavigate('export-publish')}
-          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
-            isActive('export-publish')
-              ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30 font-semibold'
-              : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'
-          }`}
-        >
-          <Share2 className="w-4 h-4 text-emerald-400 shrink-0" />
-          <span className="truncate">{formatLabel('Export & Publish', 'Xuất & đăng')}</span>
-        </button>
-      </nav>
-
-      {/* Footer Info */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-900/50 text-[11px] text-slate-400 flex items-center justify-between">
-        <span>Pi & Kem Studio v1.0</span>
-        <span className="text-amber-400 font-mono">Phase 1 Foundation</span>
-      </div>
-    </aside>
+      )}
+    </>
   );
 };

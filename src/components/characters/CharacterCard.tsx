@@ -78,6 +78,29 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         {/* Personality & Visual summary preview */}
         {activeVersion && (
           <div className="space-y-2.5 py-3 border-t border-b border-slate-800/80 my-3 text-xs text-slate-300">
+            {/* Canonical Role / Occupation / Age highlight */}
+            <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 space-y-1">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-amber-400 font-bold uppercase tracking-wider">
+                  {activeVersion.occupation || (character.isSupporting ? 'Species' : 'Age Proportions')}
+                </span>
+                <span className="text-slate-400 text-[10px]">
+                  {activeVersion.age}
+                </span>
+              </div>
+              {activeVersion.species && (
+                <p className="text-[11px] font-medium text-emerald-400">
+                  {activeVersion.species}
+                </p>
+              )}
+              {activeVersion.likes && (
+                <p className="text-[11px] text-slate-300">
+                  <span className="text-slate-400 font-medium">Likes: </span>
+                  {activeVersion.likes}
+                </p>
+              )}
+            </div>
+
             <div>
               <span className="text-slate-400 font-semibold block mb-0.5 text-[11px] uppercase tracking-wider">
                 {language === 'vi' ? 'Tính cách & Hành vi' : 'Personality & Behavior'}:

@@ -7,6 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { Project, LanguageMode } from './types';
 import { ProjectService } from './services/projectService';
 import { CharacterService } from './services/characterService';
+import { EpisodeService } from './services/episodeService';
+import { StyleService } from './services/styleService';
 import { storageService } from './services/storageService';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
@@ -30,6 +32,9 @@ export default function App() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const characters = CharacterService.getAllCharacters();
+  const episodes = EpisodeService.getAllEpisodes();
+  const activeStyle = StyleService.getActiveStyleVersion();
+  const references = CharacterService.getAllReferences();
 
   const handleRefreshAll = () => {
     setProject(ProjectService.getProject());
@@ -93,6 +98,10 @@ export default function App() {
           {currentView === 'dashboard' && (
             <DashboardView
               project={project}
+              characters={characters}
+              episodes={episodes}
+              activeStyle={activeStyle}
+              references={references}
               onNavigate={handleNavigate}
               language={language}
             />
