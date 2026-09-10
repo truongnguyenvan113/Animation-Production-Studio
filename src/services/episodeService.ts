@@ -49,10 +49,13 @@ export class EpisodeService {
     storyIdea: string;
     theme: string;
     educationalMessage: string;
+    targetAudience?: string;
+    targetDuration?: string;
+    additionalNotes?: string;
     characterIds: string[];
     supportingCharacterIds: string[];
     location: string;
-    duration: string;
+    duration?: string;
     targetPlatform: string;
     status?: EpisodeStatus;
     customCharacterVersionSnapshots?: Record<string, string>;
@@ -82,6 +85,14 @@ export class EpisodeService {
     const resolvedStyleVersionId =
       params.styleVersionSnapshotId || (activeStyle ? activeStyle.id : 'style_ver_1_0');
 
+    // Canonicalize duration and targetDuration to ensure consistency and eliminate empty strings
+    const resolvedTargetDuration =
+      (params.targetDuration && params.targetDuration.trim()) ||
+      (params.duration && params.duration.trim()) ||
+      '07:00 (Phút)';
+    const resolvedDuration =
+      (params.duration && params.duration.trim()) || resolvedTargetDuration;
+
     const newEpisode: Episode = {
       id: `ep_${String(params.episodeNumber).padStart(3, '0')}`,
       seasonId: params.seasonId,
@@ -90,10 +101,13 @@ export class EpisodeService {
       storyIdea: params.storyIdea,
       theme: params.theme,
       educationalMessage: params.educationalMessage,
+      targetAudience: params.targetAudience || 'Preschool & Early Elementary (3–8 years)',
+      targetDuration: resolvedTargetDuration,
+      additionalNotes: params.additionalNotes || '',
       characterIds: params.characterIds,
       supportingCharacterIds: params.supportingCharacterIds,
       location: params.location,
-      duration: params.duration,
+      duration: resolvedDuration,
       targetPlatform: params.targetPlatform,
       status: params.status || 'Draft',
       characterVersionSnapshots,

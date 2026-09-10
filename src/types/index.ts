@@ -187,10 +187,12 @@ export interface StoryDraft {
   episodeId: string;
   title: string;
   premise: string;
+  theme?: string;
   educationalLesson: string;
   targetAudience: string;
   targetDuration: string;
   additionalNotes?: string;
+  targetPlatform?: string;
   beginning: string;
   middle: string;
   ending: string;
@@ -217,6 +219,9 @@ export interface Episode {
   storyIdea: string;
   theme: string;
   educationalMessage: string;
+  targetAudience?: string;
+  targetDuration?: string;
+  additionalNotes?: string;
   characterIds: string[];
   supportingCharacterIds: string[];
   location: string;

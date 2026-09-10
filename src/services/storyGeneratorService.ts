@@ -17,12 +17,14 @@ export interface StoryGeneratorInput {
   title: string;
   storyIdea: string;
   educationalLesson: string;
+  theme?: string;
   additionalNotes?: string;
   targetAudience: string;
   targetDuration: string;
   characterIds: string[]; // Selected canonical character IDs
   supportingCharacterIds?: string[];
   location?: string;
+  targetPlatform?: string;
 }
 
 export interface StoryPreset {
@@ -30,12 +32,14 @@ export interface StoryPreset {
   title: string;
   storyIdea: string;
   educationalLesson: string;
+  theme?: string;
   targetAudience: string;
   targetDuration: string;
   characterIds: string[];
   supportingCharacterIds: string[];
   location: string;
   additionalNotes: string;
+  targetPlatform?: string;
 }
 
 export class StoryGeneratorService {
@@ -51,6 +55,7 @@ export class StoryGeneratorService {
           'Ba Trường (Ethan) tổ chức một giải bóng đá mini ở sân sau với khung thành xếp bằng hai chiếc gối mềm cho Pi, Kem và Mochi cùng tham gia.',
         educationalLesson:
           'Chiến thắng không quan trọng bằng niềm vui tham gia, tinh thần đồng đội, và sự kiên nhẫn khi hướng dẫn em nhỏ.',
+        theme: 'Thể thao gia đình & Tinh thần đồng đội (Family Sports & Teamwork)',
         targetAudience: '3–7 tuổi (Family co-viewing)',
         targetDuration: '07:00 (Phút)',
         characterIds: ['char_ethan', 'char_pi', 'char_kem'],
@@ -58,6 +63,7 @@ export class StoryGeneratorService {
         location: 'Sân cỏ sau nhà ngập nắng ấm (Backyard Mini Pitch)',
         additionalNotes:
           'Ba Trường thể hiện niềm yêu thích bóng đá cuồng nhiệt nhưng luôn nhường nhịn và khuyến khích Kem sút bóng. Mochi chạy lon ton làm trọng tài bất đắc dĩ.',
+        targetPlatform: 'YouTube Kids & OTT Streaming',
       },
       {
         id: 'preset_cooking',
@@ -66,6 +72,7 @@ export class StoryGeneratorService {
           'Mẹ Vân (Emma) hướng dẫn Pi và Kem nhào bột làm bánh quy hình các con thú cho buổi dã ngoại cuối tuần.',
         educationalLesson:
           'Bài học về sự cẩn thận, biết kiên nhẫn chờ đợi bột nở, và niềm vui chia sẻ bánh ngon cho cả gia đình.',
+        theme: 'Sáng tạo ẩm thực & Sự kiên nhẫn (Culinary Creativity & Patience)',
         targetAudience: '3–7 tuổi (Preschool & Primary)',
         targetDuration: '07:30 (Phút)',
         characterIds: ['char_emma', 'char_pi', 'char_kem'],
@@ -73,6 +80,7 @@ export class StoryGeneratorService {
         location: 'Gian bếp gia đình sáng sủa và ấm cúng (Family Kitchen Island)',
         additionalNotes:
           'Kem lỡ tay làm bột dính lên mũi Mochi khiến cả nhà bật cười. Mẹ Vân khéo léo biến sự cố thành trò chơi tạo hình bột vui nhộn.',
+        targetPlatform: 'YouTube Kids & OTT Streaming',
       },
       {
         id: 'preset_nature',
@@ -81,6 +89,7 @@ export class StoryGeneratorService {
           'Chiếc máy bay giấy màu đỏ của Pi bay lạc vào bụi hoa sau vườn; Pi và Kem cùng Mochi lần theo dấu vết để tìm lại.',
         educationalLesson:
           'Khuyến khích trẻ quan sát thế giới tự nhiên xung quanh, bảo vệ côn trùng có ích và biết hợp tác giải quyết vấn đề.',
+        theme: 'Khám phá thiên nhiên & Tình yêu sinh vật (Nature Exploration & Care)',
         targetAudience: '3–6 tuổi (Toddler & Preschool)',
         targetDuration: '06:30 (Phút)',
         characterIds: ['char_pi', 'char_kem', 'char_emma'],
@@ -88,6 +97,7 @@ export class StoryGeneratorService {
         location: 'Khu vườn hoa trước hiên nhà (Sunny Flower Garden)',
         additionalNotes:
           'Pi dẫn dắt như một nhà thám hiểm dũng cảm. Kem lặp lại các câu khẩu hiệu của chị gái một cách ngộ nghĩnh.',
+        targetPlatform: 'YouTube Kids & OTT Streaming',
       },
       {
         id: 'preset_cleanup',
@@ -96,6 +106,7 @@ export class StoryGeneratorService {
           'Sau một buổi chiều chơi trò đóng kịch, phòng khách bừa bộn đồ chơi. Ba Trường và Mẹ Vân biến giờ dọn dẹp thành một thử thách âm nhạc sôi động.',
         educationalLesson:
           'Tự giác giữ gìn đồ chơi, tôn trọng không gian chung và biến việc nhà thành niềm vui gắn kết các thành viên.',
+        theme: 'Ý thức trách nhiệm & Niềm vui sẻ chia việc nhà (Responsibility & Shared Joy)',
         targetAudience: '2–7 tuổi (All Family)',
         targetDuration: '06:00 (Phút)',
         characterIds: ['char_ethan', 'char_emma', 'char_pi', 'char_kem'],
@@ -103,6 +114,7 @@ export class StoryGeneratorService {
         location: 'Phòng khách gia đình ấm cúng (Living Room)',
         additionalNotes:
           'Pi sáng tạo ra bài hát dọn dẹp với vũ điệu vui nhộn. Ba Trường dùng lập trình đồng hồ đếm ngược cổ vũ hai con.',
+        targetPlatform: 'YouTube Kids & OTT Streaming',
       },
     ];
   }
@@ -158,7 +170,12 @@ export class StoryGeneratorService {
     const title = input.title.trim() || 'Tập phim mới – Khám phá cùng Pi & Kem';
     const premise = input.storyIdea.trim();
     const lesson = input.educationalLesson.trim();
+    const theme =
+      input.theme?.trim() ||
+      'Tình cảm gia đình & Tinh thần đồng đội (Family Bond & Teamwork)';
     const location = input.location?.trim() || 'Không gian gia đình ấm cúng (Home Environment)';
+    const targetPlatform =
+      input.targetPlatform?.trim() || 'YouTube Kids & OTT Streaming';
 
     const beginning = `Mở đầu trong không khí tươi vui, ấm áp tại ${location}. ${
       input.characterIds.includes('char_pi')
@@ -203,10 +220,12 @@ export class StoryGeneratorService {
       episodeId: '',
       title,
       premise,
+      theme,
       educationalLesson: lesson,
       targetAudience: input.targetAudience,
       targetDuration: input.targetDuration,
       additionalNotes: input.additionalNotes,
+      targetPlatform,
       beginning,
       middle,
       ending,
@@ -649,13 +668,16 @@ export class StoryGeneratorService {
       episodeNumber,
       title: draft.title,
       storyIdea: draft.premise,
-      theme: draft.educationalLesson,
+      theme: draft.theme || draft.educationalLesson,
       educationalMessage: draft.educationalLesson,
+      targetAudience: draft.targetAudience,
+      targetDuration: draft.targetDuration,
+      additionalNotes: draft.additionalNotes,
       characterIds,
       supportingCharacterIds,
       location: draft.location,
       duration: draft.targetDuration,
-      targetPlatform: 'YouTube Kids & OTT Streaming',
+      targetPlatform: draft.targetPlatform || 'YouTube Kids & OTT Streaming',
       status: 'Story Generated',
       customCharacterVersionSnapshots: characterVersionSnapshots,
       styleVersionSnapshotId: draft.styleVersionSnapshotId,

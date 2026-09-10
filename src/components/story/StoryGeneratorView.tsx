@@ -60,6 +60,9 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
   const [storyIdea, setStoryIdea] = useState(
     'Ba Trường (Ethan) tổ chức một giải bóng đá mini ở sân sau với khung thành xếp bằng hai chiếc gối mềm cho Pi, Kem và Mochi cùng tham gia.',
   );
+  const [theme, setTheme] = useState(
+    'Thể thao gia đình & Tinh thần đồng đội (Family Sports & Teamwork)',
+  );
   const [educationalLesson, setEducationalLesson] = useState(
     'Chiến thắng không quan trọng bằng niềm vui tham gia, tinh thần đồng đội, và sự kiên nhẫn khi hướng dẫn em nhỏ.',
   );
@@ -96,6 +99,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
     setSelectedPresetId(preset.id);
     setTitle(preset.title);
     setStoryIdea(preset.storyIdea);
+    setTheme(preset.theme || 'Tình cảm gia đình & Tinh thần đồng đội');
     setEducationalLesson(preset.educationalLesson);
     setAdditionalNotes(preset.additionalNotes);
     setTargetAudience(preset.targetAudience);
@@ -130,6 +134,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
       const draft = StoryGeneratorService.generateStoryDraft({
         title,
         storyIdea,
+        theme,
         educationalLesson,
         additionalNotes,
         targetAudience,
@@ -393,6 +398,21 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                   onChange={(e) => setStoryIdea(e.target.value)}
                   placeholder="Mô tả bối cảnh và hoạt động cốt lõi của tập phim..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-600 transition-all leading-relaxed"
+                />
+              </div>
+
+              {/* Theme */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{formatLabel('Theme', 'Chủ Đề Cốt Lõi')}</span>
+                </label>
+                <input
+                  type="text"
+                  value={theme}
+                  onChange={(e) => setTheme(e.target.value)}
+                  placeholder="e.g. Thể thao gia đình & Tinh thần đồng đội"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-600 transition-all"
                 />
               </div>
 

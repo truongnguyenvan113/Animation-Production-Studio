@@ -64,12 +64,15 @@ export class StorageService {
           if (isEthanValid && isMochiPuppy) {
             // Ensure Episode 9 has canonical storyDraft & scenes if missing
             const ep9 = parsed.episodes?.find((e: Episode) => e.id === 'ep_009');
-            if (ep9 && !ep9.storyDraft) {
+            if (ep9) {
               const seedEp9 = SEED_EPISODES.find((e) => e.id === 'ep_009');
               if (seedEp9) {
-                ep9.storyDraft = seedEp9.storyDraft;
-                ep9.scenes = seedEp9.scenes;
-                ep9.status = seedEp9.status;
+                if (!ep9.storyDraft) ep9.storyDraft = seedEp9.storyDraft;
+                if (!ep9.scenes) ep9.scenes = seedEp9.scenes;
+                if (!ep9.targetAudience) ep9.targetAudience = seedEp9.targetAudience;
+                if (!ep9.targetDuration) ep9.targetDuration = seedEp9.targetDuration;
+                if (!ep9.additionalNotes) ep9.additionalNotes = seedEp9.additionalNotes;
+                if (!ep9.duration || ep9.duration.trim() === '') ep9.duration = seedEp9.duration;
               }
             }
             return parsed;

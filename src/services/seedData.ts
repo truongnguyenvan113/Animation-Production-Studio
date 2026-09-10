@@ -639,6 +639,10 @@ export const SEED_EPISODES: Episode[] = [
     supportingCharacterIds: ['char_mochi'],
     location: 'Phòng khách gia đình ấm cúng (Living Room Canvas Area)',
     duration: '07:30 (Minutes)',
+    targetDuration: '07:30 (Minutes)',
+    targetAudience: 'Preschool & Early Elementary (3–8 years)',
+    additionalNotes:
+      'Mẹ Vân đóng vai trò định hướng dịu dàng. Ba Trường mang tinh thần thể thao vui nhộn vào hội họa. Mochi tạo khoảnh khắc hài hước kinh điển.',
     targetPlatform: 'YouTube Kids & OTT Streaming',
     status: 'Story Generated',
     // HISTORICAL SNAPSHOT RULE:
