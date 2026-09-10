@@ -15,6 +15,7 @@ import {
   Lock,
   Sparkles,
   BookOpen,
+  Film,
 } from 'lucide-react';
 
 interface EpisodeCardProps {
@@ -22,6 +23,7 @@ interface EpisodeCardProps {
   onEdit: (episodeId: string) => void;
   onDelete: (episodeId: string) => void;
   onInspectSnapshot: (episodeId: string) => void;
+  onOpenStoryboard?: (episodeId: string) => void;
   language: LanguageMode;
 }
 
@@ -30,6 +32,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   onEdit,
   onDelete,
   onInspectSnapshot,
+  onOpenStoryboard,
   language,
 }) => {
   const allCharacters = [
@@ -75,6 +78,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
 
         {/* Action buttons */}
         <div className="flex items-center gap-2">
+          {onOpenStoryboard && (
+            <button
+              onClick={() => onOpenStoryboard(episode.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 transition-colors shadow-xs"
+              title="Mở Storyboard & Shot Breakdown Phase 3"
+            >
+              <Film className="w-3.5 h-3.5 text-amber-400" />
+              <span>{formatLabel('Storyboard & Shots', 'Storyboard')}</span>
+            </button>
+          )}
+
           <button
             onClick={() => onInspectSnapshot(episode.id)}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/40 transition-colors"

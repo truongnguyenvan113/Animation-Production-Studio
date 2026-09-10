@@ -7,6 +7,7 @@ import {
   GlobalStyleVersion,
   Season,
   Episode,
+  Storyboard,
 } from '../types';
 import {
   SEED_PROJECT,
@@ -17,6 +18,7 @@ import {
   SEED_GLOBAL_STYLE_VERSIONS,
   SEED_SEASONS,
   SEED_EPISODES,
+  SEED_STORYBOARDS,
 } from './seedData';
 
 const STORAGE_KEY = 'pikem_animation_studio_v2';
@@ -30,6 +32,7 @@ export interface StudioDatabase {
   globalStyleVersions: GlobalStyleVersion[];
   seasons: Season[];
   episodes: Episode[];
+  storyboards: Storyboard[];
   updatedAt: string;
 }
 
@@ -73,8 +76,22 @@ export class StorageService {
                 if (!ep9.targetDuration) ep9.targetDuration = seedEp9.targetDuration;
                 if (!ep9.additionalNotes) ep9.additionalNotes = seedEp9.additionalNotes;
                 if (!ep9.duration || ep9.duration.trim() === '') ep9.duration = seedEp9.duration;
+                if (!ep9.storyboardId) ep9.storyboardId = seedEp9.storyboardId;
               }
             }
+
+            // Ensure storyboards array exists and contains seed storyboards if empty
+            if (!Array.isArray(parsed.storyboards) || parsed.storyboards.length === 0) {
+              parsed.storyboards = SEED_STORYBOARDS;
+            } else {
+              // Ensure ep_009 storyboard is present
+              const hasEp9Sb = parsed.storyboards.some((sb: Storyboard) => sb.episodeId === 'ep_009');
+              if (!hasEp9Sb) {
+                const seedSb9 = SEED_STORYBOARDS.find((sb) => sb.episodeId === 'ep_009');
+                if (seedSb9) parsed.storyboards.push(seedSb9);
+              }
+            }
+
             return parsed;
           }
         }
@@ -95,6 +112,7 @@ export class StorageService {
       globalStyleVersions: SEED_GLOBAL_STYLE_VERSIONS,
       seasons: SEED_SEASONS,
       episodes: SEED_EPISODES,
+      storyboards: SEED_STORYBOARDS,
       updatedAt: new Date().toISOString(),
     };
   }

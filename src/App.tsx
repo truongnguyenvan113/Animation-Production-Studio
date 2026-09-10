@@ -20,6 +20,7 @@ import { GlobalStyleView } from './components/style/GlobalStyleView';
 import { SeasonListView } from './components/seasons/SeasonListView';
 import { EpisodeListView } from './components/episodes/EpisodeListView';
 import { StoryGeneratorView } from './components/story/StoryGeneratorView';
+import { StoryboardView } from './components/storyboard/StoryboardView';
 import { ProviderAdaptersView } from './components/providers/ProviderAdaptersView';
 import { BackupModal } from './components/shared/BackupModal';
 
@@ -28,6 +29,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<string>('dashboard');
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>('char_pi');
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | undefined>(undefined);
+  const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('ep_009');
   const [language, setLanguage] = useState<LanguageMode>('bilingual');
   const [backupModalMode, setBackupModalMode] = useState<'export' | 'import' | 'reset' | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -50,6 +52,8 @@ export default function App() {
       setSelectedCharacterId(id);
     } else if (view === 'episodes' && id) {
       setSelectedSeasonId(id);
+    } else if (view === 'storyboard' && id) {
+      setSelectedEpisodeId(id);
     }
   };
 
@@ -148,6 +152,10 @@ export default function App() {
           {currentView === 'episodes' && (
             <EpisodeListView
               initialSeasonId={selectedSeasonId}
+              onOpenStoryboard={(epId) => {
+                setSelectedEpisodeId(epId);
+                setCurrentView('storyboard');
+              }}
               language={language}
             />
           )}
@@ -158,6 +166,15 @@ export default function App() {
               onNavigate={handleNavigate}
               onEpisodeCreated={() => {
                 handleRefreshAll();
+              }}
+            />
+          )}
+
+          {currentView === 'storyboard' && (
+            <StoryboardView
+              initialEpisodeId={selectedEpisodeId}
+              onNavigateToEpisode={(epId) => {
+                setSelectedEpisodeId(epId);
               }}
             />
           )}

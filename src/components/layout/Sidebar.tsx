@@ -20,6 +20,7 @@ import {
   Layers,
   Sparkles,
   ExternalLink,
+  Film,
 } from 'lucide-react';
 import { Character, LanguageMode } from '../../types';
 
@@ -241,6 +242,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="truncate">{formatLabel('Story Generator', 'Tạo Cốt Truyện')}</span>
                   <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
                     Phase 2
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('storyboard')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('storyboard')
+                      ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 font-semibold shadow-sm'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Film className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Storyboard & Shots', 'Phân cảnh Storyboard')}</span>
+                  <span className="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded font-bold">
+                    Phase 3
                   </span>
                 </button>
               </div>

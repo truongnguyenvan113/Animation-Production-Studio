@@ -235,6 +235,100 @@ export interface Episode {
   styleVersionSnapshotId: string;
   storyDraft?: StoryDraft;
   scenes?: Scene[];
+  storyboardId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type ShotType =
+  | 'Establishing Shot'
+  | 'Wide Shot'
+  | 'Medium Shot'
+  | 'Medium Close-Up'
+  | 'Close-Up'
+  | 'Extreme Close-Up'
+  | 'Over-the-Shoulder'
+  | 'Two-Shot'
+  | 'Tracking Shot'
+  | 'Insert Shot';
+
+export type ShotGenerationStatus =
+  | 'Not Generated'
+  | 'Queued'
+  | 'Generating'
+  | 'Generated'
+  | 'Approved'
+  | 'Flagged';
+
+export interface ShotContinuityNotes {
+  characterPositions?: string;
+  objectPositions?: string;
+  environmentContinuity?: string;
+  propContinuity?: string;
+  actionContinuity?: string;
+  previousShotRelationship?: string;
+}
+
+export interface Shot {
+  id: string; // e.g. "shot_ep009_s01_01"
+  storyboardSceneId: string;
+  sceneNumber: number;
+  shotNumber: number;
+  shotType: ShotType;
+  durationSeconds: number;
+  cameraDirection: string;
+  framing: string;
+  cameraMovement: string;
+  cameraAngle?: string;
+  subject?: string;
+  visualFocus?: string;
+  action: string;
+  characterIds: string[];
+  // INHERITED FROM EPISODE SNAPSHOT - IMMUTABLE PER SHOT
+  characterDnaReferences: Record<string, string>;
+  // INHERITED FROM EPISODE SNAPSHOT - IMMUTABLE PER SHOT
+  styleVersionSnapshotId: string;
+  location: string;
+  timeOfDay: string;
+  lighting: string;
+  dialogue?: string;
+  speakerCharacterId?: string;
+  speakerCharacterName?: string;
+  emotion: string;
+  visualPurpose: string;
+  continuityNotes: ShotContinuityNotes;
+  generationStatus: ShotGenerationStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface StoryboardScene {
+  id: string; // e.g. "sb_scene_ep009_01"
+  episodeSceneId: string; // references Scene.id (e.g. "scene_ep9_01")
+  sceneNumber: number;
+  title?: string;
+  location?: string;
+  timeOfDay?: string;
+  lighting?: string;
+  shots: Shot[];
+}
+
+export type StoryboardStatus =
+  | 'Draft'
+  | 'In Review'
+  | 'Approved'
+  | 'Ready for Video';
+
+export interface Storyboard {
+  id: string; // e.g. "sb_ep009"
+  episodeId: string;
+  episodeVersion?: string | number;
+  status: StoryboardStatus;
+  characterVersionSnapshots: Record<string, string>;
+  styleVersionSnapshotId: string;
+  scenes: StoryboardScene[];
+  totalShots: number;
+  totalDurationSeconds: number;
   createdAt: string;
   updatedAt: string;
 }

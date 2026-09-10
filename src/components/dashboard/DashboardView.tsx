@@ -304,12 +304,22 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </h4>
               </div>
 
-              <button
-                onClick={() => onNavigate('episodes')}
-                className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-sm"
-              >
-                {formatLabel('Inspect Episode Snapshot', 'Xem chi tiết Snapshot')}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => onNavigate('storyboard', activeEpisode.id)}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-sm flex items-center gap-1.5"
+                >
+                  <Film className="w-3.5 h-3.5" />
+                  <span>{formatLabel('Storyboard (Phase 3)', 'Storyboard (Phase 3)')}</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('episodes')}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-sm"
+                >
+                  {formatLabel('Inspect Episode Snapshot', 'Xem chi tiết Snapshot')}
+                </button>
+              </div>
             </div>
 
             <p className="text-xs text-slate-300 leading-relaxed bg-slate-950 p-3.5 rounded-xl border border-slate-800">
