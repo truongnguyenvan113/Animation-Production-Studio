@@ -1,0 +1,6 @@
+{
+  "name": "Pi & Kem Animation Production Studio",
+  "description": "Central production management and character DNA versioning system for Pi & Kem Family Animation 3D universe (Studio Sản Xuất Hoạt Hình Pi & Kem).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
