@@ -4,6 +4,7 @@ import {
   Character,
   CharacterVersion,
 } from '../../types';
+import { CharacterReferenceService } from '../../services/characterReferenceService';
 import {
   Camera,
   Clock,
@@ -16,6 +17,7 @@ import {
   Layers,
   Compass,
   ArrowRight,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface ShotCardProps {
@@ -166,12 +168,13 @@ export const ShotCard: React.FC<ShotCardProps> = ({
               const char = characters.find((c) => c.id === charId);
               const versionId = shot.characterDnaReferences[charId];
               const ver = characterVersions.find((v) => v.id === versionId);
+              const primaryRef = versionId ? CharacterReferenceService.getPrimaryReference(versionId) : undefined;
 
               return (
                 <div
                   key={charId}
                   className="inline-flex items-center text-[11px] bg-emerald-50 border border-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-mono"
-                  title={`Character DNA Snapshot: ${char?.displayName || charId} locked to ${versionId}`}
+                  title={`Character DNA Snapshot: ${char?.displayName || charId} locked to ${versionId}${primaryRef ? ` | Ref: ${primaryRef.storagePath}` : ''}`}
                 >
                   <span className="font-sans font-semibold mr-1">
                     {char?.displayName || charId}:
@@ -180,6 +183,15 @@ export const ShotCard: React.FC<ShotCardProps> = ({
                     {ver ? `v${ver.version}` : versionId || 'locked'}
                   </span>
                   <Lock className="w-2.5 h-2.5 ml-1 text-emerald-600" />
+                  {primaryRef && (
+                    <span
+                      className="ml-1 text-[9px] bg-amber-100 text-amber-900 border border-amber-300 px-1 rounded flex items-center gap-0.5 font-sans capitalize"
+                      title={`Resolved Reference: ${primaryRef.storagePath}`}
+                    >
+                      <ImageIcon className="w-2 h-2 text-amber-700" />
+                      {primaryRef.type}
+                    </span>
+                  )}
                 </div>
               );
             })}

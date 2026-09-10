@@ -20,6 +20,7 @@ export const ReferenceCardPreview: React.FC<ReferenceCardPreviewProps> = ({
   className = '',
 }) => {
   const isDataUrlOrHttp = image && (image.startsWith('data:') || image.startsWith('http') || image.startsWith('/'));
+  const normType = (type || '').toLowerCase();
 
   return (
     <div
@@ -62,7 +63,7 @@ export const ReferenceCardPreview: React.FC<ReferenceCardPreviewProps> = ({
         </div>
       ) : (
         <div className="relative z-10 flex flex-col items-center justify-center gap-2 text-center">
-        {type === 'Expression' ? (
+        {normType.includes('expression') ? (
           <div className="flex items-center gap-2">
             <div className="scale-75 opacity-70">
               <CharacterAvatar characterId={characterId} size="lg" />
@@ -74,7 +75,7 @@ export const ReferenceCardPreview: React.FC<ReferenceCardPreviewProps> = ({
               <CharacterAvatar characterId={characterId} size="lg" />
             </div>
           </div>
-        ) : type === 'Side' ? (
+        ) : normType === 'side' ? (
           <div className="relative flex items-center justify-center">
             <div className="transform -rotate-6">
               <CharacterAvatar characterId={characterId} size="xl" />
@@ -84,7 +85,7 @@ export const ReferenceCardPreview: React.FC<ReferenceCardPreviewProps> = ({
               PROFILE 90°
             </div>
           </div>
-        ) : type === '3/4' ? (
+        ) : normType === '3/4' ? (
           <div className="relative flex items-center justify-center">
             <div className="transform rotate-3 scale-105">
               <CharacterAvatar characterId={characterId} size="xl" />
@@ -93,20 +94,27 @@ export const ReferenceCardPreview: React.FC<ReferenceCardPreviewProps> = ({
               BEAUTY 45°
             </div>
           </div>
-        ) : type === 'Pose' ? (
+        ) : normType === 'full-body' || normType === 'pose' ? (
           <div className="relative flex items-center justify-center">
             <div className="animate-pulse">
               <CharacterAvatar characterId={characterId} size="xl" />
             </div>
             <div className="absolute -bottom-2 bg-slate-900/90 text-emerald-400 border border-emerald-500/40 text-[10px] font-mono px-2 py-0.5 rounded-full">
-              DYNAMIC POSE
+              FULL BODY 360°
+            </div>
+          </div>
+        ) : normType === 'custom' ? (
+          <div className="relative flex items-center justify-center">
+            <CharacterAvatar characterId={characterId} size="xl" />
+            <div className="absolute -bottom-2 bg-slate-900/90 text-purple-400 border border-purple-500/40 text-[10px] font-mono px-2 py-0.5 rounded-full">
+              CUSTOM DETAIL
             </div>
           </div>
         ) : (
           <div className="relative flex items-center justify-center">
             <CharacterAvatar characterId={characterId} size="xl" />
             <div className="absolute -bottom-2 bg-slate-900/90 text-indigo-400 border border-indigo-500/40 text-[10px] font-mono px-2 py-0.5 rounded-full">
-              MODEL SHEET
+              MODEL SHEET 0°
             </div>
           </div>
         )}

@@ -118,17 +118,9 @@ export class StoryboardService {
 
   /**
    * Enriches shot with resolved reference assets from locked Character DNA.
+   * Storyboard Shots strictly resolve references from their locked Character Version.
    */
   public enrichShotWithReferences(shot: Shot): Shot {
-    if (
-      shot.characterReferenceAssetIds &&
-      Object.keys(shot.characterReferenceAssetIds).length > 0 &&
-      shot.characterPrimaryReferenceAssets &&
-      Object.keys(shot.characterPrimaryReferenceAssets).length > 0
-    ) {
-      return shot;
-    }
-
     const { characterReferenceAssetIds, characterPrimaryReferenceAssets } =
       this.resolveCharacterReferenceAssets(
         shot.characterIds,

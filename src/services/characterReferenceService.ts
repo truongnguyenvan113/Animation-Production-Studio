@@ -1,6 +1,57 @@
 import { CharacterReference, CharacterVersion, ReferenceType, Shot } from '../types';
 import { storageService } from './storageService';
 
+export const CANONICAL_REFERENCE_TYPES: ReferenceType[] = [
+  'front',
+  '3/4',
+  'side',
+  'expression',
+  'full-body',
+  'custom',
+];
+
+export const REFERENCE_TYPE_LABELS: Record<
+  string,
+  { en: string; vi: string; description: string; angle: string }
+> = {
+  front: {
+    en: 'Front Orthographic',
+    vi: 'Chiếu diện trực giao (0°)',
+    description: 'Neutral full-body stance, facing camera directly for blueprint proportions',
+    angle: '0° Frontal',
+  },
+  '3/4': {
+    en: '3/4 Angle / Beauty',
+    vi: 'Góc nghiêng 3/4 (45°)',
+    description: 'Hero beauty angle showing cheek volume, facial curvature, and silhouette',
+    angle: '45° Semi-profile',
+  },
+  side: {
+    en: 'Side Profile',
+    vi: 'Hình chiếu cạnh (90°)',
+    description: '90-degree orthogonal side view for nose, ear depth, and posture contour',
+    angle: '90° Profile',
+  },
+  expression: {
+    en: 'Expression Sheet',
+    vi: 'Bảng biểu cảm khuôn mặt',
+    description: 'Emotional range, joyful reactions, mouth shapes, and key facial expressions',
+    angle: 'Emotional Array',
+  },
+  'full-body': {
+    en: 'Full Body / Stance',
+    vi: 'Toàn thân & Dáng đứng',
+    description: 'Full turnaround posture, anatomy, footwear, and costume silhouette',
+    angle: '360° Turnaround',
+  },
+  custom: {
+    en: 'Custom / Turnaround',
+    vi: 'Tùy biến / Phụ kiện & Chi tiết',
+    description: 'Costume turnaround, signature props, hairstyle close-ups, or custom angles',
+    angle: 'Signature Detail',
+  },
+};
+
 export class CharacterReferenceService {
   /**
    * Generates the canonical storage path for an asset:

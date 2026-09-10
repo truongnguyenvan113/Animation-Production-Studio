@@ -80,6 +80,11 @@ export class StorageService {
               }
             }
 
+            // Ensure characterReferences array exists and contains seed data if empty
+            if (!Array.isArray(parsed.characterReferences) || parsed.characterReferences.length === 0) {
+              parsed.characterReferences = SEED_CHARACTER_REFERENCES;
+            }
+
             // Ensure storyboards array exists and contains seed storyboards if empty
             if (!Array.isArray(parsed.storyboards) || parsed.storyboards.length === 0) {
               parsed.storyboards = SEED_STORYBOARDS;

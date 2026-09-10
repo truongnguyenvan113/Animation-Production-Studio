@@ -2,6 +2,7 @@ export type ReferenceType =
   | 'front'
   | '3/4'
   | 'side'
+  | 'expression'
   | 'expressions'
   | 'full-body'
   | 'custom'

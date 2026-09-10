@@ -171,6 +171,29 @@ export const ShotPromptPreviewModal: React.FC<ShotPromptPreviewModalProps> = ({
                 ))}
               </div>
 
+              {/* Resolved Reference Image Assets */}
+              {promptData.referenceAssets && promptData.referenceAssets.length > 0 && (
+                <div className="border border-amber-200 bg-amber-50/60 rounded-xl p-3.5 space-y-2">
+                  <div className="text-xs font-bold text-amber-900 flex items-center justify-between">
+                    <span className="flex items-center">
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-600" />
+                      2b. Ảnh tham chiếu phân giải từ Locked Version (Resolved Reference Assets)
+                    </span>
+                    <span className="text-[10px] font-mono text-amber-700 bg-amber-100 px-2 py-0.5 rounded">
+                      characters/&#123;charId&#125;/&#123;verId&#125;/
+                    </span>
+                  </div>
+                  {promptData.referenceAssets.map((refAsset, idx) => (
+                    <p
+                      key={idx}
+                      className="text-xs font-mono text-amber-900 bg-white/90 p-2 rounded border border-amber-200 break-all"
+                    >
+                      {refAsset}
+                    </p>
+                  ))}
+                </div>
+              )}
+
               {/* Environment & Camera */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="border border-slate-200 bg-slate-50 rounded-xl p-3 space-y-1">
