@@ -337,10 +337,25 @@ export type StoryboardStatus =
   | 'Approved'
   | 'Ready for Video';
 
+export interface StoryboardRevision {
+  id: string; // e.g. "rev_sb_ep009_v1"
+  revisionNumber: number;
+  episodeVersion: string | number;
+  scenes: StoryboardScene[];
+  totalShots: number;
+  totalDurationSeconds: number;
+  status: StoryboardStatus;
+  createdAt: string;
+  archivedAt: string;
+  note?: string;
+}
+
 export interface Storyboard {
   id: string; // e.g. "sb_ep009"
   episodeId: string;
   episodeVersion?: string | number;
+  revisionNumber?: number;
+  revisions?: StoryboardRevision[];
   status: StoryboardStatus;
   characterVersionSnapshots: Record<string, string>;
   styleVersionSnapshotId: string;

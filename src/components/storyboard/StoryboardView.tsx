@@ -14,6 +14,7 @@ import { ShotCard } from './ShotCard';
 import { ShotEditorModal } from './ShotEditorModal';
 import { ShotPromptPreviewModal } from './ShotPromptPreviewModal';
 import { ImmutabilityAuditModal } from './ImmutabilityAuditModal';
+import { StoryboardRevisionHistoryModal } from './StoryboardRevisionHistoryModal';
 import {
   Film,
   Plus,
@@ -29,6 +30,7 @@ import {
   ListFilter,
   CheckCircle2,
   Tv,
+  History,
 } from 'lucide-react';
 
 interface StoryboardViewProps {
@@ -62,6 +64,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
   } | null>(null);
 
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showRevisionModal, setShowRevisionModal] = useState(false);
 
   // Sync DB on changes
   useEffect(() => {
@@ -87,6 +90,16 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
       setDb(storage.getDatabase());
     } catch (err: any) {
       alert(err.message || 'Lỗi khi tạo storyboard');
+    }
+  };
+
+  const handleRestoreRevision = (revisionId: string) => {
+    if (!storyboard) return;
+    try {
+      storyboardService.restoreRevision(storyboard.id, revisionId);
+      setDb(storage.getDatabase());
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi khôi phục revision');
     }
   };
 
@@ -237,6 +250,17 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                   </button>
 
                   <button
+                    id="btn-view-revisions"
+                    type="button"
+                    onClick={() => setShowRevisionModal(true)}
+                    className="inline-flex items-center text-xs font-semibold px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 hover:bg-indigo-100 shadow-sm transition-colors"
+                    title="Xem lịch sử các bản sửa đổi Storyboard"
+                  >
+                    <History className="w-4 h-4 mr-1.5 text-indigo-600" />
+                    Lịch sử Revisions ({(storyboard.revisions || []).length})
+                  </button>
+
+                  <button
                     id="btn-export-storyboard-json"
                     type="button"
                     onClick={handleExportJson}
@@ -252,17 +276,17 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                     onClick={() => {
                       if (
                         window.confirm(
-                          'Tạo lại Storyboard sẽ phân rã lại 6 cảnh kịch bản thành các shot chuẩn. Tiếp tục?'
+                          'Tạo lại Storyboard sẽ kích hoạt Regeneration Safety: lưu trữ bản hiện tại thành một Revision lịch sử, tăng số hiệu phiên bản, bảo toàn các shot và chỉnh sửa sản xuất đã có. Tiếp tục?'
                         )
                       ) {
                         handleGenerateStoryboard();
                       }
                     }}
                     className="inline-flex items-center text-xs font-semibold px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
-                    title="Tạo lại từ 6 cảnh kịch bản Phase 2"
+                    title="Tạo lại Storyboard với cơ chế Regeneration Safety (Lưu Revision an toàn)"
                   >
                     <RotateCcw className="w-3.5 h-3.5 mr-1" />
-                    Tạo lại
+                    Tạo lại (Lưu Revision)
                   </button>
                 </>
               ) : (
@@ -282,10 +306,17 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
           {/* Immutability & Production Metrics Bar */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
-              <span className="text-slate-500 block text-[11px]">Tổng số Phân cảnh (Scenes)</span>
-              <span className="font-bold text-slate-900 text-base">
-                {storyboard?.scenes.length || episode.scenes?.length || 0} Cảnh chuẩn
-              </span>
+              <span className="text-slate-500 block text-[11px]">Phiên bản & Phân cảnh</span>
+              <div className="flex items-center space-x-1.5 mt-0.5">
+                <span className="font-bold text-slate-900 text-base">
+                  {storyboard?.scenes.length || episode.scenes?.length || 0} Cảnh
+                </span>
+                {storyboard && (
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
+                    Rev v{storyboard.revisionNumber || storyboard.episodeVersion || 1}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -460,11 +491,38 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                     </h4>
                   </div>
 
-                  {/* Add Shot Button (Bounded 2 - 8) */}
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs text-slate-500">
-                      {currentScene.shots.length} / 8 shots
-                    </span>
+                  {/* Add Shot Button and Duration Synchronization Status */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {(() => {
+                      const sourceScene = episode?.scenes?.find(
+                        (s) => s.id === currentScene.episodeSceneId || s.sceneNumber === currentScene.sceneNumber
+                      );
+                      const targetDuration = sourceScene?.estimatedDurationSeconds;
+                      const currentSum = currentScene.shots.reduce((acc, s) => acc + (s.durationSeconds || 0), 0);
+                      const isDurationSynced = targetDuration ? currentSum === targetDuration : true;
+
+                      return (
+                        <div className="flex items-center space-x-2">
+                          <span
+                            className={`text-xs px-2.5 py-1 rounded-lg border font-mono font-bold flex items-center ${
+                              isDurationSynced
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : 'bg-amber-50 text-amber-800 border-amber-300'
+                            }`}
+                            title={`Tổng thời lượng các shot: ${currentSum}s / Kịch bản: ${targetDuration || '--'}s`}
+                          >
+                            <Clock className="w-3.5 h-3.5 mr-1" />
+                            {currentSum}s {targetDuration ? `/ ${targetDuration}s` : ''}
+                            {isDurationSynced && (
+                              <CheckCircle2 className="w-3.5 h-3.5 ml-1 text-emerald-600" />
+                            )}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            {currentScene.shots.length} / 8 shots
+                          </span>
+                        </div>
+                      );
+                    })()}
                     <button
                       id={`btn-add-shot-scene-${currentScene.sceneNumber}`}
                       type="button"
@@ -530,10 +588,32 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <span className="text-xs font-semibold text-slate-600 bg-white px-2 py-1 rounded border border-slate-200">
-                        {scene.shots.length} shots &bull;{' '}
-                        {scene.shots.reduce((acc, s) => acc + s.durationSeconds, 0)}s
-                      </span>
+                      {(() => {
+                        const sourceScene = episode?.scenes?.find(
+                          (s) => s.id === scene.episodeSceneId || s.sceneNumber === scene.sceneNumber
+                        );
+                        const targetDuration = sourceScene?.estimatedDurationSeconds;
+                        const currentSum = scene.shots.reduce((acc, s) => acc + (s.durationSeconds || 0), 0);
+                        const isDurationSynced = targetDuration ? currentSum === targetDuration : true;
+
+                        return (
+                          <span
+                            className={`text-xs font-semibold px-2.5 py-1 rounded-lg border flex items-center ${
+                              isDurationSynced
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : 'bg-white text-slate-600 border-slate-200'
+                            }`}
+                            title={`Tổng thời lượng các shot: ${currentSum}s / Kịch bản: ${targetDuration || '--'}s`}
+                          >
+                            <Clock className="w-3 h-3 mr-1 text-slate-400" />
+                            {scene.shots.length} shots &bull; {currentSum}s
+                            {targetDuration ? ` / ${targetDuration}s` : ''}
+                            {isDurationSynced && (
+                              <CheckCircle2 className="w-3 h-3 ml-1 text-emerald-600" />
+                            )}
+                          </span>
+                        );
+                      })()}
                       <button
                         type="button"
                         onClick={() => handleAddShot(scene.id)}
@@ -620,6 +700,16 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
         <ImmutabilityAuditModal
           storyboardId={storyboard.id}
           onClose={() => setShowAuditModal(false)}
+        />
+      )}
+
+      {/* 4. Storyboard Revision History Modal */}
+      {showRevisionModal && storyboard && (
+        <StoryboardRevisionHistoryModal
+          isOpen={showRevisionModal}
+          onClose={() => setShowRevisionModal(false)}
+          storyboard={storyboard}
+          onRestoreRevision={handleRestoreRevision}
         />
       )}
     </div>
