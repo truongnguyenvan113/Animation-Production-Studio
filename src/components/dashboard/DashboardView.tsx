@@ -95,7 +95,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         {/* Action / Architecture Guarantee Button */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => onNavigate('story-generator')}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-md shadow-amber-500/20 transition-all hover:scale-[1.02]"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>{formatLabel('Story Generator (Phase 2)', 'Tạo Cốt Truyện (Phase 2)')}</span>
+          </button>
+
           <button
             onClick={() => setShowArchDetails(true)}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-500/30 transition-all hover:scale-[1.02]"

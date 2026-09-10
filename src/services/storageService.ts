@@ -62,6 +62,16 @@ export class StorageService {
           const isMochiPuppy = mochiVer?.species?.toLowerCase().includes('puppy') || mochiVer?.visualIdentity?.toLowerCase().includes('puppy');
           
           if (isEthanValid && isMochiPuppy) {
+            // Ensure Episode 9 has canonical storyDraft & scenes if missing
+            const ep9 = parsed.episodes?.find((e: Episode) => e.id === 'ep_009');
+            if (ep9 && !ep9.storyDraft) {
+              const seedEp9 = SEED_EPISODES.find((e) => e.id === 'ep_009');
+              if (seedEp9) {
+                ep9.storyDraft = seedEp9.storyDraft;
+                ep9.scenes = seedEp9.scenes;
+                ep9.status = seedEp9.status;
+              }
+            }
             return parsed;
           }
         }

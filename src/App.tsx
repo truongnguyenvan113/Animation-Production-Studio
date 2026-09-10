@@ -19,6 +19,7 @@ import { CharacterReferenceGallery } from './components/characters/CharacterRefe
 import { GlobalStyleView } from './components/style/GlobalStyleView';
 import { SeasonListView } from './components/seasons/SeasonListView';
 import { EpisodeListView } from './components/episodes/EpisodeListView';
+import { StoryGeneratorView } from './components/story/StoryGeneratorView';
 import { ProviderAdaptersView } from './components/providers/ProviderAdaptersView';
 import { BackupModal } from './components/shared/BackupModal';
 
@@ -148,6 +149,16 @@ export default function App() {
             <EpisodeListView
               initialSeasonId={selectedSeasonId}
               language={language}
+            />
+          )}
+
+          {currentView === 'story-generator' && (
+            <StoryGeneratorView
+              language={language}
+              onNavigate={handleNavigate}
+              onEpisodeCreated={() => {
+                handleRefreshAll();
+              }}
             />
           )}
 

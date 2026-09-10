@@ -228,6 +228,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     Tập 9
                   </span>
                 </button>
+
+                <button
+                  onClick={() => onNavigate('story-generator')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('story-generator')
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Story Generator', 'Tạo Cốt Truyện')}</span>
+                  <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
+                    Phase 2
+                  </span>
+                </button>
               </div>
             )}
           </div>
@@ -267,26 +282,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {pipelineRoadmapOpen && (
               <div className="mt-2 p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2 text-xs text-slate-400">
-                <div className="flex items-center gap-2 text-slate-300">
-                  <span className="w-2 h-2 rounded-full bg-slate-600" />
-                  <span>Stage 2: Story Generator & Script</span>
+                <div
+                  onClick={() => onNavigate('story-generator')}
+                  className="flex items-center gap-2 text-amber-300 font-semibold cursor-pointer hover:underline"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Stage 2: Story Generator & Script (Active)</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-300">
+                <div className="flex items-center gap-2 text-slate-400">
                   <span className="w-2 h-2 rounded-full bg-slate-600" />
                   <span>Stage 3: Storyboard & Panels</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-300">
+                <div className="flex items-center gap-2 text-slate-400">
                   <span className="w-2 h-2 rounded-full bg-slate-600" />
                   <span>Stage 4: Video Generation Jobs</span>
                 </div>
-                <div className="flex items-center gap-2 text-slate-300">
+                <div className="flex items-center gap-2 text-slate-400">
                   <span className="w-2 h-2 rounded-full bg-slate-600" />
                   <span>Stage 5: Audio & Video Editor</span>
                 </div>
                 <p className="text-[11px] text-amber-400/80 italic pt-1">
                   {language === 'vi'
-                    ? 'Đang ở Giai đoạn Nền tảng 1: Chuẩn hóa Character DNA.'
-                    : 'Currently in Stage 1 Foundation: Character DNA is Source of Truth.'}
+                    ? 'Giai đoạn 2: Khởi tạo kịch bản gắn liền với Character DNA.'
+                    : 'Stage 2: Story Generation bound strictly to Character DNA.'}
                 </p>
               </div>
             )}
@@ -296,8 +314,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Footer Info */}
         <div className="p-3.5 border-t border-slate-800/80 bg-slate-900/50 text-xs text-slate-400 flex items-center justify-between">
           <span className="font-medium text-slate-300">Pi & Kem Studio</span>
-          <span className="text-amber-400 font-mono text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-            Phase 1 Foundation
+          <span className="text-amber-400 font-mono text-[11px] bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-semibold">
+            Phase 2 Active
           </span>
         </div>
       </aside>

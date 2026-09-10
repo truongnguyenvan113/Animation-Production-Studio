@@ -13,6 +13,9 @@ import {
   Layers,
   Sparkles,
   Info,
+  BookOpen,
+  Film,
+  Clock,
 } from 'lucide-react';
 
 interface SnapshotInspectorModalProps {
@@ -164,6 +167,93 @@ export const SnapshotInspectorModal: React.FC<SnapshotInspectorModalProps> = ({
               </div>
             )}
           </div>
+
+          {/* Story Draft & Granular Scenes (Phase 2) */}
+          {episode.storyDraft && (
+            <div className="space-y-4 pt-2 border-t border-slate-800">
+              <div className="flex items-center justify-between">
+                <h4 className="font-bold text-sm text-white flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-amber-400" />
+                  {formatLabel('Story Draft & 3-Act Narrative', 'Kịch Bản 3 Hồi & Cốt Truyện')}
+                </h4>
+                <span className="text-[10px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded">
+                  {episode.scenes?.length || 0} Scenes
+                </span>
+              </div>
+
+              {/* 3-Act Pills */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider block">
+                    Act 1: Beginning
+                  </span>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    {episode.storyDraft.beginning}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block">
+                    Act 2: Middle
+                  </span>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    {episode.storyDraft.middle}
+                  </p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1">
+                  <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">
+                    Act 3: Ending
+                  </span>
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    {episode.storyDraft.ending}
+                  </p>
+                </div>
+              </div>
+
+              {/* Granular Scene Summary */}
+              {episode.scenes && episode.scenes.length > 0 && (
+                <div className="space-y-2">
+                  <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1.5">
+                    <Film className="w-3.5 h-3.5 text-amber-400" />
+                    {formatLabel('Granular 3D Scenes & Character DNA Bindings', 'Phân Cảnh 3D & Khóa DNA')}
+                  </span>
+                  <div className="space-y-2">
+                    {episode.scenes.map((sc) => (
+                      <div
+                        key={sc.id}
+                        className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 space-y-1.5"
+                      >
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-amber-300">
+                            Scene {sc.sceneNumber}: {sc.title}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-mono">
+                            {sc.location}
+                          </span>
+                        </div>
+                        <p className="text-slate-300 text-[11px] leading-relaxed">
+                          {sc.action}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 pt-1">
+                          {sc.characterIds.map((cId) => {
+                            const ver = sc.characterDnaReferences[cId] || 'ver_1';
+                            return (
+                              <span
+                                key={cId}
+                                className="text-[10px] bg-slate-900 border border-slate-800 px-2 py-0.5 rounded text-slate-300 flex items-center gap-1 font-mono"
+                              >
+                                <span>{cId}</span>
+                                <span className="text-emerald-400 font-bold">({ver})</span>
+                              </span>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Footer */}

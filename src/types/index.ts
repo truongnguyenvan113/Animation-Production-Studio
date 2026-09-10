@@ -156,6 +156,59 @@ export interface Season {
   updatedAt: string;
 }
 
+export interface DialogueLine {
+  characterId: string;
+  characterName: string;
+  line: string;
+  emotion?: string;
+  deliveryNote?: string;
+}
+
+export interface Scene {
+  id: string;
+  sceneNumber: number;
+  title: string;
+  location: string;
+  timeOfDay: string;
+  lighting: string;
+  characterIds: string[];
+  characterDnaReferences: Record<string, string>; // Maps characterId -> specific CharacterVersionId snapshot
+  action: string;
+  dialogue: DialogueLine[];
+  emotion: string;
+  storyPurpose: string;
+  educationalPurpose: string;
+  cameraDirection?: string;
+  estimatedDurationSeconds?: number;
+}
+
+export interface StoryDraft {
+  id: string;
+  episodeId: string;
+  title: string;
+  premise: string;
+  educationalLesson: string;
+  targetAudience: string;
+  targetDuration: string;
+  additionalNotes?: string;
+  beginning: string;
+  middle: string;
+  ending: string;
+  emotionalArc: string;
+  location: string;
+  characterParticipation: Array<{
+    characterId: string;
+    characterName: string;
+    characterRole: string;
+    versionSnapshotId: string;
+    participationRole: string;
+  }>;
+  styleVersionSnapshotId: string;
+  scenes: Scene[];
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Episode {
   id: string;
   seasonId: string;
@@ -175,6 +228,8 @@ export interface Episode {
   characterVersionSnapshots: Record<string, string>;
   // Exact GlobalStyleVersion used for this episode
   styleVersionSnapshotId: string;
+  storyDraft?: StoryDraft;
+  scenes?: Scene[];
   createdAt: string;
   updatedAt: string;
 }

@@ -57,6 +57,12 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
               EPISODE {episode.episodeNumber}
             </span>
             <StatusBadge status={episode.status} language={language} />
+            {episode.scenes && episode.scenes.length > 0 && (
+              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                {episode.scenes.length} Scenes
+              </span>
+            )}
             <span className="text-[11px] text-slate-500 flex items-center gap-1">
               <Clock className="w-3 h-3" /> {episode.duration}
             </span>
