@@ -403,14 +403,22 @@ export type ImageGenerationJobStatus =
   | 'failed'
   | 'cancelled';
 
+export type OutputApprovalStatus = 'pending' | 'approved' | 'rejected';
+
 export interface ImageGenerationOutputAsset {
   id: string; // e.g. "out_job_img_001_01"
   jobId: string;
   shotId: string;
+  iterationNumber?: number; // 1, 2, 3...
   imageUrl: string; // High-res Data URL or canonical URI
   thumbnailUrl?: string;
   storagePath: string; // Canonical: "renders/episodes/{episodeId}/shots/{shotId}/output_{timestamp}.png"
   isApproved?: boolean;
+  approvalStatus?: OutputApprovalStatus;
+  rejectionReason?: string;
+  rejectionTimestamp?: string;
+  approvedTimestamp?: string;
+  deterministicHash?: string;
   aspectRatio: string;
   width: number;
   height: number;
@@ -430,6 +438,96 @@ export interface ImageGenerationPromptBreakdown {
   dialogueCue: string;
 }
 
+export interface GenerationInputSnapshot {
+  snapshotCreatedAt: string;
+  deterministicPayloadHash: string;
+  shotPayload: {
+    id: string;
+    shotNumber: number;
+    sceneNumber: number;
+    shotType: string;
+    durationSeconds: number;
+    action: string;
+    cameraDirection: string;
+    framing: string;
+    cameraMovement: string;
+    cameraAngle?: string;
+    lighting: string;
+    location: string;
+    dialogue?: string;
+    speakerCharacterName?: string;
+    emotion: string;
+    visualPurpose: string;
+    characterIds: string[];
+  };
+  resolvedCharacterVersions: Array<{
+    characterId: string;
+    characterName: string;
+    characterVersionId: string;
+    versionNumber: string;
+    visualPromptSnippet: string;
+    canonicalAppearance: string;
+  }>;
+  resolvedReferenceAssets: Array<{
+    id: string;
+    characterId: string;
+    characterVersionId: string;
+    label: string;
+    viewAngle: string;
+    storagePath: string;
+  }>;
+  resolvedStyleSnapshot: {
+    id: string;
+    versionNumber: string;
+    name: string;
+    positivePrompt: string;
+    negativePrompt: string;
+    colorPaletteRule: string;
+    lightingRule: string;
+  };
+  compiledPrompt: string;
+  negativePrompt: string;
+}
+
+export interface GenerationIntegrityAuditResult {
+  jobId: string;
+  shotId: string;
+  auditTimestamp: string;
+  isImmutable: boolean;
+  score: number; // 100%
+  checks: {
+    zeroActiveCharacterStateLeak: {
+      passed: boolean;
+      details: string;
+      lockedVersions: Record<string, string>;
+      activeVersionsInDb: Record<string, string>;
+    };
+    zeroActiveStyleStateLeak: {
+      passed: boolean;
+      details: string;
+      lockedStyleVersionId: string;
+      activeStyleVersionIdInDb: string;
+    };
+    referenceAssetIsolation: {
+      passed: boolean;
+      details: string;
+      resolvedAssetIds: string[];
+      invalidAssetIds: string[];
+    };
+    deterministicInputChecksum: {
+      passed: boolean;
+      checksum: string;
+      details: string;
+    };
+    regenerationImmutabilityGuarantee: {
+      passed: boolean;
+      details: string;
+      previousOutputsCount: number;
+      outputsArePreserved: boolean;
+    };
+  };
+}
+
 export interface ImageGenerationJob {
   id: string; // e.g. "img_job_shot_ep009_s01_01_1720000000"
   shotId: string;
@@ -438,6 +536,13 @@ export interface ImageGenerationJob {
   sceneNumber: number;
   episodeId: string;
   storyboardId: string;
+
+  // REGENERATION & ITERATION TRACKING
+  parentJobId?: string; // If regenerated, points to previous job ID
+  iterationNumber?: number; // 1 (initial run), 2, 3...
+
+  // COMPLETE FROZEN GENERATION INPUT SNAPSHOT
+  inputSnapshot?: GenerationInputSnapshot;
 
   // IMMUTABILITY CONTRACT:
   // Strictly extracted from Shot - NEVER active or current version
