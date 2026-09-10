@@ -9,6 +9,7 @@ import {
   GlobalStyleVersion,
 } from '../../types';
 import { StoryboardService, PromptPreviewResult } from '../../services/storyboardService';
+import { ImageGenerationService } from '../../services/imageGenerationService';
 import { StorageService } from '../../services/storageService';
 import { ShotCard } from './ShotCard';
 import { ShotEditorModal } from './ShotEditorModal';
@@ -36,13 +37,16 @@ import {
 interface StoryboardViewProps {
   initialEpisodeId?: string;
   onNavigateToEpisode?: (episodeId: string) => void;
+  onNavigateToImageGeneration?: (episodeId?: string) => void;
 }
 
 export const StoryboardView: React.FC<StoryboardViewProps> = ({
   initialEpisodeId,
   onNavigateToEpisode,
+  onNavigateToImageGeneration,
 }) => {
   const storyboardService = StoryboardService.getInstance();
+  const imageGenService = ImageGenerationService.getInstance();
   const storage = StorageService.getInstance();
 
   const [db, setDb] = useState(() => storage.getDatabase());
@@ -102,6 +106,26 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
       alert(err.message || 'Lỗi khi khôi phục revision');
     }
   };
+
+  const handleGenerateShotImage = async (shot: Shot) => {
+    if (!storyboard) return;
+    try {
+      const job = imageGenService.createJobFromShot(
+        shot,
+        selectedEpisodeId,
+        storyboard.id,
+        'mock-studio'
+      );
+      await imageGenService.runJob(job.id);
+      setDb(storage.getDatabase());
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi tạo ảnh cho shot');
+    }
+  };
+
+  const episodeJobsCount = (db.imageGenerationJobs || []).filter(
+    (j) => j.episodeId === selectedEpisodeId
+  ).length;
 
   const handleSaveShot = (updatedShot: Shot) => {
     if (!storyboard || !editingShot) return;
@@ -239,6 +263,19 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               {storyboard ? (
                 <>
+                  {onNavigateToImageGeneration && (
+                    <button
+                      id="btn-nav-image-pipeline"
+                      type="button"
+                      onClick={() => onNavigateToImageGeneration(selectedEpisodeId)}
+                      className="inline-flex items-center text-xs font-bold px-3.5 py-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-sm transition-colors"
+                      title="Xem Hàng Đợi Render Ảnh CGI Giai Đoạn 4"
+                    >
+                      <Sparkles className="w-4 h-4 mr-1.5" />
+                      Hàng Đợi Render Phase 4 ({episodeJobsCount})
+                    </button>
+                  )}
+
                   <button
                     id="btn-audit-immutability"
                     type="button"
@@ -563,6 +600,12 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                     onOpenPromptPreview={handleOpenPromptPreview}
                     onEditShot={(s) => setEditingShot({ shot: s, sceneId: currentScene.id })}
                     onDeleteShot={(s) => handleDeleteShot(currentScene.id, s)}
+                    onGenerateImage={handleGenerateShotImage}
+                    onViewImageOutput={() => {
+                      if (onNavigateToImageGeneration) {
+                        onNavigateToImageGeneration(selectedEpisodeId);
+                      }
+                    }}
                     canDelete={currentScene.shots.length > 2}
                   />
                 ))}
@@ -636,6 +679,12 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                         onOpenPromptPreview={handleOpenPromptPreview}
                         onEditShot={(s) => setEditingShot({ shot: s, sceneId: scene.id })}
                         onDeleteShot={(s) => handleDeleteShot(scene.id, s)}
+                        onGenerateImage={handleGenerateShotImage}
+                        onViewImageOutput={() => {
+                          if (onNavigateToImageGeneration) {
+                            onNavigateToImageGeneration(selectedEpisodeId);
+                          }
+                        }}
                         canDelete={scene.shots.length > 2}
                       />
                     ))}

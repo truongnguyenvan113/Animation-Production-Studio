@@ -317,6 +317,8 @@ export interface Shot {
   visualPurpose: string;
   continuityNotes: ShotContinuityNotes;
   generationStatus: ShotGenerationStatus;
+  activeImageOutputUrl?: string;
+  activeImageJobId?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -380,3 +382,110 @@ export interface ProviderAdapterSpec {
 }
 
 export type LanguageMode = 'bilingual' | 'vi' | 'en';
+
+// ==========================================
+// PHASE 4: IMAGE GENERATION PIPELINE TYPES
+// ==========================================
+
+export type ImageGenerationProvider =
+  | 'mock-studio'
+  | 'gemini-imagen'
+  | 'midjourney'
+  | 'flux-pro'
+  | 'stable-diffusion'
+  | 'dall-e-3';
+
+export type ImageGenerationJobStatus =
+  | 'pending'
+  | 'queued'
+  | 'processing'
+  | 'completed'
+  | 'failed'
+  | 'cancelled';
+
+export interface ImageGenerationOutputAsset {
+  id: string; // e.g. "out_job_img_001_01"
+  jobId: string;
+  shotId: string;
+  imageUrl: string; // High-res Data URL or canonical URI
+  thumbnailUrl?: string;
+  storagePath: string; // Canonical: "renders/episodes/{episodeId}/shots/{shotId}/output_{timestamp}.png"
+  isApproved?: boolean;
+  aspectRatio: string;
+  width: number;
+  height: number;
+  fileSize?: number;
+  seed?: number;
+  createdAt: string;
+}
+
+export interface ImageGenerationPromptBreakdown {
+  styleDna: string;
+  charactersDna: string[];
+  referenceAssets: string[];
+  environment: string;
+  cameraAndLighting: string;
+  actionAndEmotion: string;
+  continuity: string;
+  dialogueCue: string;
+}
+
+export interface ImageGenerationJob {
+  id: string; // e.g. "img_job_shot_ep009_s01_01_1720000000"
+  shotId: string;
+  shotNumber: number;
+  sceneId: string;
+  sceneNumber: number;
+  episodeId: string;
+  storyboardId: string;
+
+  // IMMUTABILITY CONTRACT:
+  // Strictly extracted from Shot - NEVER active or current version
+  characterDnaSnapshots: Record<string, string>; // characterId -> CharacterVersionId
+  characterVersionNames?: Record<string, string>; // characterId -> "v1.0"
+  referenceAssetIds: string[]; // Resolved reference asset IDs strictly from locked CharacterVersion
+  referenceAssetPaths: Record<string, string>; // refId -> "characters/{charId}/{verId}/..."
+  styleVersionSnapshotId: string; // Strictly from shot.styleVersionSnapshotId
+  styleVersionName?: string; // "v1.0"
+
+  // PROMPT SPECIFICATION
+  prompt: string; // Fully compiled prompt string
+  negativePrompt?: string;
+  promptBreakdown?: ImageGenerationPromptBreakdown;
+
+  // PROVIDER & EXECUTION
+  provider: ImageGenerationProvider;
+  modelName?: string;
+  status: ImageGenerationJobStatus;
+  progress: number; // 0 to 100
+  params: {
+    aspectRatio: string;
+    resolution: string;
+    seed?: number;
+    steps?: number;
+    guidanceScale?: number;
+    sampler?: string;
+  };
+
+  // OUTPUTS & AUDIT TIMESTAMPS
+  outputAssets: ImageGenerationOutputAsset[];
+  error: string | null;
+  createdAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  executionDurationMs?: number;
+}
+
+export interface ImageProviderSpec {
+  id: ImageGenerationProvider;
+  name: string;
+  badge: string;
+  category: 'Mock Engine' | 'Cloud Diffusion' | 'Production API';
+  description: string;
+  supportedRatios: string[];
+  maxResolution: string;
+  defaultSteps: number;
+  promptSyntax: string;
+  isMockOnly: boolean;
+}
+

@@ -304,7 +304,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </h4>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => onNavigate('storyboard', activeEpisode.id)}
                   className="px-3.5 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-500 text-white transition-colors shadow-sm flex items-center gap-1.5"
@@ -314,10 +314,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 </button>
 
                 <button
-                  onClick={() => onNavigate('episodes')}
-                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-sm"
+                  onClick={() => onNavigate('image-generation')}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-sm flex items-center gap-1.5"
                 >
-                  {formatLabel('Inspect Episode Snapshot', 'Xem chi tiết Snapshot')}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{formatLabel('Image Pipeline (Phase 4)', 'Tạo Ảnh (Phase 4)')}</span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('episodes')}
+                  className="px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors shadow-sm"
+                >
+                  {formatLabel('Episode Snapshot', 'Chi tiết Snapshot')}
                 </button>
               </div>
             </div>

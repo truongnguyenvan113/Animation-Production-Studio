@@ -21,6 +21,7 @@ import { SeasonListView } from './components/seasons/SeasonListView';
 import { EpisodeListView } from './components/episodes/EpisodeListView';
 import { StoryGeneratorView } from './components/story/StoryGeneratorView';
 import { StoryboardView } from './components/storyboard/StoryboardView';
+import { ImageGenerationQueueView } from './components/generation/ImageGenerationQueueView';
 import { ProviderAdaptersView } from './components/providers/ProviderAdaptersView';
 import { BackupModal } from './components/shared/BackupModal';
 
@@ -175,6 +176,20 @@ export default function App() {
               initialEpisodeId={selectedEpisodeId}
               onNavigateToEpisode={(epId) => {
                 setSelectedEpisodeId(epId);
+              }}
+              onNavigateToImageGeneration={(epId) => {
+                if (epId) setSelectedEpisodeId(epId);
+                setCurrentView('image-generation');
+              }}
+            />
+          )}
+
+          {currentView === 'image-generation' && (
+            <ImageGenerationQueueView
+              language={language}
+              onNavigateToStoryboard={(epId) => {
+                if (epId) setSelectedEpisodeId(epId);
+                setCurrentView('storyboard');
               }}
             />
           )}

@@ -27,6 +27,8 @@ interface ShotCardProps {
   onOpenPromptPreview: (shot: Shot) => void;
   onEditShot: (shot: Shot) => void;
   onDeleteShot?: (shot: Shot) => void;
+  onGenerateImage?: (shot: Shot) => void;
+  onViewImageOutput?: (shot: Shot) => void;
   canDelete?: boolean;
 }
 
@@ -37,6 +39,8 @@ export const ShotCard: React.FC<ShotCardProps> = ({
   onOpenPromptPreview,
   onEditShot,
   onDeleteShot,
+  onGenerateImage,
+  onViewImageOutput,
   canDelete = false,
 }) => {
   const getShotTypeBadgeColor = (type: string) => {
@@ -88,11 +92,46 @@ export const ShotCard: React.FC<ShotCardProps> = ({
         </div>
 
         <div className="flex items-center space-x-1.5">
-          <span className="text-[11px] font-medium text-slate-500 bg-slate-200/70 px-2 py-0.5 rounded-full">
+          <span
+            className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
+              shot.generationStatus === 'Approved'
+                ? 'bg-purple-100 text-purple-800 border-purple-200 font-bold'
+                : shot.generationStatus === 'Generated'
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-200 font-bold'
+                : shot.generationStatus === 'Queued'
+                ? 'bg-amber-100 text-amber-800 border-amber-200'
+                : 'bg-slate-200/70 text-slate-500 border-slate-300'
+            }`}
+          >
             {shot.generationStatus}
           </span>
         </div>
       </div>
+
+      {/* Rendered Frame Preview if Available */}
+      {shot.activeImageOutputUrl && (
+        <div
+          onClick={() => onViewImageOutput && onViewImageOutput(shot)}
+          className="relative bg-slate-950 aspect-video cursor-pointer group overflow-hidden border-b border-slate-200"
+        >
+          <img
+            src={shot.activeImageOutputUrl}
+            alt={`Rendered keyframe for Shot ${shot.shotNumber}`}
+            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
+            <span className="text-xs font-bold text-white bg-slate-900/80 px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 shadow-lg">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              Xem Khung Hình CGI
+            </span>
+          </div>
+          {shot.generationStatus === 'Approved' && (
+            <span className="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+              Keyframe Đã Duyệt
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Card Content Body */}
       <div className="p-4 space-y-3 flex-1 text-sm">
@@ -221,15 +260,33 @@ export const ShotCard: React.FC<ShotCardProps> = ({
 
       {/* Card Action Buttons */}
       <div className="bg-slate-50 px-4 py-2.5 border-t border-slate-200 flex items-center justify-between gap-2">
-        <button
-          id={`btn-prompt-preview-${shot.id}`}
-          type="button"
-          onClick={() => onOpenPromptPreview(shot)}
-          className="inline-flex items-center text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1.5 rounded-lg transition-colors"
-        >
-          <Eye className="w-3.5 h-3.5 mr-1" />
-          Xem Prompt AI
-        </button>
+        <div className="flex items-center space-x-1.5">
+          <button
+            id={`btn-prompt-preview-${shot.id}`}
+            type="button"
+            onClick={() => onOpenPromptPreview(shot)}
+            className="inline-flex items-center text-xs font-semibold text-indigo-700 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 px-2.5 py-1.5 rounded-lg transition-colors"
+          >
+            <Eye className="w-3.5 h-3.5 mr-1" />
+            Prompt
+          </button>
+
+          {onGenerateImage && (
+            <button
+              id={`btn-generate-shot-image-${shot.id}`}
+              type="button"
+              onClick={() => onGenerateImage(shot)}
+              className={`inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
+                shot.activeImageOutputUrl
+                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+                  : 'text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border-amber-200 font-bold'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-1" />
+              {shot.activeImageOutputUrl ? 'Tạo Lại' : 'Render Frame'}
+            </button>
+          )}
+        </div>
 
         <div className="flex items-center space-x-1">
           <button

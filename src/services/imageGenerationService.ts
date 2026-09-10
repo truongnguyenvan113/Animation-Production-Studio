@@ -1,0 +1,741 @@
+import {
+  Shot,
+  StoryboardScene,
+  Storyboard,
+  ImageGenerationJob,
+  ImageGenerationJobStatus,
+  ImageGenerationProvider,
+  ImageGenerationOutputAsset,
+  ImageProviderSpec,
+  CharacterVersion,
+  GlobalStyleVersion,
+} from '../types';
+import { StorageService } from './storageService';
+import { StoryboardService } from './storyboardService';
+
+export const IMAGE_PROVIDER_SPECS: ImageProviderSpec[] = [
+  {
+    id: 'mock-studio',
+    name: 'Pi & Kem Mock Engine',
+    badge: 'Offline Adapter',
+    category: 'Mock Engine',
+    description: 'Decoupled studio mock execution layer for deterministic preview generation without external API dependencies.',
+    supportedRatios: ['16:9', '4:3', '1:1', '9:16'],
+    maxResolution: '4K UHD (3840x2160)',
+    defaultSteps: 30,
+    promptSyntax: 'Prompt Breakdown + Reference Asset Binding + Style Weights',
+    isMockOnly: true,
+  },
+  {
+    id: 'gemini-imagen',
+    name: 'Google Imagen 3',
+    badge: 'Cloud API Ready',
+    category: 'Production API',
+    description: 'Ultra-fast stylized and photorealistic generation with advanced prompt fidelity and text rendering.',
+    supportedRatios: ['16:9', '1:1', '4:3', '9:16', '3:4'],
+    maxResolution: '2048x2048',
+    defaultSteps: 40,
+    promptSyntax: 'Natural Language Scene Description with Lighting & Character Anchors',
+    isMockOnly: false,
+  },
+  {
+    id: 'flux-pro',
+    name: 'FLUX.1 Pro',
+    badge: 'Feature-Film Tier',
+    category: 'Cloud Diffusion',
+    description: 'State-of-the-art flow-matching architecture delivering exceptional character visual anatomy and volumetric 3D lighting.',
+    supportedRatios: ['16:9', '21:9', '1:1', '9:16'],
+    maxResolution: '2048x2048',
+    defaultSteps: 50,
+    promptSyntax: 'Detailed 3D CGI Movie Style + Volumetric Lighting + Shading Prompts',
+    isMockOnly: false,
+  },
+  {
+    id: 'midjourney',
+    name: 'Midjourney v6.1',
+    badge: 'Stylized 3D',
+    category: 'Production API',
+    description: 'Renowned cinematic aesthetics with vibrant pastel color grading and rich tactile cartoon textures.',
+    supportedRatios: ['16:9', '4:3', '1:1'],
+    maxResolution: '2048x2048',
+    defaultSteps: 35,
+    promptSyntax: '--ar 16:9 --style raw --v 6.1 --cw 100 (Character Weight)',
+    isMockOnly: false,
+  },
+  {
+    id: 'stable-diffusion',
+    name: 'SD 3.5 Large (LoRA)',
+    badge: 'Consistent Weights',
+    category: 'Cloud Diffusion',
+    description: 'Self-hosted and cloud-scalable diffusion model with dedicated Character DNA LoRA adapters.',
+    supportedRatios: ['16:9', '1:1', '9:16'],
+    maxResolution: '1536x1536',
+    defaultSteps: 28,
+    promptSyntax: '<lora:pikem_dna_v1:0.85> + Negative Prompting Support',
+    isMockOnly: false,
+  },
+  {
+    id: 'dall-e-3',
+    name: 'OpenAI DALL-E 3',
+    badge: 'Instruction Tuned',
+    category: 'Production API',
+    description: 'Exceptional comprehension of intricate spatial layout and multi-character storytelling interactions.',
+    supportedRatios: ['16:9', '1:1', '9:16'],
+    maxResolution: '1792x1024',
+    defaultSteps: 30,
+    promptSyntax: 'Explicit Multi-Character Staging & Visual Relationship Directions',
+    isMockOnly: false,
+  },
+];
+
+export class ImageGenerationService {
+  private static instance: ImageGenerationService;
+  private storage: StorageService;
+  private storyboardService: StoryboardService;
+  private activeTimers: Map<string, any> = new Map();
+
+  private constructor() {
+    this.storage = StorageService.getInstance();
+    this.storyboardService = StoryboardService.getInstance();
+  }
+
+  public static getInstance(): ImageGenerationService {
+    if (!ImageGenerationService.instance) {
+      ImageGenerationService.instance = new ImageGenerationService();
+    }
+    return ImageGenerationService.instance;
+  }
+
+  /**
+   * Resolve provider specification
+   */
+  public getProviderSpec(providerId: ImageGenerationProvider): ImageProviderSpec {
+    return (
+      IMAGE_PROVIDER_SPECS.find((p) => p.id === providerId) ||
+      IMAGE_PROVIDER_SPECS[0]
+    );
+  }
+
+  /**
+   * CRITICAL IMMUTABILITY MANDATE:
+   * Create an Image Generation Job STRICTLY from a locked Shot.
+   * Resolves Character DNA Version + Reference Assets + Style Snapshot automatically from the Shot.
+   * NEVER use active Character Version or current Style.
+   */
+  public createJobFromShot(
+    shot: Shot,
+    episodeId: string,
+    storyboardId: string,
+    provider: ImageGenerationProvider = 'mock-studio',
+    customParams?: Partial<ImageGenerationJob['params']>
+  ): ImageGenerationJob {
+    const db = this.storage.getDatabase();
+
+    // 1. Resolve Character DNA Snapshots STRICTLY from Shot (immutable snapshot map)
+    const characterDnaSnapshots: Record<string, string> = { ...shot.characterDnaReferences };
+    const characterVersionNames: Record<string, string> = {};
+    const referenceAssetIds: string[] = [];
+    const referenceAssetPaths: Record<string, string> = {};
+
+    // For every character locked to this shot, resolve their specific version's reference assets
+    Object.entries(characterDnaSnapshots).forEach(([charId, versionId]) => {
+      const charVersion = db.characterVersions.find(
+        (v: CharacterVersion) => v.characterId === charId && v.id === versionId
+      );
+      if (charVersion) {
+        characterVersionNames[charId] = charVersion.version || versionId;
+      } else {
+        characterVersionNames[charId] = versionId;
+      }
+
+      // Query references STRICTLY belonging to this locked characterVersionId
+      const refsForVersion = db.characterReferences.filter(
+        (ref) => ref.characterId === charId && ref.characterVersionId === versionId
+      );
+
+      refsForVersion.forEach((ref) => {
+        referenceAssetIds.push(ref.id);
+        referenceAssetPaths[ref.id] = ref.storagePath;
+      });
+    });
+
+    // 2. Resolve Global Style Snapshot STRICTLY from Shot (NEVER active style)
+    const styleVersionSnapshotId = shot.styleVersionSnapshotId;
+    const styleVersion = db.globalStyleVersions.find(
+      (sv: GlobalStyleVersion) => sv.id === styleVersionSnapshotId
+    );
+    const styleVersionName = styleVersion ? styleVersion.version : 'v1.0';
+
+    // 3. Compile prompt preview using storyboard resolution engine
+    const promptPreview = this.storyboardService.generatePromptPreview(shot);
+
+    const now = new Date().toISOString();
+    const jobId = `img_job_${shot.id}_${Date.now()}`;
+
+    const newJob: ImageGenerationJob = {
+      id: jobId,
+      shotId: shot.id,
+      shotNumber: shot.shotNumber,
+      sceneId: shot.storyboardSceneId,
+      sceneNumber: shot.sceneNumber,
+      episodeId,
+      storyboardId,
+
+      // Immutability Contract
+      characterDnaSnapshots,
+      characterVersionNames,
+      referenceAssetIds,
+      referenceAssetPaths,
+      styleVersionSnapshotId,
+      styleVersionName,
+
+      // Prompt Specifications
+      prompt: promptPreview.fullPrompt,
+      negativePrompt: styleVersion?.negativePrompt || '',
+      promptBreakdown: {
+        styleDna: promptPreview.styleDna,
+        charactersDna: promptPreview.charactersDna,
+        referenceAssets: promptPreview.referenceAssets,
+        environment: promptPreview.environment,
+        cameraAndLighting: promptPreview.cameraAndLighting,
+        actionAndEmotion: promptPreview.actionAndEmotion,
+        continuity: promptPreview.continuity,
+        dialogueCue: promptPreview.dialogueCue,
+      },
+
+      // Provider & Execution
+      provider,
+      modelName: this.getProviderSpec(provider).name,
+      status: 'queued',
+      progress: 0,
+      params: {
+        aspectRatio: customParams?.aspectRatio || '16:9',
+        resolution: customParams?.resolution || '1920x1080',
+        seed: customParams?.seed ?? Math.floor(Math.random() * 900000 + 100000),
+        steps: customParams?.steps ?? this.getProviderSpec(provider).defaultSteps,
+        guidanceScale: customParams?.guidanceScale ?? 7.5,
+        sampler: customParams?.sampler ?? 'Euler-a',
+      },
+
+      outputAssets: [],
+      error: null,
+      createdAt: now,
+    };
+
+    // Update shot status
+    const currentSb = db.storyboards.find((sb) => sb.id === storyboardId);
+    if (currentSb) {
+      currentSb.scenes.forEach((scene) => {
+        const foundShot = scene.shots.find((s) => s.id === shot.id);
+        if (foundShot && foundShot.generationStatus === 'Not Generated') {
+          foundShot.generationStatus = 'Queued';
+        }
+      });
+    }
+
+    const currentJobs = db.imageGenerationJobs || [];
+    this.storage.saveDatabase({
+      imageGenerationJobs: [newJob, ...currentJobs],
+      storyboards: db.storyboards,
+    });
+
+    return newJob;
+  }
+
+  /**
+   * Batch create jobs for an entire scene
+   */
+  public createJobsForScene(
+    scene: StoryboardScene,
+    episodeId: string,
+    storyboardId: string,
+    provider: ImageGenerationProvider = 'mock-studio'
+  ): ImageGenerationJob[] {
+    return scene.shots.map((shot) =>
+      this.createJobFromShot(shot, episodeId, storyboardId, provider)
+    );
+  }
+
+  /**
+   * Batch create jobs for an entire storyboard
+   */
+  public createJobsForStoryboard(
+    storyboard: Storyboard,
+    provider: ImageGenerationProvider = 'mock-studio'
+  ): ImageGenerationJob[] {
+    const jobs: ImageGenerationJob[] = [];
+    storyboard.scenes.forEach((scene) => {
+      scene.shots.forEach((shot) => {
+        jobs.push(this.createJobFromShot(shot, storyboard.episodeId, storyboard.id, provider));
+      });
+    });
+    return jobs;
+  }
+
+  /**
+   * Run an Image Generation Job through the provider adapter / mock execution layer.
+   */
+  public async runJob(jobId: string, simulateFailure: boolean = false): Promise<ImageGenerationJob> {
+    const db = this.storage.getDatabase();
+    const jobIndex = (db.imageGenerationJobs || []).findIndex((j) => j.id === jobId);
+    if (jobIndex === -1) {
+      throw new Error(`Job ${jobId} not found in database.`);
+    }
+
+    const job = { ...db.imageGenerationJobs[jobIndex] };
+    const startTime = Date.now();
+
+    // Set processing state
+    job.status = 'processing';
+    job.progress = 20;
+    job.startedAt = new Date().toISOString();
+    job.error = null;
+
+    db.imageGenerationJobs[jobIndex] = job;
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+
+    // Simulate pipeline stage progression
+    await new Promise((r) => setTimeout(r, 600));
+    job.progress = 55;
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+
+    await new Promise((r) => setTimeout(r, 700));
+    job.progress = 85;
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+
+    await new Promise((r) => setTimeout(r, 500));
+
+    if (simulateFailure) {
+      job.status = 'failed';
+      job.progress = 85;
+      job.error =
+        'Mock Pipeline Error: Tensor consistency verification failed for locked reference assets. Provider timed out during cross-attention alignment.';
+      job.completedAt = new Date().toISOString();
+      job.executionDurationMs = Date.now() - startTime;
+
+      // Update shot generation status
+      this.updateShotStatus(job.storyboardId, job.shotId, 'Flagged');
+
+      db.imageGenerationJobs[jobIndex] = job;
+      this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+      return job;
+    }
+
+    // Generate high quality mock output asset SVG
+    const outputAsset = this.generateMockOutputAsset(job);
+
+    job.status = 'completed';
+    job.progress = 100;
+    job.outputAssets = [outputAsset, ...(job.outputAssets || [])];
+    job.completedAt = new Date().toISOString();
+    job.executionDurationMs = Date.now() - startTime;
+    job.error = null;
+
+    db.imageGenerationJobs[jobIndex] = job;
+
+    // Update Shot with active output image
+    this.updateShotStatus(job.storyboardId, job.shotId, 'Generated', outputAsset.imageUrl, job.id);
+
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+    return job;
+  }
+
+  /**
+   * Run all queued or pending jobs in batch
+   */
+  public async runAllQueued(episodeId?: string): Promise<void> {
+    const db = this.storage.getDatabase();
+    const queuedJobs = (db.imageGenerationJobs || []).filter(
+      (j) =>
+        (j.status === 'queued' || j.status === 'pending') &&
+        (!episodeId || j.episodeId === episodeId)
+    );
+
+    for (const job of queuedJobs) {
+      try {
+        await this.runJob(job.id);
+      } catch (err) {
+        console.error(`Error running job ${job.id}:`, err);
+      }
+    }
+  }
+
+  /**
+   * Cancel an ongoing or queued job
+   */
+  public cancelJob(jobId: string): void {
+    const db = this.storage.getDatabase();
+    const job = (db.imageGenerationJobs || []).find((j) => j.id === jobId);
+    if (!job) return;
+
+    job.status = 'cancelled';
+    job.error = 'Job cancelled by animator.';
+    job.completedAt = new Date().toISOString();
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+  }
+
+  /**
+   * Retry a failed or cancelled job
+   */
+  public async retryJob(jobId: string): Promise<ImageGenerationJob> {
+    const db = this.storage.getDatabase();
+    const job = (db.imageGenerationJobs || []).find((j) => j.id === jobId);
+    if (!job) throw new Error('Job not found');
+
+    job.status = 'queued';
+    job.progress = 0;
+    job.error = null;
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+
+    return this.runJob(jobId);
+  }
+
+  /**
+   * Delete a job from history
+   */
+  public deleteJob(jobId: string): void {
+    const db = this.storage.getDatabase();
+    const updated = (db.imageGenerationJobs || []).filter((j) => j.id !== jobId);
+    this.storage.saveDatabase({ imageGenerationJobs: updated });
+  }
+
+  /**
+   * Approve a generated output image for the shot
+   */
+  public approveOutput(jobId: string, outputAssetId: string): void {
+    const db = this.storage.getDatabase();
+    const job = (db.imageGenerationJobs || []).find((j) => j.id === jobId);
+    if (!job) return;
+
+    job.outputAssets.forEach((out) => {
+      out.isApproved = out.id === outputAssetId;
+    });
+
+    const targetOutput = job.outputAssets.find((o) => o.id === outputAssetId);
+    if (targetOutput) {
+      this.updateShotStatus(
+        job.storyboardId,
+        job.shotId,
+        'Approved',
+        targetOutput.imageUrl,
+        job.id
+      );
+    }
+
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+  }
+
+  /**
+   * Update shot generation status and active image in storyboard
+   */
+  private updateShotStatus(
+    storyboardId: string,
+    shotId: string,
+    status: Shot['generationStatus'],
+    imageUrl?: string,
+    jobId?: string
+  ): void {
+    const db = this.storage.getDatabase();
+    const sb = db.storyboards.find((s) => s.id === storyboardId);
+    if (!sb) return;
+
+    sb.scenes.forEach((scene) => {
+      const shot = scene.shots.find((s) => s.id === shotId);
+      if (shot) {
+        shot.generationStatus = status;
+        if (imageUrl) shot.activeImageOutputUrl = imageUrl;
+        if (jobId) shot.activeImageJobId = jobId;
+        shot.updatedAt = new Date().toISOString();
+      }
+    });
+
+    this.storage.saveDatabase({ storyboards: [...db.storyboards] });
+  }
+
+  /**
+   * Generate an aesthetically rich, deterministic SVG mockup depicting the 3D CGI shot
+   */
+  private generateMockOutputAsset(job: ImageGenerationJob): ImageGenerationOutputAsset {
+    const db = this.storage.getDatabase();
+    const storyboard = db.storyboards.find((s) => s.id === job.storyboardId);
+    let shot: Shot | undefined;
+    if (storyboard) {
+      for (const scene of storyboard.scenes) {
+        const found = scene.shots.find((s) => s.id === job.shotId);
+        if (found) {
+          shot = found;
+          break;
+        }
+      }
+    }
+
+    const shotTitle = shot?.action || 'Pi & Kem Animation Frame';
+    const location = shot?.location || 'Pi & Kem Home Studio';
+    const lighting = shot?.lighting || 'Warm Soft 3D Lighting';
+    const cameraAngle = shot?.cameraAngle || shot?.shotType || 'Cinematic Wide';
+    const dialogue = shot?.dialogue ? `"${shot.dialogue}"` : '';
+    const speaker = shot?.speakerCharacterName || '';
+
+    // Color theme based on location and lighting
+    let bgGradientStart = '#1e1b4b'; // deep indigo
+    let bgGradientEnd = '#312e81';
+    let accentColor = '#f59e0b'; // amber
+
+    if (location.toLowerCase().includes('kitchen') || location.toLowerCase().includes('bếp')) {
+      bgGradientStart = '#451a03'; // warm amber/brown
+      bgGradientEnd = '#78350f';
+      accentColor = '#fbbf24';
+    } else if (location.toLowerCase().includes('living') || location.toLowerCase().includes('khách')) {
+      bgGradientStart = '#0f172a'; // cozy slate
+      bgGradientEnd = '#1e293b';
+      accentColor = '#38bdf8';
+    } else if (location.toLowerCase().includes('garden') || location.toLowerCase().includes('vườn')) {
+      bgGradientStart = '#064e3b'; // emerald
+      bgGradientEnd = '#047857';
+      accentColor = '#a7f3d0';
+    }
+
+    // List locked DNA versions
+    const lockedDnaPills = Object.entries(job.characterDnaSnapshots)
+      .map(([charId, verId]) => {
+        const charName =
+          charId === 'char_pi'
+            ? 'Pi'
+            : charId === 'char_kem'
+            ? 'Kem'
+            : charId === 'char_ethan'
+            ? 'Ba Trường'
+            : charId === 'char_emma'
+            ? 'Mẹ Vân'
+            : charId === 'char_mochi'
+            ? 'Mochi'
+            : charId;
+        const verStr = job.characterVersionNames?.[charId] || verId;
+        return `${charName}:${verStr}`;
+      })
+      .join(' • ');
+
+    const refCount = job.referenceAssetIds.length;
+    const seed = job.params.seed || 49281;
+
+    // Build SVG string
+    const svg = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 720" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad_${job.id}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="${bgGradientStart}" />
+      <stop offset="50%" stop-color="${bgGradientEnd}" />
+      <stop offset="100%" stop-color="#090d16" />
+    </linearGradient>
+    <linearGradient id="glowGrad_${job.id}" x1="50%" y1="0%" x2="50%" y2="100%">
+      <stop offset="0%" stop-color="${accentColor}" stop-opacity="0.25" />
+      <stop offset="100%" stop-color="${accentColor}" stop-opacity="0.0" />
+    </linearGradient>
+    <pattern id="grid_${job.id}" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M 80 0 L 0 0 0 80" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background Environment -->
+  <rect width="1280" height="720" fill="url(#bgGrad_${job.id})" />
+  <rect width="1280" height="720" fill="url(#grid_${job.id})" />
+
+  <!-- Ambient Light Volume -->
+  <ellipse cx="640" cy="300" rx="550" ry="260" fill="url(#glowGrad_${job.id})" />
+
+  <!-- Rule of Thirds Guides (Cinematics) -->
+  <line x1="426" y1="0" x2="426" y2="720" stroke="rgba(255,255,255,0.08)" stroke-dasharray="6,6" />
+  <line x1="854" y1="0" x2="854" y2="720" stroke="rgba(255,255,255,0.08)" stroke-dasharray="6,6" />
+  <line x1="0" y1="240" x2="1280" y2="240" stroke="rgba(255,255,255,0.08)" stroke-dasharray="6,6" />
+  <line x1="0" y1="480" x2="1280" y2="480" stroke="rgba(255,255,255,0.08)" stroke-dasharray="6,6" />
+
+  <!-- Camera HUD Crosshairs -->
+  <path d="M 620 360 L 660 360 M 640 340 L 640 380" stroke="${accentColor}" stroke-width="1.5" stroke-opacity="0.6" />
+  <circle cx="640" cy="360" r="40" fill="none" stroke="${accentColor}" stroke-width="1" stroke-opacity="0.3" stroke-dasharray="4,4" />
+
+  <!-- Safety Margins -->
+  <rect x="40" y="40" width="1200" height="640" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+  <rect x="60" y="60" width="1160" height="600" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="8,8" />
+
+  <!-- Stylized Character Representation Stage -->
+  <g transform="translate(640, 420)">
+    <!-- Floor reflection / Shadow -->
+    <ellipse cx="0" cy="110" rx="360" ry="32" fill="#000000" fill-opacity="0.4" />
+
+    <!-- Center Card: Visual Representation of 3D Scene -->
+    <rect x="-300" y="-180" width="600" height="260" rx="20" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5" />
+
+    <!-- Stylized 3D CGI Characters Avatar Group -->
+    <g transform="translate(0, -60)">
+      <!-- Pi Character Silhouette / Circle -->
+      <circle cx="-100" cy="0" r="44" fill="#0284c7" stroke="#38bdf8" stroke-width="3" />
+      <text x="-100" y="8" font-family="system-ui, sans-serif" font-size="16" font-weight="900" fill="#ffffff" text-anchor="middle">PI</text>
+      <text x="-100" y="24" font-family="system-ui, sans-serif" font-size="9" font-weight="700" fill="#bae6fd" text-anchor="middle">5 TUỔI</text>
+
+      <!-- Kem Character Silhouette / Circle -->
+      <circle cx="100" cy="5" r="38" fill="#e11d48" stroke="#fb7185" stroke-width="3" />
+      <text x="100" y="11" font-family="system-ui, sans-serif" font-size="15" font-weight="900" fill="#ffffff" text-anchor="middle">KEM</text>
+      <text x="100" y="26" font-family="system-ui, sans-serif" font-size="9" font-weight="700" fill="#fecdd3" text-anchor="middle">3 TUỔI</text>
+
+      <!-- Center Sparkle / Action Connector -->
+      <circle cx="0" cy="-10" r="26" fill="${accentColor}" fill-opacity="0.2" stroke="${accentColor}" stroke-width="2" />
+      <polygon points="0,-22 4,-12 14,-10 6,-3 8,7 0,2 -8,7 -6,-3 -14,-10 -4,-12" fill="${accentColor}" />
+    </g>
+
+    <!-- Shot Action Description Inside Canvas -->
+    <text x="0" y="20" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="#ffffff" text-anchor="middle">
+      ${escapeXml(shotTitle.slice(0, 75))}
+    </text>
+    <text x="0" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="500" fill="#94a3b8" text-anchor="middle">
+      ${escapeXml(location)} &bull; ${escapeXml(lighting)} &bull; ${escapeXml(cameraAngle)}
+    </text>
+
+    <!-- Dialogue Bubble If Available -->
+    ${
+      dialogue
+        ? `
+      <rect x="-260" y="80" width="520" height="34" rx="17" fill="rgba(245, 158, 11, 0.15)" stroke="rgba(245, 158, 11, 0.4)" stroke-width="1" />
+      <text x="0" y="102" font-family="system-ui, sans-serif" font-size="12" font-style="italic" font-weight="600" fill="#fef3c7" text-anchor="middle">
+        ${speaker ? `${escapeXml(speaker)}: ` : ''}${escapeXml(dialogue.slice(0, 65))}
+      </text>
+    `
+        : ''
+    }
+  </g>
+
+  <!-- Top Left HUD: Scene & Shot Metadata -->
+  <g transform="translate(60, 85)">
+    <rect x="0" y="0" width="280" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
+    <text x="14" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8">
+      SCENE ${job.sceneNumber} &bull; SHOT #${job.shotNumber} (${job.shotId})
+    </text>
+    <text x="14" y="40" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">
+      ${escapeXml(job.episodeId.toUpperCase())} &bull; 16:9 4K CGI RENDER
+    </text>
+  </g>
+
+  <!-- Top Right HUD: Provider & Seed -->
+  <g transform="translate(940, 85)">
+    <rect x="0" y="0" width="280" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
+    <text x="266" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="${accentColor}" text-anchor="end">
+      PROVIDER: ${job.provider.toUpperCase()}
+    </text>
+    <text x="266" y="40" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="end">
+      SEED: #${seed} &bull; STEPS: ${job.params.steps || 30}
+    </text>
+  </g>
+
+  <!-- Bottom Bar: IMMUTABILITY AUDIT WATERMARK -->
+  <g transform="translate(60, 620)">
+    <rect x="0" y="0" width="1160" height="40" rx="8" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(52, 211, 153, 0.3)" />
+    <circle cx="20" cy="20" r="5" fill="#10b981" />
+    <text x="35" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#34d399">
+      LOCKED DNA SNAPSHOT:
+    </text>
+    <text x="195" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="600" fill="#f1f5f9">
+      ${lockedDnaPills || 'Standard Universe DNA'}
+    </text>
+    <text x="720" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#a78bfa">
+      STYLE: ${job.styleVersionName || 'v1.0'}
+    </text>
+    <text x="880" y="24" font-family="system-ui, sans-serif" font-size="11" font-weight="bold" fill="#f59e0b">
+      REFS: ${refCount} ASSETS RESOLVED
+    </text>
+    <text x="1140" y="24" font-family="monospace" font-size="10" fill="#64748b" text-anchor="end">
+      IMMUTABLE
+    </text>
+  </g>
+</svg>
+    `.trim();
+
+    const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+    const outputId = `out_img_${job.id}_${Date.now()}`;
+    const storagePath = `renders/episodes/${job.episodeId}/shots/${job.shotId}/frame_${Date.now()}.png`;
+
+    return {
+      id: outputId,
+      jobId: job.id,
+      shotId: job.shotId,
+      imageUrl: dataUrl,
+      thumbnailUrl: dataUrl,
+      storagePath,
+      isApproved: false,
+      aspectRatio: job.params.aspectRatio || '16:9',
+      width: 1920,
+      height: 1080,
+      fileSize: Math.floor(Math.random() * 800000 + 1200000), // ~1.5MB simulated
+      seed,
+      createdAt: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Helper to pre-populate sample jobs for Episode 9 so the queue view is immediately active
+   */
+  public ensureInitialJobs(): void {
+    const db = this.storage.getDatabase();
+    if (db.imageGenerationJobs && db.imageGenerationJobs.length > 0) {
+      return;
+    }
+
+    const sb9 = db.storyboards?.find((sb) => sb.episodeId === 'ep_009');
+    if (!sb9 || !sb9.scenes || sb9.scenes.length === 0) return;
+
+    const scene1 = sb9.scenes[0];
+    if (!scene1.shots || scene1.shots.length === 0) return;
+
+    // Create 3 initial jobs: 1 Completed, 1 In-Queue, 1 Pending
+    const shot1 = scene1.shots[0];
+    const shot2 = scene1.shots[1] || scene1.shots[0];
+    const shot3 = scene1.shots[2] || scene1.shots[0];
+
+    const job1 = this.createJobFromShot(shot1, 'ep_009', sb9.id, 'mock-studio');
+    // Pre-generate frame for shot 1
+    const output1 = this.generateMockOutputAsset(job1);
+    output1.isApproved = true;
+    job1.status = 'completed';
+    job1.progress = 100;
+    job1.outputAssets = [output1];
+    job1.completedAt = new Date().toISOString();
+    job1.executionDurationMs = 1840;
+
+    // Create job 2
+    const job2 = this.createJobFromShot(shot2, 'ep_009', sb9.id, 'gemini-imagen');
+    job2.status = 'completed';
+    job2.progress = 100;
+    const output2 = this.generateMockOutputAsset(job2);
+    job2.outputAssets = [output2];
+    job2.completedAt = new Date().toISOString();
+    job2.executionDurationMs = 2100;
+
+    // Create job 3 (queued)
+    const job3 = this.createJobFromShot(shot3, 'ep_009', sb9.id, 'flux-pro');
+    job3.status = 'queued';
+    job3.progress = 0;
+
+    // Update shots in db
+    shot1.generationStatus = 'Approved';
+    shot1.activeImageOutputUrl = output1.imageUrl;
+    shot1.activeImageJobId = job1.id;
+
+    shot2.generationStatus = 'Generated';
+    shot2.activeImageOutputUrl = output2.imageUrl;
+    shot2.activeImageJobId = job2.id;
+
+    shot3.generationStatus = 'Queued';
+
+    this.storage.saveDatabase({
+      imageGenerationJobs: [job1, job2, job3],
+      storyboards: [...db.storyboards],
+    });
+  }
+}
+
+function escapeXml(unsafe: string): string {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}

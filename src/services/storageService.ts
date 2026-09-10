@@ -8,6 +8,7 @@ import {
   Season,
   Episode,
   Storyboard,
+  ImageGenerationJob,
 } from '../types';
 import {
   SEED_PROJECT,
@@ -33,6 +34,7 @@ export interface StudioDatabase {
   seasons: Season[];
   episodes: Episode[];
   storyboards: Storyboard[];
+  imageGenerationJobs: ImageGenerationJob[];
   updatedAt: string;
 }
 
@@ -97,6 +99,11 @@ export class StorageService {
               }
             }
 
+            // Ensure imageGenerationJobs array exists
+            if (!Array.isArray(parsed.imageGenerationJobs)) {
+              parsed.imageGenerationJobs = [];
+            }
+
             return parsed;
           }
         }
@@ -118,6 +125,7 @@ export class StorageService {
       seasons: SEED_SEASONS,
       episodes: SEED_EPISODES,
       storyboards: SEED_STORYBOARDS,
+      imageGenerationJobs: [],
       updatedAt: new Date().toISOString(),
     };
   }
