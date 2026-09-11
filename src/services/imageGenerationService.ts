@@ -212,8 +212,8 @@ export class ImageGenerationService {
         characterName: char?.displayName || cId,
         characterVersionId: vId,
         versionNumber: ver?.version || '1.0',
-        visualPromptSnippet: ver?.visualPrompt || '',
-        canonicalAppearance: ver?.canonicalAppearance || '',
+        visualPromptSnippet: ver?.characterPrompt || '',
+        canonicalAppearance: ver?.visualIdentity || '',
       };
     });
 
@@ -223,8 +223,8 @@ export class ImageGenerationService {
         id: refId,
         characterId: ref?.characterId || '',
         characterVersionId: ref?.characterVersionId || '',
-        label: ref?.label || refId,
-        viewAngle: ref?.viewAngle || 'Standard 3/4',
+        label: ref?.description || ref?.type || refId,
+        viewAngle: ref?.type || 'Standard 3/4',
         storagePath: ref?.storagePath || referenceAssetPaths[refId] || '',
       };
     });
@@ -232,11 +232,11 @@ export class ImageGenerationService {
     const resolvedStyleSnapshot = {
       id: styleVersionSnapshotId,
       versionNumber: styleVersion?.version || '1.0',
-      name: styleVersion?.name || 'Default 3D CGI',
-      positivePrompt: styleVersion?.positivePrompt || '',
+      name: styleVersion?.version || 'Default 3D CGI',
+      positivePrompt: styleVersion?.globalPrompt || '',
       negativePrompt: styleVersion?.negativePrompt || '',
-      colorPaletteRule: styleVersion?.colorPaletteRule || '',
-      lightingRule: styleVersion?.lightingRule || '',
+      colorPaletteRule: styleVersion?.colorPalette || '',
+      lightingRule: styleVersion?.lighting || '',
     };
 
     const shotPayload = {
