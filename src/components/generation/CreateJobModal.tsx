@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Shot,
   Episode,
   Storyboard,
   ImageGenerationProvider,
   LanguageMode,
+  ProjectReference,
 } from '../../types';
 import { StorageService } from '../../services/storageService';
 import { ImageGenerationService, IMAGE_PROVIDER_SPECS } from '../../services/imageGenerationService';
@@ -19,6 +20,11 @@ import {
   Film,
   Camera,
   Play,
+  FolderArchive,
+  Image as ImageIcon,
+  Video,
+  Check,
+  Info,
 } from 'lucide-react';
 
 interface CreateJobModalProps {
@@ -58,6 +64,8 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
   const [steps, setSteps] = useState<number>(30);
   const [guidanceScale, setGuidanceScale] = useState<number>(7.5);
   const [runImmediately, setRunImmediately] = useState<boolean>(true);
+  const [selectedReferenceIds, setSelectedReferenceIds] = useState<string[]>([]);
+  const [refCategoryFilter, setRefCategoryFilter] = useState<'all' | 'character' | 'style' | 'location' | 'video' | 'image'>('all');
 
   const handleProviderSelect = (newProvider: ImageGenerationProvider) => {
     setProvider(newProvider);
@@ -87,6 +95,51 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
     return currentScene.shots[0];
   }, [currentScene, selectedShotId]);
 
+  // Available project references from library
+  const availableReferences = useMemo(() => {
+    return db.projectReferences || [];
+  }, [db.projectReferences]);
+
+  // Auto-suggest references when shot changes
+  useEffect(() => {
+    if (!currentShot) return;
+    const allRefs = db.projectReferences || [];
+    const autoRefs: string[] = [];
+
+    // Match locked character versions in shot
+    Object.entries(currentShot.characterDnaReferences || {}).forEach(([charId, versionId]) => {
+      const match = allRefs.find(
+        (r) => r.characterId === charId && r.characterVersionId === versionId
+      );
+      if (match && !autoRefs.includes(match.id)) {
+        autoRefs.push(match.id);
+      }
+    });
+
+    // Match style reference
+    const styleRef = allRefs.find(
+      (r) => r.type === 'style' && r.styleVersionId === currentShot.styleVersionSnapshotId
+    );
+    if (styleRef && !autoRefs.includes(styleRef.id)) {
+      autoRefs.push(styleRef.id);
+    }
+
+    if (autoRefs.length > 0) {
+      setSelectedReferenceIds((prev) => Array.from(new Set([...prev, ...autoRefs])));
+    }
+  }, [currentShot?.id, db.projectReferences]);
+
+  const toggleReferenceSelection = (refId: string) => {
+    setSelectedReferenceIds((prev) =>
+      prev.includes(refId) ? prev.filter((id) => id !== refId) : [...prev, refId]
+    );
+  };
+
+  const filteredReferences = useMemo(() => {
+    if (refCategoryFilter === 'all') return availableReferences;
+    return availableReferences.filter((r) => r.type === refCategoryFilter);
+  }, [availableReferences, refCategoryFilter]);
+
   if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -106,6 +159,7 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
           steps,
           guidanceScale,
           modelName: selectedModel,
+          projectReferenceIds: selectedReferenceIds,
         }
       );
 
@@ -257,6 +311,118 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
               </p>
             </div>
           )}
+
+          {/* Project Reference Library Selection */}
+          <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center space-x-2">
+                <FolderArchive className="w-4 h-4 text-amber-400" />
+                <span className="font-bold text-slate-200">
+                  {isVi ? 'Thư Viện Tham Chiếu Dự Án (Reference Library):' : 'Project Reference Library:'}
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold">
+                  {selectedReferenceIds.length} {isVi ? 'đã chọn' : 'selected'}
+                </span>
+              </div>
+
+              {/* Category Filter Tabs */}
+              <div className="flex items-center space-x-1 overflow-x-auto pb-1 sm:pb-0">
+                {(['all', 'character', 'style', 'location', 'image', 'video'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setRefCategoryFilter(cat)}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                      refCategoryFilter === cat
+                        ? 'bg-amber-500 text-slate-950'
+                        : 'bg-slate-900 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {cat.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Golden Rule Immuntability Notice */}
+            <div className="flex items-start space-x-2 p-2.5 rounded-lg bg-indigo-950/40 border border-indigo-500/30 text-indigo-300 text-[11px]">
+              <Info className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+              <span>
+                {isVi
+                  ? 'Character DNA & Version Snapshots luôn là Chân Lý Tối Thượng (Source of Truth). Tham chiếu sáng tạo bổ trợ góc máy, ánh sáng và bối cảnh, không bao giờ ghi đè lên DNA nhân vật.'
+                  : 'Character DNA & Version Snapshots remain the Source of Truth. Creative references guide lighting, composition, and framing without overriding Character DNA.'}
+              </span>
+            </div>
+
+            {/* Reference Items Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+              {filteredReferences.map((ref) => {
+                const isSelected = selectedReferenceIds.includes(ref.id);
+                return (
+                  <div
+                    key={ref.id}
+                    onClick={() => toggleReferenceSelection(ref.id)}
+                    className={`flex items-center space-x-2.5 p-2 rounded-lg border cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-amber-500/10 border-amber-500/50 ring-1 ring-amber-500/30'
+                        : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
+                    }`}
+                  >
+                    {/* Checkbox */}
+                    <div
+                      className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${
+                        isSelected ? 'bg-amber-500 text-slate-950' : 'border border-slate-700 bg-slate-950'
+                      }`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                    </div>
+
+                    {/* Thumbnail / Icon */}
+                    <div className="w-10 h-8 rounded bg-slate-950 overflow-hidden shrink-0 border border-slate-800 flex items-center justify-center">
+                      {ref.uri ? (
+                        <img
+                          src={ref.uri}
+                          alt={ref.name}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : ref.type === 'video' ? (
+                        <Video className="w-4 h-4 text-purple-400" />
+                      ) : (
+                        <ImageIcon className="w-4 h-4 text-slate-400" />
+                      )}
+                    </div>
+
+                    {/* Meta info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-slate-200 truncate text-[11px]">
+                          {ref.name}
+                        </span>
+                        <span className="text-[9px] px-1 py-0.2 rounded font-mono bg-slate-800 text-slate-400 ml-1 shrink-0 uppercase">
+                          {ref.type}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1.5 text-[10px] text-slate-500 truncate">
+                        {ref.characterId && (
+                          <span className="text-emerald-400 font-mono">
+                            {ref.characterId.replace('char_', '')}: {ref.characterVersionId || 'v1.0'}
+                          </span>
+                        )}
+                        <span>&bull;</span>
+                        <span>{ref.source.replace('_', ' ')}</span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+              {filteredReferences.length === 0 && (
+                <div className="col-span-2 text-center py-4 text-slate-500 text-xs">
+                  {isVi ? 'Không tìm thấy tham chiếu nào trong mục này.' : 'No references found in this category.'}
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* Provider Selection */}
           <div className="space-y-2">

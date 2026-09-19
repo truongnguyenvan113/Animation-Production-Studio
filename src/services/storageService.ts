@@ -9,6 +9,7 @@ import {
   Episode,
   Storyboard,
   ImageGenerationJob,
+  ProjectReference,
 } from '../types';
 import {
   SEED_PROJECT,
@@ -21,6 +22,7 @@ import {
   SEED_EPISODES,
   SEED_STORYBOARDS,
 } from './seedData';
+import { SEED_PROJECT_REFERENCES } from './projectReferenceService';
 
 const STORAGE_KEY = 'pikem_animation_studio_v2';
 
@@ -44,6 +46,7 @@ export interface StudioDatabase {
   episodes: Episode[];
   storyboards: Storyboard[];
   imageGenerationJobs: ImageGenerationJob[];
+  projectReferences: ProjectReference[];
   updatedAt: string;
 }
 
@@ -172,6 +175,33 @@ export class StorageService {
               });
             }
 
+            // Ensure projectReferences array exists and contains seed data if empty
+            if (!Array.isArray(parsed.projectReferences) || parsed.projectReferences.length === 0) {
+              parsed.projectReferences = SEED_PROJECT_REFERENCES;
+            } else {
+              // Sanitize all image & thumbnail URIs in projectReferences
+              for (const pref of parsed.projectReferences) {
+                if (pref.uri) pref.uri = sanitizeImageUri(pref.uri) || pref.uri;
+                if (pref.thumbnail) pref.thumbnail = sanitizeImageUri(pref.thumbnail) || pref.thumbnail;
+              }
+
+              // Audit orphan character links in projectReferences
+              const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
+              const validVersionIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
+              
+              parsed.projectReferences = parsed.projectReferences.map((pref: ProjectReference) => {
+                if (pref.characterId && !validCharIds.has(pref.characterId)) {
+                  const { characterId, characterVersionId, ...rest } = pref;
+                  return rest as ProjectReference;
+                }
+                if (pref.characterVersionId && !validVersionIds.has(pref.characterVersionId)) {
+                  const { characterVersionId, ...rest } = pref;
+                  return rest as ProjectReference;
+                }
+                return pref;
+              });
+            }
+
             return parsed;
           }
         }
@@ -194,6 +224,7 @@ export class StorageService {
       episodes: SEED_EPISODES,
       storyboards: SEED_STORYBOARDS,
       imageGenerationJobs: [],
+      projectReferences: SEED_PROJECT_REFERENCES,
       updatedAt: new Date().toISOString(),
     };
   }

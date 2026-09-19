@@ -160,7 +160,10 @@ export class ImageGenerationService {
     episodeId: string,
     storyboardId: string,
     provider: ImageGenerationProvider = 'mock-studio',
-    customParams?: Partial<ImageGenerationJob['params']> & { modelName?: string }
+    customParams?: Partial<ImageGenerationJob['params']> & {
+      modelName?: string;
+      projectReferenceIds?: string[];
+    }
   ): ImageGenerationJob {
     const db = this.storage.getDatabase();
 
@@ -242,6 +245,23 @@ export class ImageGenerationService {
       lightingRule: styleVersion?.lighting || '',
     };
 
+    // 4b. Resolve selected Project References strictly from Project Reference Library
+    const selectedRefIds = customParams?.projectReferenceIds || [];
+    const projectReferenceSnapshots = selectedRefIds.map((refId) => {
+      const pref = (db.projectReferences || []).find((r) => r.id === refId);
+      return {
+        id: refId,
+        name: pref?.name || refId,
+        type: pref?.type || 'image',
+        source: pref?.source || 'uploaded_image',
+        uri: pref?.uri || '',
+        storagePath: pref?.storagePath || `references/${refId}`,
+        characterId: pref?.characterId,
+        characterVersionId: pref?.characterVersionId,
+        tags: pref?.tags ? [...pref.tags] : [],
+      };
+    });
+
     const shotPayload = {
       id: shot.id,
       shotNumber: shot.shotNumber,
@@ -267,6 +287,7 @@ export class ImageGenerationService {
       characterDnaSnapshots,
       referenceAssetIds,
       styleVersionSnapshotId,
+      projectReferenceIds: selectedRefIds,
       prompt: promptPreview.fullPrompt,
       seed,
     });
@@ -277,6 +298,7 @@ export class ImageGenerationService {
       shotPayload,
       resolvedCharacterVersions,
       resolvedReferenceAssets,
+      resolvedProjectReferences: projectReferenceSnapshots,
       resolvedStyleSnapshot,
       compiledPrompt: promptPreview.fullPrompt,
       negativePrompt: styleVersion?.negativePrompt || '',
@@ -300,6 +322,8 @@ export class ImageGenerationService {
       characterVersionNames,
       referenceAssetIds,
       referenceAssetPaths,
+      projectReferenceIds: selectedRefIds,
+      projectReferenceSnapshots,
       styleVersionSnapshotId,
       styleVersionName,
 
@@ -418,6 +442,10 @@ export class ImageGenerationService {
       characterVersionIds: { ...job.characterDnaSnapshots },
       referenceAssetIds: [...job.referenceAssetIds],
       referenceAssetUrls: { ...job.referenceAssetPaths },
+      projectReferenceIds: job.projectReferenceIds ? [...job.projectReferenceIds] : [],
+      projectReferences: job.projectReferenceSnapshots
+        ? job.projectReferenceSnapshots.map((p) => ({ ...p }))
+        : [],
       styleSnapshot: {
         id: styleSnap?.id || job.styleVersionSnapshotId,
         versionNumber: styleSnap?.versionNumber || job.styleVersionName || 'v1.0',
@@ -719,6 +747,7 @@ export class ImageGenerationService {
         resolution: options?.resolution || existingJob.params.resolution,
         seed: newSeed,
         steps: options?.steps || existingJob.params.steps,
+        projectReferenceIds: existingJob.projectReferenceIds ? [...existingJob.projectReferenceIds] : undefined,
       }
     );
 

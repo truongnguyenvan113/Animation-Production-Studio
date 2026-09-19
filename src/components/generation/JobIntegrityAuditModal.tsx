@@ -270,6 +270,23 @@ GUARANTEE: 100% Frozen & Isolated Execution. No active Character/Style state acc
                   </span>
                 ))}
               </div>
+              {job.projectReferenceIds && job.projectReferenceIds.length > 0 && (
+                <div className="pt-2 border-t border-slate-900">
+                  <span className="text-[10px] text-slate-400 block mb-1 font-bold">
+                    Project Reference Library Snapshots (Bất Biến):
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 font-mono text-[11px]">
+                    {job.projectReferenceIds.map((prefId) => (
+                      <span
+                        key={prefId}
+                        className="px-2 py-0.5 rounded bg-purple-950/60 border border-purple-500/30 text-purple-300 font-bold"
+                      >
+                        {prefId}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Check 4 */}

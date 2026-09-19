@@ -11,6 +11,7 @@ import {
   MessageSquare,
   Eye,
   FileCode,
+  FolderArchive,
 } from 'lucide-react';
 
 interface JobPromptModalProps {
@@ -278,6 +279,34 @@ export const JobPromptModal: React.FC<JobPromptModalProps> = ({
                   )}
                 </div>
               </div>
+
+              {/* Project References Snapshot */}
+              {job.projectReferenceSnapshots && job.projectReferenceSnapshots.length > 0 && (
+                <div className="border border-slate-800 rounded-xl overflow-hidden">
+                  <div className="bg-slate-950 px-4 py-2 font-bold text-slate-300 border-b border-slate-800 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-purple-300">
+                      <FolderArchive className="w-4 h-4 text-purple-400" />
+                      Project Reference Library Snapshots ({job.projectReferenceSnapshots.length})
+                    </span>
+                    <span className="text-[10px] text-purple-400 font-mono">Immutable Job Frozen Copy</span>
+                  </div>
+                  <div className="divide-y divide-slate-800/60 bg-slate-900/60 max-h-40 overflow-y-auto custom-scrollbar">
+                    {job.projectReferenceSnapshots.map((pref) => (
+                      <div key={pref.id} className="px-4 py-2 flex items-center justify-between text-[11px]">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-purple-300 font-bold font-mono">{pref.name}</span>
+                          <span className="text-slate-400 text-[10px] bg-slate-800 px-1.5 py-0.5 rounded uppercase">
+                            {pref.type} &bull; {pref.source}
+                          </span>
+                        </div>
+                        <span className="text-slate-500 font-mono truncate max-w-[200px]">
+                          {pref.uri}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Style snapshot */}
               <div className="border border-slate-800 rounded-xl p-3 bg-slate-950/60 flex items-center justify-between">

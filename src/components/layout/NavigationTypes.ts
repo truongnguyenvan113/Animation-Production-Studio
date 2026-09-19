@@ -3,6 +3,7 @@ export type NavigationId =
   | 'characters'
   | 'character-dna'
   | 'character-references'
+  | 'reference-library'
   | 'supporting-characters'
   | 'visual-style'
   | 'seasons'

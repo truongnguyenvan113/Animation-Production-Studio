@@ -120,6 +120,56 @@ export interface CharacterReference {
   height?: number;
 }
 
+export type ProjectReferenceType =
+  | 'image'
+  | 'video'
+  | 'character'
+  | 'style'
+  | 'location'
+  | 'prop';
+
+export type ProjectReferenceSource =
+  | 'uploaded_image'
+  | 'generated_image'
+  | 'uploaded_video'
+  | 'generated_video'
+  | 'character_sheet'
+  | 'style_guide';
+
+export interface ProjectReference {
+  id: string; // Persistent unique asset ID e.g. "pref_img_001", "pref_vid_001"
+  name: string;
+  description?: string;
+  type: ProjectReferenceType; // image | video | character | style | location | prop
+  source: ProjectReferenceSource; // uploaded_image | generated_image | uploaded_video | generated_video | character_sheet | style_guide
+  uri: string; // Data URL, SVG URI, video path, or canonical URI
+  storagePath: string; // Canonical storage path: "references/images/{id}.png", etc.
+  thumbnail?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt?: string;
+
+  // Exact character + version link (Character DNA integrity)
+  characterId?: string;
+  characterVersionId?: string;
+
+  // Visual/style & shot provenance
+  styleVersionId?: string;
+  episodeId?: string;
+  shotId?: string;
+  jobId?: string;
+  outputAssetId?: string;
+
+  // Media dimensions & format
+  aspectRatio?: string;
+  width?: number;
+  height?: number;
+  durationSeconds?: number;
+  fileSize?: number;
+  mimeType?: string;
+  isFavorite?: boolean;
+}
+
 export interface GlobalStyle {
   id: string;
   projectId: string;
@@ -479,6 +529,17 @@ export interface GenerationInputSnapshot {
     viewAngle: string;
     storagePath: string;
   }>;
+  resolvedProjectReferences?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    source: string;
+    uri: string;
+    storagePath: string;
+    characterId?: string;
+    characterVersionId?: string;
+    tags?: string[];
+  }>;
   resolvedStyleSnapshot: {
     id: string;
     versionNumber: string;
@@ -553,6 +614,18 @@ export interface ImageGenerationJob {
   characterVersionNames?: Record<string, string>; // characterId -> "v1.0"
   referenceAssetIds: string[]; // Resolved reference asset IDs strictly from locked CharacterVersion
   referenceAssetPaths: Record<string, string>; // refId -> "characters/{charId}/{verId}/..."
+  projectReferenceIds?: string[]; // Selected project reference IDs
+  projectReferenceSnapshots?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    source: string;
+    uri: string;
+    storagePath: string;
+    characterId?: string;
+    characterVersionId?: string;
+    tags?: string[];
+  }>;
   styleVersionSnapshotId: string; // Strictly from shot.styleVersionSnapshotId
   styleVersionName?: string; // "v1.0"
 
@@ -614,6 +687,18 @@ export interface ImmutableJobSnapshot {
   characterVersionIds: Record<string, string>; // characterId -> frozen CharacterVersionId
   referenceAssetIds: string[];
   referenceAssetUrls: Record<string, string>; // refId -> storagePath or canonical URI
+  projectReferenceIds?: string[];
+  projectReferences?: Array<{
+    id: string;
+    name: string;
+    type: string;
+    source: string;
+    uri: string;
+    storagePath: string;
+    characterId?: string;
+    characterVersionId?: string;
+    tags?: string[];
+  }>;
   styleSnapshot: {
     id: string;
     versionNumber: string;

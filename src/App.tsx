@@ -22,6 +22,7 @@ import { EpisodeListView } from './components/episodes/EpisodeListView';
 import { StoryGeneratorView } from './components/story/StoryGeneratorView';
 import { StoryboardView } from './components/storyboard/StoryboardView';
 import { ImageGenerationQueueView } from './components/generation/ImageGenerationQueueView';
+import { ProjectReferenceLibraryView } from './components/references/ProjectReferenceLibraryView';
 import { ProviderAdaptersView } from './components/providers/ProviderAdaptersView';
 import { BackupModal } from './components/shared/BackupModal';
 
@@ -190,6 +191,16 @@ export default function App() {
               onNavigateToStoryboard={(epId) => {
                 if (epId) setSelectedEpisodeId(epId);
                 setCurrentView('storyboard');
+              }}
+            />
+          )}
+
+          {currentView === 'reference-library' && (
+            <ProjectReferenceLibraryView
+              language={language}
+              onNavigate={handleNavigate}
+              onCreateJobWithRef={(refId) => {
+                setCurrentView('image-generation');
               }}
             />
           )}

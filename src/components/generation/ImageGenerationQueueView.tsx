@@ -33,6 +33,7 @@ import {
   Search,
   ExternalLink,
   Film,
+  FolderArchive,
 } from 'lucide-react';
 
 interface ImageGenerationQueueViewProps {
@@ -637,6 +638,17 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                       <span className="px-2 py-0.5 rounded-md bg-white border border-amber-300 text-amber-800 font-mono text-[11px] font-bold">
                         Refs: {job.referenceAssetIds.length} tệp
                       </span>
+
+                      {/* Project References Snapshot Badge */}
+                      {job.projectReferenceIds && job.projectReferenceIds.length > 0 && (
+                        <span
+                          className="px-2 py-0.5 rounded-md bg-white border border-purple-300 text-purple-800 font-mono text-[11px] font-bold flex items-center gap-1"
+                          title={`Frozen Project References: ${job.projectReferenceIds.join(', ')}`}
+                        >
+                          <FolderArchive className="w-3 h-3 text-purple-600" />
+                          Project Refs: {job.projectReferenceIds.length}
+                        </span>
+                      )}
                     </div>
 
                     {/* Prompt Preview Snippet */}

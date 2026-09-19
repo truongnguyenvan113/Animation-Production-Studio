@@ -21,6 +21,7 @@ import {
   Layers,
   ChevronRight,
   Info,
+  FolderArchive,
 } from 'lucide-react';
 import {
   Project,
@@ -102,6 +103,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           >
             <Sparkles className="w-4 h-4" />
             <span>{formatLabel('Story Generator (Phase 2)', 'Tạo Cốt Truyện (Phase 2)')}</span>
+          </button>
+
+          <button
+            onClick={() => onNavigate('reference-library')}
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-amber-400 border border-amber-500/30 transition-all hover:scale-[1.02]"
+          >
+            <FolderArchive className="w-4 h-4 text-amber-400" />
+            <span>{formatLabel('Reference Library (Phase 4.4)', 'Thư Viện Tham Chiếu (Phase 4.4)')}</span>
           </button>
 
           <button

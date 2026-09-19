@@ -21,6 +21,7 @@ import {
   Sparkles,
   ExternalLink,
   Film,
+  FolderArchive,
 } from 'lucide-react';
 import { Character, LanguageMode } from '../../types';
 
@@ -272,6 +273,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="truncate">{formatLabel('Image Pipeline & QA', 'Hàng Đợi Tạo Ảnh & QA')}</span>
                   <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
                     Phase 4.1
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('reference-library')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('reference-library')
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40 font-semibold shadow-sm'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <FolderArchive className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Reference Library', 'Thư Viện Tham Chiếu')}</span>
+                  <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
+                    Phase 4.4
                   </span>
                 </button>
               </div>
