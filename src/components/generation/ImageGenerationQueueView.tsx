@@ -12,12 +12,14 @@ import { ImageGenerationService, IMAGE_PROVIDER_SPECS } from '../../services/ima
 import { JobPromptModal } from './JobPromptModal';
 import { JobPreviewModal } from './JobPreviewModal';
 import { CreateJobModal } from './CreateJobModal';
+import { JobIntegrityAuditModal } from './JobIntegrityAuditModal';
 import {
   Sparkles,
   Layers,
   Play,
   RotateCcw,
   CheckCircle2,
+  XCircle,
   AlertTriangle,
   Clock,
   Filter,
@@ -55,6 +57,7 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
   // Modals state
   const [promptModalJob, setPromptModalJob] = useState<ImageGenerationJob | null>(null);
   const [previewModalJob, setPreviewModalJob] = useState<ImageGenerationJob | null>(null);
+  const [auditModalJob, setAuditModalJob] = useState<ImageGenerationJob | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   // Auto ensure initial sample jobs if empty so user sees instant working pipeline
@@ -82,8 +85,9 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
     const completed = jobs.filter((j) => j.status === 'completed').length;
     const failed = jobs.filter((j) => j.status === 'failed').length;
     const approved = jobs.filter((j) => j.outputAssets?.some((o) => o.isApproved)).length;
+    const rejected = jobs.filter((j) => j.outputAssets?.some((o) => o.approvalStatus === 'rejected')).length;
 
-    return { total, queued, processing, completed, failed, approved };
+    return { total, queued, processing, completed, failed, approved, rejected };
   }, [jobs]);
 
   // Filtered jobs
@@ -93,6 +97,8 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
       if (selectedStatus !== 'all') {
         if (selectedStatus === 'approved') {
           if (!job.outputAssets?.some((o) => o.isApproved)) return false;
+        } else if (selectedStatus === 'rejected') {
+          if (!job.outputAssets?.some((o) => o.approvalStatus === 'rejected')) return false;
         } else if (job.status !== selectedStatus) {
           return false;
         }
@@ -152,7 +158,40 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
 
   const handleApproveOutput = (jobId: string, outputId: string) => {
     imageGenService.approveOutput(jobId, outputId);
-    setDb(storage.getDatabase());
+    const updatedDb = storage.getDatabase();
+    setDb(updatedDb);
+    const updatedJob = updatedDb.imageGenerationJobs.find((j) => j.id === jobId);
+    if (updatedJob && previewModalJob?.id === jobId) {
+      setPreviewModalJob(updatedJob);
+    }
+  };
+
+  const handleRejectOutput = (jobId: string, outputId: string, reason: string) => {
+    imageGenService.rejectOutput(jobId, outputId, reason);
+    const updatedDb = storage.getDatabase();
+    setDb(updatedDb);
+    const updatedJob = updatedDb.imageGenerationJobs.find((j) => j.id === jobId);
+    if (updatedJob && previewModalJob?.id === jobId) {
+      setPreviewModalJob(updatedJob);
+    }
+  };
+
+  const handleRegenerateJob = async (jobId: string) => {
+    try {
+      const newJob = await imageGenService.regenerateJob(jobId);
+      const updatedDb1 = storage.getDatabase();
+      setDb(updatedDb1);
+      // Run new job immediately to generate live frame
+      await imageGenService.runJob(newJob.id);
+      const updatedDb2 = storage.getDatabase();
+      setDb(updatedDb2);
+      const updatedJob = updatedDb2.imageGenerationJobs.find((j) => j.id === newJob.id);
+      if (updatedJob) {
+        setPreviewModalJob(updatedJob);
+      }
+    } catch (err: any) {
+      alert(err.message || 'Lỗi khi tái tạo Job');
+    }
   };
 
   const handleQueueAllEpisodeShots = () => {
@@ -308,6 +347,16 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
             <span className="text-xs text-rose-500">error state</span>
           </div>
         </div>
+
+        <div className="bg-white p-4 rounded-xl border border-rose-300 shadow-xs">
+          <span className="text-[11px] font-bold text-rose-700 uppercase tracking-wider block">
+            {isVi ? 'Từ Chối (QA Rejected)' : 'QA Rejected'}
+          </span>
+          <div className="flex items-baseline space-x-2 mt-1">
+            <span className="text-2xl font-extrabold text-rose-700 font-mono">{metrics.rejected}</span>
+            <span className="text-xs text-rose-500">rework</span>
+          </div>
+        </div>
       </div>
 
       {/* Filter & Search Bar */}
@@ -320,6 +369,7 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
               { id: 'queued', label: isVi ? 'Hàng đợi' : 'Queued' },
               { id: 'completed', label: isVi ? 'Đã render' : 'Completed' },
               { id: 'approved', label: isVi ? 'Đã duyệt' : 'Approved' },
+              { id: 'rejected', label: isVi ? 'Từ chối (QA)' : 'Rejected' },
               { id: 'failed', label: isVi ? 'Lỗi' : 'Failed' },
             ].map((tab) => (
               <button
@@ -456,13 +506,18 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                         </div>
                       )}
 
-                      {/* Approval badge on thumbnail */}
-                      {isApproved && (
+                      {/* Approval or Rejection badge on thumbnail */}
+                      {isApproved ? (
                         <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3" />
                           Keyframe
                         </span>
-                      )}
+                      ) : output?.approvalStatus === 'rejected' ? (
+                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1">
+                          <XCircle className="w-3 h-3" />
+                          QA Rejected
+                        </span>
+                      ) : null}
                     </div>
 
                     {/* Thumbnail sub-info */}
@@ -634,15 +689,25 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                           </button>
                         )}
 
-                        {/* Preview and approve buttons if completed */}
+                        {/* Preview, Audit, Approve, and Regenerate buttons if completed */}
                         {job.status === 'completed' && output && (
                           <>
+                            {/* Direct QA Audit Button */}
+                            <button
+                              onClick={() => setAuditModalJob(job)}
+                              className="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors"
+                              title={isVi ? "Kiểm tra chứng chỉ bất biến & Zero Active State Leak" : "Audit Immutability & Snapshots"}
+                            >
+                              <ShieldCheck className="w-3.5 h-3.5 mr-1 text-emerald-600" />
+                              {isVi ? 'Kiểm Định QA' : 'Audit'}
+                            </button>
+
                             <button
                               onClick={() => setPreviewModalJob(job)}
                               className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition-colors"
                             >
                               <Maximize2 className="w-3.5 h-3.5 mr-1 text-indigo-600" />
-                              {isVi ? 'Xem ảnh' : 'Preview'}
+                              {isVi ? 'Xem & Phê Duyệt' : 'Preview & QA'}
                             </button>
 
                             {!isApproved && (
@@ -656,11 +721,12 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                             )}
 
                             <button
-                              onClick={() => handleRetryJob(job.id)}
-                              className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
-                              title="Tạo lại khung hình mới"
+                              onClick={() => handleRegenerateJob(job.id)}
+                              className="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                              title={isVi ? "Tạo Run mới kế thừa snapshot mà không ghi đè ảnh cũ" : "Regenerate new run"}
                             >
-                              <RotateCcw className="w-4 h-4" />
+                              <RotateCcw className="w-3.5 h-3.5 mr-1" />
+                              {isVi ? 'Tạo Run Mới' : 'Regenerate'}
                             </button>
                           </>
                         )}
@@ -728,6 +794,16 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
           job={previewModalJob}
           onClose={() => setPreviewModalJob(null)}
           onApproveOutput={handleApproveOutput}
+          onRejectOutput={handleRejectOutput}
+          onRegenerateJob={handleRegenerateJob}
+          language={language}
+        />
+      )}
+
+      {auditModalJob && (
+        <JobIntegrityAuditModal
+          job={auditModalJob}
+          onClose={() => setAuditModalJob(null)}
           language={language}
         />
       )}

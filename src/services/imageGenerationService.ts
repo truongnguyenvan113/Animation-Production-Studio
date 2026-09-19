@@ -212,8 +212,8 @@ export class ImageGenerationService {
         characterName: char?.displayName || cId,
         characterVersionId: vId,
         versionNumber: ver?.version || '1.0',
-        visualPromptSnippet: ver?.characterPrompt || '',
-        canonicalAppearance: ver?.visualIdentity || '',
+        visualPromptSnippet: ver?.characterPrompt || ver?.visualIdentity || '',
+        canonicalAppearance: ver?.clothing || ver?.bodyProportions || '',
       };
     });
 
@@ -232,7 +232,7 @@ export class ImageGenerationService {
     const resolvedStyleSnapshot = {
       id: styleVersionSnapshotId,
       versionNumber: styleVersion?.version || '1.0',
-      name: styleVersion?.version || 'Default 3D CGI',
+      name: styleVersion?.animationStyle || 'Default 3D CGI',
       positivePrompt: styleVersion?.globalPrompt || '',
       negativePrompt: styleVersion?.negativePrompt || '',
       colorPaletteRule: styleVersion?.colorPalette || '',

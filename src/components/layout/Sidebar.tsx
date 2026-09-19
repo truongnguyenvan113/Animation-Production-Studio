@@ -269,9 +269,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }`}
                 >
                   <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
-                  <span className="truncate">{formatLabel('Image Pipeline', 'Hàng Đợi Tạo Ảnh')}</span>
+                  <span className="truncate">{formatLabel('Image Pipeline & QA', 'Hàng Đợi Tạo Ảnh & QA')}</span>
                   <span className="ml-auto text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
-                    Phase 4
+                    Phase 4.1
                   </span>
                 </button>
               </div>
