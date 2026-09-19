@@ -116,12 +116,30 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
   }, [jobs, selectedEpisodeId, selectedStatus, selectedProvider, searchQuery]);
 
   // Actions
-  const handleRunJob = async (jobId: string, simulateError: boolean = false) => {
+  const handleRunJob = async (
+    jobId: string,
+    simulateError: boolean = false,
+    simulateRateLimit: boolean = false
+  ) => {
     try {
-      await imageGenService.runJob(jobId, simulateError);
+      await imageGenService.runJob(jobId, simulateError, simulateRateLimit);
       setDb(storage.getDatabase());
     } catch (err: any) {
       alert(err.message || 'Lỗi khi chạy Job');
+    }
+  };
+
+  const handleSwitchModelAndRetry = async (jobId: string, newModel: string) => {
+    const currentDb = storage.getDatabase();
+    const targetJob = (currentDb.imageGenerationJobs || []).find((j) => j.id === jobId);
+    if (targetJob) {
+      targetJob.modelName = newModel;
+      targetJob.status = 'queued';
+      targetJob.error = null;
+      targetJob.rateLimitInfo = undefined;
+      storage.saveDatabase({ imageGenerationJobs: [...currentDb.imageGenerationJobs] });
+      await imageGenService.runJob(jobId);
+      setDb(storage.getDatabase());
     }
   };
 
@@ -549,10 +567,28 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
 
                       {/* Status and Provider Badges */}
                       <div className="flex items-center space-x-2">
-                        {/* Provider Badge */}
-                        <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
-                          {providerSpec.name}
-                        </span>
+                        {/* Provider & Model Badge */}
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
+                            {providerSpec.name}
+                          </span>
+                          {job.modelName && (
+                            <span
+                              className="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200"
+                              title="Selected Model"
+                            >
+                              {job.modelName}
+                            </span>
+                          )}
+                          {job.requestId && (
+                            <span
+                              className="text-[10px] font-mono text-slate-400 hidden sm:inline"
+                              title="Provider Request ID"
+                            >
+                              {job.requestId}
+                            </span>
+                          )}
+                        </div>
 
                         {/* Status Badge */}
                         <span
@@ -619,19 +655,44 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
 
                     {/* Error message display if failed */}
                     {job.error && (
-                      <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start space-x-2">
-                        <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                          <strong className="block font-bold">Trạng thái Lỗi Kết Xuất (Error State):</strong>
-                          <span className="font-mono text-[11px]">{job.error}</span>
+                      <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-2">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-start space-x-2">
+                            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="block font-bold">Trạng thái Lỗi Kết Xuất (Error State):</strong>
+                              <span className="font-mono text-[11px]">{job.error}</span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleRetryJob(job.id)}
+                            className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs shrink-0"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5 inline mr-1" />
+                            Thử Lại
+                          </button>
                         </div>
-                        <button
-                          onClick={() => handleRetryJob(job.id)}
-                          className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-xs shrink-0"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5 inline mr-1" />
-                          Thử Lại
-                        </button>
+
+                        {/* Rate Limit Diagnostic & Quick Fallback */}
+                        {job.rateLimitInfo && (
+                          <div className="p-2.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 flex flex-wrap items-center justify-between gap-2 text-[11px]">
+                            <div className="space-y-0.5">
+                              <span className="font-bold flex items-center gap-1 text-amber-800">
+                                <Clock className="w-3.5 h-3.5 text-amber-600" />
+                                Quota / Rate Limit Exceeded (Reset: {job.rateLimitInfo.resetWindowMinutes}m)
+                              </span>
+                              <span className="text-amber-700 text-[10px]">
+                                Gợi ý chuyển sang: <code className="font-mono font-bold bg-amber-100 px-1 py-0.5 rounded">{job.rateLimitInfo.suggestedAlternativeModel}</code>
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleSwitchModelAndRetry(job.id, job.rateLimitInfo!.suggestedAlternativeModel)}
+                              className="px-2.5 py-1 rounded bg-amber-600 hover:bg-amber-700 text-white font-bold text-[10px] shadow-xs transition-colors"
+                            >
+                              Đổi sang {job.rateLimitInfo.suggestedAlternativeModel} & Thử Lại
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 
@@ -658,25 +719,35 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                       <div className="flex items-center space-x-2">
                         {/* Run button if queued */}
                         {(job.status === 'queued' || job.status === 'pending') && (
-                          <button
-                            onClick={() => handleRunJob(job.id)}
-                            className="inline-flex items-center text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-colors"
-                          >
-                            <Play className="w-3.5 h-3.5 mr-1 fill-current" />
-                            {isVi ? 'Chạy Render' : 'Run Job'}
-                          </button>
-                        )}
+                          <>
+                            <button
+                              onClick={() => handleRunJob(job.id)}
+                              className="inline-flex items-center text-xs font-bold px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-xs transition-colors"
+                            >
+                              <Play className="w-3.5 h-3.5 mr-1 fill-current" />
+                              {isVi ? 'Chạy Render' : 'Run Job'}
+                            </button>
 
-                        {/* Test simulate error button */}
-                        {(job.status === 'queued' || job.status === 'pending') && (
-                          <button
-                            onClick={() => handleRunJob(job.id, true)}
-                            className="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 transition-colors"
-                            title="Mô phỏng lỗi adapter để kiểm tra error state"
-                          >
-                            <AlertTriangle className="w-3.5 h-3.5 mr-1 text-rose-500" />
-                            {isVi ? 'Test Lỗi' : 'Simulate Error'}
-                          </button>
+                            {/* Test simulate rate limit (429) */}
+                            <button
+                              onClick={() => handleRunJob(job.id, false, true)}
+                              className="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors"
+                              title="Mô phỏng 429 Quota Exceeded để kiểm tra cơ chế đổi model & backoff"
+                            >
+                              <Clock className="w-3.5 h-3.5 mr-1 text-amber-600" />
+                              {isVi ? 'Test Quota' : 'Simulate 429'}
+                            </button>
+
+                            {/* Test simulate error button */}
+                            <button
+                              onClick={() => handleRunJob(job.id, true, false)}
+                              className="inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-600 hover:text-rose-700 border border-slate-200 transition-colors"
+                              title="Mô phỏng lỗi adapter để kiểm tra error state"
+                            >
+                              <AlertTriangle className="w-3.5 h-3.5 mr-1 text-rose-500" />
+                              {isVi ? 'Test Lỗi' : 'Simulate Error'}
+                            </button>
+                          </>
                         )}
 
                         {/* Cancel button if processing */}
