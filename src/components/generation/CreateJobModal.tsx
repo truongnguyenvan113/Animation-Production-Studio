@@ -8,6 +8,7 @@ import {
 } from '../../types';
 import { StorageService } from '../../services/storageService';
 import { ImageGenerationService, IMAGE_PROVIDER_SPECS } from '../../services/imageGenerationService';
+import { ImageAdapterRegistry } from '../../services/adapters';
 import {
   X,
   Sparkles,
@@ -41,18 +42,27 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
   const db = storage.getDatabase();
   const imageGenService = ImageGenerationService.getInstance();
 
+  const registry = ImageAdapterRegistry.getInstance();
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>(
     initialEpisodeId || 'ep_009'
   );
   const [selectedSceneNumber, setSelectedSceneNumber] = useState<number>(1);
   const [selectedShotId, setSelectedShotId] = useState<string>(initialShotId || '');
   const [provider, setProvider] = useState<ImageGenerationProvider>('mock-studio');
+  const [selectedModel, setSelectedModel] = useState<string>(() =>
+    registry.getActiveModel('mock-studio')
+  );
   const [aspectRatio, setAspectRatio] = useState<string>('16:9');
   const [resolution, setResolution] = useState<string>('1920x1080');
   const [seed, setSeed] = useState<number>(() => Math.floor(Math.random() * 900000 + 100000));
   const [steps, setSteps] = useState<number>(30);
   const [guidanceScale, setGuidanceScale] = useState<number>(7.5);
   const [runImmediately, setRunImmediately] = useState<boolean>(true);
+
+  const handleProviderSelect = (newProvider: ImageGenerationProvider) => {
+    setProvider(newProvider);
+    setSelectedModel(registry.getActiveModel(newProvider));
+  };
 
   const isVi = language === 'vi';
 
@@ -95,6 +105,7 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
           seed,
           steps,
           guidanceScale,
+          modelName: selectedModel,
         }
       );
 
@@ -259,7 +270,7 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
                   <button
                     key={spec.id}
                     type="button"
-                    onClick={() => setProvider(spec.id)}
+                    onClick={() => handleProviderSelect(spec.id)}
                     className={`p-3 rounded-xl text-left border transition-all ${
                       isSelected
                         ? 'bg-amber-500/15 border-amber-500/60 ring-2 ring-amber-500/20 text-white'
@@ -278,6 +289,24 @@ export const CreateJobModal: React.FC<CreateJobModalProps> = ({
                   </button>
                 );
               })}
+            </div>
+
+            {/* Exact Model Selection */}
+            <div className="pt-2">
+              <label className="block text-slate-400 font-semibold mb-1">
+                {isVi ? 'Model Thực Thi (Exact Model ID):' : 'Execution Model (Exact Model ID):'}
+              </label>
+              <select
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-slate-200 font-mono text-xs focus:outline-none focus:border-amber-500"
+              >
+                {registry.getAdapter(provider).supportedModels.map((m) => (
+                  <option key={m} value={m}>
+                    {m} {m === registry.getAdapter(provider).defaultModel ? (isVi ? '(Mặc định)' : '(Default)') : ''}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

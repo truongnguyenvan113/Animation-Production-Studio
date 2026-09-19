@@ -234,6 +234,9 @@ export class MidjourneyAdapter extends BaseImageProviderAdapter {
         if (options?.simulateRateLimit) {
           throw new Error(`429 Too Many Requests: Midjourney concurrent job limit reached for ${model}.`);
         }
+        if (options?.simulateError) {
+          throw new Error(`Midjourney API Error: GPU cluster execution failed on prompt render for ${model}`);
+        }
         await new Promise((r) => setTimeout(r, 750));
 
         const outputAsset = renderGenericProviderFrame({
@@ -315,6 +318,9 @@ export class StableDiffusionAdapter extends BaseImageProviderAdapter {
         if (options?.simulateRateLimit) {
           throw new Error(`429: SD LoRA cluster capacity full.`);
         }
+        if (options?.simulateError) {
+          throw new Error(`Stable Diffusion pipeline error: UNet cross-attention failure on ${model}`);
+        }
         await new Promise((r) => setTimeout(r, 600));
 
         const outputAsset = renderGenericProviderFrame({
@@ -394,6 +400,9 @@ export class DallEAdapter extends BaseImageProviderAdapter {
       const result = await this.retryWithBackoff(async () => {
         if (options?.simulateRateLimit) {
           throw new Error(`429: OpenAI organization rate limit exceeded on ${model}.`);
+        }
+        if (options?.simulateError) {
+          throw new Error(`OpenAI DALL-E 3 API Error: Safety/generation reject on ${model}`);
         }
         await new Promise((r) => setTimeout(r, 650));
 

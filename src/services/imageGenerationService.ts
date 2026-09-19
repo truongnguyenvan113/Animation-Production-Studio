@@ -160,7 +160,7 @@ export class ImageGenerationService {
     episodeId: string,
     storyboardId: string,
     provider: ImageGenerationProvider = 'mock-studio',
-    customParams?: Partial<ImageGenerationJob['params']>
+    customParams?: Partial<ImageGenerationJob['params']> & { modelName?: string }
   ): ImageGenerationJob {
     const db = this.storage.getDatabase();
 
@@ -319,7 +319,9 @@ export class ImageGenerationService {
 
       // Provider & Execution
       provider,
-      modelName: this.getProviderSpec(provider).name,
+      modelName:
+        customParams?.modelName ||
+        ImageAdapterRegistry.getInstance().getActiveModel(provider),
       status: 'queued',
       progress: 0,
       params: {
