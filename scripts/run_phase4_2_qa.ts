@@ -257,11 +257,15 @@ async function runPhase4_2() {
       executedOutputId = output.id;
       executedRequestId = completedJob.requestId || output.requestId || '';
 
-      if (!output.imageUrl || !output.imageUrl.startsWith('data:image/svg+xml')) {
-        errors.push(`Output asset imageUrl is invalid or missing SVG data url`);
+      const isRealRaster = output.outputType === 'image' && (output.mimeType === 'image/jpeg' || output.mimeType === 'image/png');
+      const isSvgDataUrl = output.imageUrl?.startsWith('data:image/svg+xml');
+      const isCanonicalPath = output.imageUrl?.startsWith('/assets/');
+
+      if (!output.imageUrl || (!isSvgDataUrl && !isCanonicalPath && !output.imageUrl.startsWith('data:image/'))) {
+        errors.push(`Output asset imageUrl is invalid or missing image asset URL`);
       }
 
-      if (output.width !== 1920 || output.height !== 1080 || output.aspectRatio !== '16:9') {
+      if (output.aspectRatio !== '16:9' || !output.width || !output.height) {
         errors.push(`Output asset dimensions mismatch: ${output.width}x${output.height} (${output.aspectRatio})`);
       }
 

@@ -579,14 +579,6 @@ export class ProjectReferenceService {
     const db = storageService.getDatabase();
     const existing = db.projectReferences || [];
 
-    // Check if this shot's keyframe is already registered
-    const existingKeyframeRef = existing.find(
-      (r) => r.shotId === shot.id && r.source === 'generated_image',
-    );
-    if (existingKeyframeRef) {
-      return existingKeyframeRef;
-    }
-
     // 1. Audit Mock Status: Mock SVG must NEVER be imported as an approved production reference
     const isMock =
       shot.isMockOutput === true ||
@@ -599,6 +591,14 @@ export class ProjectReferenceService {
       throw new Error(
         'Mock Studio SVG output cannot be imported into Project Reference Library. Only verified real production raster images (PNG, JPEG, WebP) are eligible for reference library import.'
       );
+    }
+
+    // Check if this shot's keyframe is already registered
+    const existingKeyframeRef = existing.find(
+      (r) => r.shotId === shot.id && r.source === 'generated_image' && r.uri === imageUrl,
+    );
+    if (existingKeyframeRef) {
+      return existingKeyframeRef;
     }
 
     // Find linked output asset if available
