@@ -267,16 +267,19 @@ export class MockStudioAdapter extends BaseImageProviderAdapter {
 
     const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     const outputId = `out_mock_${snapshot.jobId}_${Date.now()}`;
-    const storagePath = `renders/episodes/${snapshot.episodeId}/shots/${snapshot.shotId}/frame_mock_${requestId}.png`;
+    const storagePath = `renders/episodes/${snapshot.episodeId}/shots/${snapshot.shotId}/frame_mock_${requestId}.svg`;
 
     return {
       id: outputId,
+      outputId,
       jobId: snapshot.jobId,
       shotId: snapshot.shotId,
       iterationNumber,
       imageUrl: dataUrl,
       thumbnailUrl: dataUrl,
       storagePath,
+      outputType: 'mock',
+      mimeType: 'image/svg+xml',
       isApproved: false,
       approvalStatus: 'pending',
       deterministicHash: hash,
@@ -289,6 +292,8 @@ export class MockStudioAdapter extends BaseImageProviderAdapter {
       model,
       requestId,
       createdAt: new Date().toISOString(),
+      isProductionReady: false,
+      isMock: true,
     };
   }
 }

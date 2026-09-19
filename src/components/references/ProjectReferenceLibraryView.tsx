@@ -1426,13 +1426,20 @@ const ImportKeyframeModal: React.FC<ImportModalProps> = ({
     return list;
   }, [storyboards]);
 
+  const [importError, setImportError] = useState<string | null>(null);
+
   const handleImport = (item: { shot: Shot; episodeId: string; imageUrl: string }) => {
-    const newRef = ProjectReferenceService.importKeyframeAsReference({
-      shot: item.shot,
-      episodeId: item.episodeId,
-      imageUrl: item.imageUrl,
-    });
-    onImported(newRef);
+    setImportError(null);
+    try {
+      const newRef = ProjectReferenceService.importKeyframeAsReference({
+        shot: item.shot,
+        episodeId: item.episodeId,
+        imageUrl: item.imageUrl,
+      });
+      onImported(newRef);
+    } catch (err: any) {
+      setImportError(err.message || 'Lỗi khi nhập tài nguyên tham chiếu.');
+    }
   };
 
   return (
@@ -1453,47 +1460,78 @@ const ImportKeyframeModal: React.FC<ImportModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-4 text-xs custom-scrollbar">
           <p className="text-slate-400">
             {isVi
-              ? 'Tái sử dụng các keyframe kết xuất đã phê duyệt làm tài nguyên tham chiếu chính thức mà không cần tải lên lại.'
-              : 'Reuse existing approved storyboard keyframes as project reference assets without re-uploading.'}
+              ? 'Tái sử dụng các keyframe kết xuất đã phê duyệt làm tài nguyên tham chiếu chính thức mà không cần tải lên lại. Lưu ý: Chỉ các khung hình sản xuất thực tế (Raster PNG/JPEG) mới được phép nhập; khung hình Mock Studio SVG bị từ chối.'
+              : 'Reuse existing approved storyboard keyframes as project reference assets without re-uploading. Note: Only genuine production raster frames (PNG/JPEG) are permitted; mock SVG frames are rejected.'}
           </p>
+
+          {importError && (
+            <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-500/50 text-rose-300 flex items-center space-x-2">
+              <X className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>{importError}</span>
+            </div>
+          )}
 
           {shotsWithRenders.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {shotsWithRenders.map((item) => (
-                <div
-                  key={item.shot.id}
-                  className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center space-x-3"
-                >
-                  <div className="w-20 aspect-video rounded-lg bg-slate-900 overflow-hidden shrink-0 border border-slate-800">
-                    <img
-                      src={item.imageUrl}
-                      alt={item.shot.action}
-                      className="w-full h-full object-cover"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
+              {shotsWithRenders.map((item) => {
+                const isMock = Boolean(
+                  item.shot.isMockOutput === true ||
+                    item.imageUrl?.startsWith('data:image/svg+xml') ||
+                    item.imageUrl?.includes('<svg') ||
+                    item.shot.outputMimeType === 'image/svg+xml'
+                );
 
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center space-x-1 font-bold text-slate-200 truncate">
-                      <span>Shot #{item.shot.shotNumber}</span>
-                      <span className="text-[10px] text-slate-500">
-                        (Scene {item.sceneNumber} • {item.episodeId})
-                      </span>
+                return (
+                  <div
+                    key={item.shot.id}
+                    className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center space-x-3"
+                  >
+                    <div className="w-20 aspect-video rounded-lg bg-slate-900 overflow-hidden shrink-0 border border-slate-800 relative">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.shot.action}
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                      {isMock ? (
+                        <span className="absolute bottom-0 inset-x-0 bg-amber-600/90 text-slate-950 font-black text-[8px] text-center uppercase tracking-wider py-0.5">
+                          Mock SVG
+                        </span>
+                      ) : (
+                        <span className="absolute bottom-0 inset-x-0 bg-emerald-600/90 text-white font-bold text-[8px] text-center uppercase tracking-wider py-0.5">
+                          Production
+                        </span>
+                      )}
                     </div>
-                    <p className="text-[10px] text-slate-400 line-clamp-1">
-                      {item.shot.action}
-                    </p>
 
-                    <button
-                      onClick={() => handleImport(item)}
-                      className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] transition-colors"
-                    >
-                      <Plus className="w-3 h-3 mr-1" />
-                      {isVi ? 'Lưu vào Thư Viện' : 'Import Asset'}
-                    </button>
+                    <div className="flex-1 min-w-0 space-y-1">
+                      <div className="flex items-center space-x-1 font-bold text-slate-200 truncate">
+                        <span>Shot #{item.shot.shotNumber}</span>
+                        <span className="text-[10px] text-slate-500">
+                          (Scene {item.sceneNumber} • {item.episodeId})
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 line-clamp-1">
+                        {item.shot.action}
+                      </p>
+
+                      {isMock ? (
+                        <span className="inline-block text-[9px] text-amber-400/90 font-medium">
+                          Khung hình Mock (không thể nhập)
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handleImport(item)}
+                          className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] transition-colors"
+                        >
+                          <Plus className="w-3 h-3 mr-1" />
+                          {isVi ? 'Lưu vào Thư Viện' : 'Import Asset'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ) : (
             <div className="text-center py-12 text-slate-500 space-y-2">

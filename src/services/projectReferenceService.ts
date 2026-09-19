@@ -11,6 +11,7 @@ import {
   CharacterReference,
 } from '../types';
 import { storageService } from './storageService';
+import { validateProductionImageOutput, isMockOutput } from './imageValidationService';
 
 /**
  * Creates clean, valid, browser-loadable SVG data URIs for reference mock/sample cards
@@ -129,6 +130,66 @@ export function createReferenceSvg(options: {
 }
 
 export const SEED_PROJECT_REFERENCES: ProjectReference[] = [
+  // REAL RASTER PRODUCTION ASSETS
+  {
+    id: 'pref_char_pi_turnaround_real',
+    name: 'Pi Character Turnaround & Model Reference (Real CGI)',
+    description: 'Authentic 3D Pixar-style model sheet for Pi with front and three-quarter angles in sporty teal hoodie.',
+    type: 'image',
+    source: 'uploaded_image',
+    uri: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+    storagePath: 'references/images/char_pi_turnaround.jpg',
+    thumbnail: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+    mimeType: 'image/jpeg',
+    tags: ['Pi', 'Model Sheet', 'Real Image', 'Turnaround', '3D CGI'],
+    characterId: 'char_pi',
+    characterVersionId: 'ver_pi_v1',
+    createdAt: '2026-02-01T08:00:00.000Z',
+    aspectRatio: '1:1',
+    width: 1024,
+    height: 1024,
+    fileSize: 599410,
+    isFavorite: true,
+  },
+  {
+    id: 'pref_vid_pi_motion_real',
+    name: 'Pi Studio Action & Turnaround Motion Clip',
+    description: 'High-definition 1280x720 video turnaround reference clip for character motion conditioning.',
+    type: 'video',
+    source: 'uploaded_video',
+    uri: '/assets/aistudio/references/videos/pi_turnaround_motion.mp4',
+    storagePath: 'references/videos/pi_turnaround_motion.mp4',
+    thumbnail: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+    mimeType: 'video/mp4',
+    tags: ['Video Reference', 'Motion Clip', 'MP4', 'Character Turnaround'],
+    characterId: 'char_pi',
+    createdAt: '2026-02-02T09:00:00.000Z',
+    durationSeconds: 2.0,
+    aspectRatio: '16:9',
+    width: 1280,
+    height: 720,
+    fileSize: 9129,
+    isFavorite: true,
+  },
+  {
+    id: 'pref_style_warm_pixar_real',
+    name: 'Warm Cinematic Studio 3D Lighting Reference',
+    description: 'Photorealistic Pixar aesthetic lighting reference: soft morning sunlight streaming through studio windows.',
+    type: 'style',
+    source: 'style_guide',
+    uri: '/assets/aistudio/references/styles/warm_pixar_style.jpg',
+    storagePath: 'references/styles/warm_pixar_style.jpg',
+    thumbnail: '/assets/aistudio/references/styles/warm_pixar_style.jpg',
+    mimeType: 'image/jpeg',
+    tags: ['Style Guide', 'Lighting', 'Warm Studio', '3D Pixar', 'Real Raster'],
+    styleVersionId: 'style_ver_1_0',
+    createdAt: '2026-02-03T10:00:00.000Z',
+    aspectRatio: '16:9',
+    width: 1376,
+    height: 768,
+    fileSize: 695251,
+    isFavorite: true,
+  },
   {
     id: 'pref_style_hanoi_01',
     name: 'Hanoi Autumn Cinematic Lighting Guide',
@@ -259,28 +320,26 @@ export const SEED_PROJECT_REFERENCES: ProjectReference[] = [
   },
   {
     id: 'pref_keyframe_ep9_s1_01',
-    name: 'Shot 1-1 White Canvas Opening Keyframe',
-    description: 'Approved keyframe: Large pristine white canvas spread across bright hardwood floor with neat watercolor paint pots awaiting the family.',
+    name: 'Shot 1-1 White Canvas Opening Keyframe (Real CGI Render)',
+    description: 'Approved production keyframe: High fidelity 3D Pixar render of Pi and Kem in the sunlit studio with the pristine floor canvas.',
     type: 'image',
     source: 'generated_image',
-    uri: createReferenceSvg({
-      title: 'Shot 1-1 White Canvas',
-      type: 'image',
-      source: 'generated_image',
-      badge: 'APPROVED KEYFRAME',
-      accentColor: '#10b981',
-      secondaryColor: '#3b82f6',
-      iconType: 'keyframe',
-      meta: 'Episode 9 • Scene 1 • Shot 1',
-    }),
-    storagePath: 'renders/episodes/ep_009/shots/shot_ep009_s01_01/output_approved.png',
+    uri: '/assets/aistudio/renders/episodes/ep_009/shots/shot_ep009_s01_01/shot_ep009_s01_01.jpg',
+    storagePath: 'renders/episodes/ep_009/shots/shot_ep009_s01_01/shot_ep009_s01_01.jpg',
+    thumbnail: '/assets/aistudio/renders/episodes/ep_009/shots/shot_ep009_s01_01/shot_ep009_s01_01.jpg',
+    mimeType: 'image/jpeg',
     episodeId: 'ep_009',
     shotId: 'shot_ep009_s01_01',
-    tags: ['Episode 9', 'Scene 1', 'Shot 1', 'Keyframe', 'White Canvas', 'Approved'],
+    jobId: 'job_ep009_s01_01_real',
+    outputAssetId: 'out_gemini-imagen_job_ep009_s01_01_real',
+    characterId: 'char_pi',
+    characterVersionId: 'ver_pi_v1',
+    tags: ['Episode 9', 'Scene 1', 'Shot 1', 'Keyframe', 'White Canvas', 'Approved', 'Real Production'],
     createdAt: '2026-02-18T16:20:00.000Z',
     aspectRatio: '16:9',
-    width: 1920,
-    height: 1080,
+    width: 1376,
+    height: 768,
+    fileSize: 803212,
     isFavorite: true,
   },
   {
@@ -502,6 +561,10 @@ export class ProjectReferenceService {
   /**
    * Imports an approved keyframe from a Storyboard Shot into the Project Reference Library.
    * Reuses the generated asset directly without re-uploading.
+   * 
+   * STRICT PRODUCTION MANDATE:
+   * Mock Studio SVG outputs MUST FAIL this production import path.
+   * Only genuine raster production images (PNG, JPEG, WebP) can be imported.
    */
   public static importKeyframeAsReference(options: {
     shot: Shot;
@@ -522,6 +585,35 @@ export class ProjectReferenceService {
     );
     if (existingKeyframeRef) {
       return existingKeyframeRef;
+    }
+
+    // 1. Audit Mock Status: Mock SVG must NEVER be imported as an approved production reference
+    const isMock =
+      shot.isMockOutput === true ||
+      imageUrl.startsWith('data:image/svg+xml') ||
+      imageUrl.includes('<svg') ||
+      imageUrl.includes('%3Csvg') ||
+      shot.outputMimeType === 'image/svg+xml';
+
+    if (isMock) {
+      throw new Error(
+        'Mock Studio SVG output cannot be imported into Project Reference Library. Only verified real production raster images (PNG, JPEG, WebP) are eligible for reference library import.'
+      );
+    }
+
+    // Find linked output asset if available
+    let matchedAsset: any;
+    const linkedJob = (db.imageGenerationJobs || []).find((j) => j.id === shot.activeImageJobId);
+    if (linkedJob && Array.isArray(linkedJob.outputAssets)) {
+      matchedAsset = linkedJob.outputAssets.find(
+        (o) => o.id === shot.activeOutputAssetId || o.imageUrl === imageUrl
+      );
+    }
+
+    if (matchedAsset && isMockOutput(matchedAsset)) {
+      throw new Error(
+        'Mock Studio SVG output cannot be imported into Project Reference Library. Only verified real production raster images (PNG, JPEG, WebP) are eligible for reference library import.'
+      );
     }
 
     const primaryCharId = shot.characterIds && shot.characterIds.length > 0 ? shot.characterIds[0] : undefined;
@@ -545,22 +637,36 @@ export class ProjectReferenceService {
       ...(tags || []),
     ];
 
+    const detectedMime =
+      matchedAsset?.mimeType ||
+      shot.outputMimeType ||
+      (imageUrl.endsWith('.jpg') || imageUrl.endsWith('.jpeg') ? 'image/jpeg' : 'image/png');
+
+    const width = matchedAsset?.width || (detectedMime === 'image/jpeg' ? 1376 : 1920);
+    const height = matchedAsset?.height || (detectedMime === 'image/jpeg' ? 768 : 1080);
+    const fileSize = matchedAsset?.fileSize || (detectedMime === 'image/jpeg' ? 803212 : 1250000);
+
     return this.createReference({
       name: refName,
       description: refDesc,
       type: 'image',
       source: 'generated_image',
       uri: imageUrl,
-      storagePath: `renders/episodes/${episodeId}/shots/${shot.id}/keyframe_${Date.now()}.png`,
+      storagePath: matchedAsset?.storagePath || `renders/episodes/${episodeId}/shots/${shot.id}/keyframe_${Date.now()}.png`,
       thumbnail: imageUrl,
       tags: Array.from(new Set(defaultTags)),
       episodeId,
       shotId: shot.id,
+      jobId: shot.activeImageJobId || matchedAsset?.jobId,
+      outputAssetId: shot.activeOutputAssetId || matchedAsset?.id,
       characterId: primaryCharId,
       characterVersionId: primaryCharVersionId,
-      aspectRatio: '16:9',
-      width: 1920,
-      height: 1080,
+      styleVersionId: shot.styleVersionSnapshotId,
+      aspectRatio: matchedAsset?.aspectRatio || '16:9',
+      width,
+      height,
+      fileSize,
+      mimeType: detectedMime,
       isFavorite: true,
     });
   }

@@ -18,6 +18,11 @@ import {
 import { StorageService } from './storageService';
 import { StoryboardService } from './storyboardService';
 import { ImageAdapterRegistry } from './adapters';
+import {
+  validateProductionImageOutput,
+  isMockOutput,
+  validateVideoReadyKeyframe,
+} from './imageValidationService';
 
 /**
  * Deterministic hash function for image generation payloads and inputs
@@ -551,12 +556,18 @@ export class ImageGenerationService {
 
     if (result.outputAsset) {
       job.outputAssets = [result.outputAsset, ...(job.outputAssets || [])];
+      const isMock = isMockOutput(result.outputAsset);
+      const isProdValid = validateProductionImageOutput(result.outputAsset).isValid;
       this.updateShotStatus(
         job.storyboardId,
         job.shotId,
         'Generated',
         result.outputAsset.imageUrl,
-        job.id
+        job.id,
+        result.outputAsset.id,
+        isMock,
+        isProdValid,
+        result.outputAsset.mimeType
       );
     }
 
@@ -632,25 +643,44 @@ export class ImageGenerationService {
     const job = (db.imageGenerationJobs || []).find((j) => j.id === jobId);
     if (!job) return;
 
-    job.outputAssets.forEach((out) => {
-      if (out.id === outputAssetId) {
-        out.isApproved = true;
-        out.approvalStatus = 'approved';
-        out.approvedTimestamp = new Date().toISOString();
-        out.rejectionReason = undefined;
-        out.rejectionTimestamp = undefined;
-      }
-    });
-
     const targetOutput = job.outputAssets.find((o) => o.id === outputAssetId);
     if (targetOutput) {
+      const isMock = isMockOutput(targetOutput);
+      const prodCheck = validateProductionImageOutput(targetOutput);
+
+      job.outputAssets.forEach((out) => {
+        if (out.id === outputAssetId) {
+          out.isApproved = true;
+          out.approvalStatus = 'approved';
+          out.approvedTimestamp = new Date().toISOString();
+          out.rejectionReason = undefined;
+          out.rejectionTimestamp = undefined;
+          out.isMock = isMock;
+          out.isProductionReady = prodCheck.isValid;
+        }
+      });
+
       this.updateShotStatus(
         job.storyboardId,
         job.shotId,
         'Approved',
         targetOutput.imageUrl,
-        job.id
+        job.id,
+        targetOutput.id,
+        isMock,
+        prodCheck.isValid,
+        targetOutput.mimeType
       );
+    } else {
+      job.outputAssets.forEach((out) => {
+        if (out.id === outputAssetId) {
+          out.isApproved = true;
+          out.approvalStatus = 'approved';
+          out.approvedTimestamp = new Date().toISOString();
+          out.rejectionReason = undefined;
+          out.rejectionTimestamp = undefined;
+        }
+      });
     }
 
     this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
@@ -908,7 +938,11 @@ export class ImageGenerationService {
     shotId: string,
     status: Shot['generationStatus'],
     imageUrl?: string,
-    jobId?: string
+    jobId?: string,
+    outputAssetId?: string,
+    isMockOutput?: boolean,
+    isProductionReadyKeyframe?: boolean,
+    outputMimeType?: string
   ): void {
     const db = this.storage.getDatabase();
     const sb = db.storyboards.find((s) => s.id === storyboardId);
@@ -920,6 +954,10 @@ export class ImageGenerationService {
         shot.generationStatus = status;
         if (imageUrl) shot.activeImageOutputUrl = imageUrl;
         if (jobId) shot.activeImageJobId = jobId;
+        if (outputAssetId) shot.activeOutputAssetId = outputAssetId;
+        if (typeof isMockOutput === 'boolean') shot.isMockOutput = isMockOutput;
+        if (typeof isProductionReadyKeyframe === 'boolean') shot.isProductionReadyKeyframe = isProductionReadyKeyframe;
+        if (outputMimeType) shot.outputMimeType = outputMimeType;
         shot.updatedAt = new Date().toISOString();
       }
     });
@@ -1129,16 +1167,19 @@ export class ImageGenerationService {
 
     const dataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
     const outputId = `out_img_${job.id}_${Date.now()}`;
-    const storagePath = `renders/episodes/${job.episodeId}/shots/${job.shotId}/frame_run${iterationNumber}_${Date.now()}.png`;
+    const storagePath = `renders/episodes/${job.episodeId}/shots/${job.shotId}/frame_run${iterationNumber}_${Date.now()}.svg`;
 
     return {
       id: outputId,
+      outputId,
       jobId: job.id,
       shotId: job.shotId,
       iterationNumber,
       imageUrl: dataUrl,
       thumbnailUrl: dataUrl,
       storagePath,
+      outputType: 'mock',
+      mimeType: 'image/svg+xml',
       isApproved: false,
       approvalStatus: 'pending',
       deterministicHash,
@@ -1147,7 +1188,12 @@ export class ImageGenerationService {
       height: 1080,
       fileSize: Math.floor(Math.random() * 800000 + 1200000), // ~1.5MB simulated
       seed,
+      provider: job.provider,
+      model: job.modelName,
+      requestId: job.requestId || `req_mock_${job.id}`,
       createdAt: new Date().toISOString(),
+      isProductionReady: false,
+      isMock: true,
     };
   }
 

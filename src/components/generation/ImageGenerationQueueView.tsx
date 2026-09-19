@@ -458,6 +458,15 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
             const isApproved = output?.isApproved;
             const providerSpec = imageGenService.getProviderSpec(job.provider);
 
+            const isJobMock = Boolean(
+              output?.outputType === 'mock' ||
+                output?.isMock === true ||
+                job.provider === 'mock_studio' ||
+                output?.imageUrl?.startsWith('data:image/svg+xml') ||
+                output?.mimeType === 'image/svg+xml'
+            );
+            const isJobProduction = Boolean(!isJobMock && output);
+
             return (
               <div
                 key={job.id}
@@ -525,18 +534,32 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                         </div>
                       )}
 
-                      {/* Approval or Rejection badge on thumbnail */}
-                      {isApproved ? (
-                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-purple-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Keyframe
-                        </span>
-                      ) : output?.approvalStatus === 'rejected' ? (
-                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-rose-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1">
-                          <XCircle className="w-3 h-3" />
-                          QA Rejected
-                        </span>
-                      ) : null}
+                      {/* Approval, Production vs Mock badge on thumbnail */}
+                      {output && (
+                        <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                          {isApproved ? (
+                            <span className="px-2 py-0.5 rounded-md bg-purple-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Keyframe
+                            </span>
+                          ) : output?.approvalStatus === 'rejected' ? (
+                            <span className="px-2 py-0.5 rounded-md bg-rose-600 text-white font-bold text-[10px] shadow-sm flex items-center gap-1">
+                              <XCircle className="w-3 h-3" />
+                              QA Rejected
+                            </span>
+                          ) : null}
+
+                          {isJobMock ? (
+                            <span className="px-1.5 py-0.5 rounded-md bg-amber-500/90 text-slate-950 font-black text-[9px] shadow-sm uppercase tracking-wider">
+                              Mock Output
+                            </span>
+                          ) : isJobProduction ? (
+                            <span className="px-1.5 py-0.5 rounded-md bg-emerald-600/90 text-white font-bold text-[9px] shadow-sm uppercase tracking-wider">
+                              Production
+                            </span>
+                          ) : null}
+                        </div>
+                      )}
                     </div>
 
                     {/* Thumbnail sub-info */}
@@ -573,6 +596,15 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                           <span className="text-xs font-bold font-mono px-2.5 py-0.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200">
                             {providerSpec.name}
                           </span>
+                          {isJobMock ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-300">
+                              Mock SVG
+                            </span>
+                          ) : isJobProduction ? (
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              Production Frame
+                            </span>
+                          ) : null}
                           {job.modelName && (
                             <span
                               className="text-[10px] font-mono px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 border border-slate-200"

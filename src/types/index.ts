@@ -369,6 +369,10 @@ export interface Shot {
   generationStatus: ShotGenerationStatus;
   activeImageOutputUrl?: string;
   activeImageJobId?: string;
+  activeOutputAssetId?: string;
+  isMockOutput?: boolean;
+  isProductionReadyKeyframe?: boolean;
+  outputMimeType?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -455,14 +459,24 @@ export type ImageGenerationJobStatus =
 
 export type OutputApprovalStatus = 'pending' | 'approved' | 'rejected';
 
+export type OutputAssetType = 'mock' | 'image';
+export type OutputMimeType =
+  | 'image/png'
+  | 'image/jpeg'
+  | 'image/webp'
+  | 'image/svg+xml';
+
 export interface ImageGenerationOutputAsset {
   id: string; // e.g. "out_job_img_001_01"
+  outputId?: string; // Explicit alias for id
   jobId: string;
   shotId: string;
   iterationNumber?: number; // 1, 2, 3...
   imageUrl: string; // High-res Data URL or canonical URI
   thumbnailUrl?: string;
   storagePath: string; // Canonical: "renders/episodes/{episodeId}/shots/{shotId}/output_{timestamp}.png"
+  outputType: OutputAssetType; // "mock" | "image"
+  mimeType: OutputMimeType | string; // "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml"
   isApproved?: boolean;
   approvalStatus?: OutputApprovalStatus;
   rejectionReason?: string;
@@ -478,6 +492,8 @@ export interface ImageGenerationOutputAsset {
   model?: string;
   requestId?: string;
   createdAt: string;
+  isProductionReady?: boolean;
+  isMock?: boolean;
 }
 
 export interface ImageGenerationPromptBreakdown {

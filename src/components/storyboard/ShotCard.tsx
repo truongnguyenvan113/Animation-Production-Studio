@@ -18,6 +18,7 @@ import {
   Compass,
   ArrowRight,
   Image as ImageIcon,
+  Film,
 } from 'lucide-react';
 
 interface ShotCardProps {
@@ -54,6 +55,29 @@ export const ShotCard: React.FC<ShotCardProps> = ({
     }
     return url;
   }, [shot.activeImageOutputUrl]);
+  const isMock = Boolean(
+    shot.isMockOutput === true ||
+    (displayImageUrl &&
+      (displayImageUrl.startsWith('data:image/svg+xml') ||
+        displayImageUrl.includes('<svg') ||
+        displayImageUrl.includes('%3Csvg'))) ||
+    shot.outputMimeType === 'image/svg+xml'
+  );
+
+  const isProduction = Boolean(
+    shot.isProductionReadyKeyframe === true ||
+    (!isMock &&
+      displayImageUrl &&
+      (shot.outputMimeType === 'image/jpeg' ||
+        shot.outputMimeType === 'image/png' ||
+        displayImageUrl.endsWith('.jpg') ||
+        displayImageUrl.endsWith('.png') ||
+        displayImageUrl.startsWith('data:image/png') ||
+        displayImageUrl.startsWith('data:image/jpeg')))
+  );
+
+  const isVideoReady = isProduction && shot.generationStatus === 'Approved';
+
   const getShotTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'Establishing Shot':
@@ -145,13 +169,41 @@ export const ShotCard: React.FC<ShotCardProps> = ({
           <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
             <span className="text-xs font-bold text-white bg-slate-900/80 px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 shadow-lg">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-              Xem Khung Hình CGI
+              {isMock ? 'Xem Thử Nghiệm Mock' : 'Xem Khung Hình CGI'}
             </span>
           </div>
-          {shot.generationStatus === 'Approved' && (
-            <span className="absolute top-2 left-2 bg-purple-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
-              Keyframe Đã Duyệt
-            </span>
+
+          {/* Real vs Mock Badging on Image Frame */}
+          {isMock ? (
+            <>
+              <div className="absolute top-2 left-2 flex flex-col gap-1 items-start">
+                <span className="bg-amber-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                  Mock Output (Test Asset)
+                </span>
+              </div>
+              <div className="absolute bottom-2 left-2 right-2 bg-slate-950/85 backdrop-blur-xs border border-amber-500/40 rounded px-2 py-1 text-[10px] text-amber-300 font-semibold flex items-center justify-between">
+                <span>NOT Production Keyframe</span>
+                <span className="text-rose-400 font-bold">NOT Ready for Video</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="absolute top-2 left-2 flex items-center gap-1">
+                <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
+                  Production Image
+                </span>
+                {shot.outputMimeType && (
+                  <span className="bg-slate-900/80 text-emerald-300 text-[9px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30">
+                    {shot.outputMimeType.replace('image/', '').toUpperCase()}
+                  </span>
+                )}
+              </div>
+              {isVideoReady && (
+                <span className="absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-black px-2 py-0.5 rounded shadow-sm flex items-center gap-1">
+                  Ready for Video
+                </span>
+              )}
+            </>
           )}
         </div>
       )}
@@ -299,15 +351,36 @@ export const ShotCard: React.FC<ShotCardProps> = ({
               id={`btn-generate-shot-image-${shot.id}`}
               type="button"
               onClick={() => onGenerateImage(shot)}
-              className={`inline-flex items-center text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
-                shot.activeImageOutputUrl
-                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200'
+              className={`inline-flex items-center text-xs px-2.5 py-1.5 rounded-lg border transition-colors ${
+                isMock
+                  ? 'text-amber-900 bg-amber-100 hover:bg-amber-200 border-amber-300 font-bold shadow-xs'
+                  : shot.activeImageOutputUrl
+                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 font-medium'
                   : 'text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border-amber-200 font-bold'
               }`}
+              title={
+                isMock
+                  ? 'Tạo ảnh thật từ Provider (Google Imagen / Flux) để thay thế bản Mock'
+                  : undefined
+              }
             >
               <Sparkles className="w-3.5 h-3.5 mr-1" />
-              {shot.activeImageOutputUrl ? 'Tạo Lại' : 'Render Frame'}
+              {isMock
+                ? 'Tạo Ảnh Thật (Real Image)'
+                : shot.activeImageOutputUrl
+                ? 'Tạo Lại'
+                : 'Render Frame'}
             </button>
+          )}
+
+          {isVideoReady && (
+            <span
+              className="inline-flex items-center text-[11px] font-bold px-2 py-1 rounded-md bg-emerald-100 text-emerald-800 border border-emerald-300"
+              title="Khung hình sản xuất đã phê duyệt & sẵn sàng chuyển sang tạo Video"
+            >
+              <Film className="w-3 h-3 mr-1 text-emerald-600" />
+              Video-Ready
+            </span>
           )}
         </div>
 
