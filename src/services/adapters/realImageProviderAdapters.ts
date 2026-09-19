@@ -52,7 +52,7 @@ export class GeminiImagenAdapter extends BaseImageProviderAdapter {
           '#1e3a8a', // Deep Blue
           '#3b82f6', // Bright Blue
           '#60a5fa',
-          'IMAGEN 3 &bull; CLOUD API'
+          'IMAGEN 3 • CLOUD API'
         );
 
         return {
@@ -161,7 +161,7 @@ export class FluxProAdapter extends BaseImageProviderAdapter {
           bgStart: '#3b0764', // Deep Purple
           bgEnd: '#581c87',
           accent: '#c084fc', // Purple Glow
-          engineBadge: 'FLUX.1 PRO &bull; FLOW-MATCHING',
+          engineBadge: 'FLUX.1 PRO • FLOW-MATCHING',
         });
 
         return {
@@ -247,7 +247,7 @@ export class MidjourneyAdapter extends BaseImageProviderAdapter {
           bgStart: '#0f172a',
           bgEnd: '#1e293b',
           accent: '#f43f5e', // Rose
-          engineBadge: 'MIDJOURNEY V6.1 &bull; STYLIZED 3D',
+          engineBadge: 'MIDJOURNEY V6.1 • STYLIZED 3D',
         });
 
         return {
@@ -331,7 +331,7 @@ export class StableDiffusionAdapter extends BaseImageProviderAdapter {
           bgStart: '#14532d', // Forest
           bgEnd: '#166534',
           accent: '#4ade80', // Mint Green
-          engineBadge: 'STABLE DIFFUSION 3.5 &bull; LORA WEIGHTS',
+          engineBadge: 'STABLE DIFFUSION 3.5 • LORA WEIGHTS',
         });
 
         return {
@@ -414,7 +414,7 @@ export class DallEAdapter extends BaseImageProviderAdapter {
           bgStart: '#1c1917', // Warm Slate
           bgEnd: '#292524',
           accent: '#10b981', // Emerald
-          engineBadge: 'DALL-E 3 &bull; INSTRUCTION TUNED',
+          engineBadge: 'DALL-E 3 • INSTRUCTION TUNED',
         });
 
         return {
@@ -566,7 +566,7 @@ function renderGenericProviderFrame(config: RenderFrameConfig): ImageGenerationO
       ${escapeXml(action.slice(0, 75))}
     </text>
     <text x="0" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="500" fill="#94a3b8" text-anchor="middle">
-      ${escapeXml(location)} &bull; ${escapeXml(lighting)} &bull; ${escapeXml(cameraAngle)}
+      ${escapeXml(location)} • ${escapeXml(lighting)} • ${escapeXml(cameraAngle)}
     </text>
 
     ${
@@ -585,10 +585,10 @@ function renderGenericProviderFrame(config: RenderFrameConfig): ImageGenerationO
   <g transform="translate(60, 85)">
     <rect x="0" y="0" width="340" height="52" rx="8" fill="rgba(15, 23, 42, 0.9)" stroke="rgba(255, 255, 255, 0.15)" />
     <text x="14" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8">
-      SCENE ${snapshot.sceneNumber} &bull; SHOT #${snapshot.shotNumber} (${snapshot.shotId})
+      SCENE ${snapshot.sceneNumber} • SHOT #${snapshot.shotNumber} (${snapshot.shotId})
     </text>
     <text x="14" y="40" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">
-      RUN #${iterationNumber} &bull; HASH #${hash.slice(0, 8)} &bull; 16:9
+      RUN #${iterationNumber} • HASH #${hash.slice(0, 8)} • 16:9
     </text>
   </g>
 
@@ -599,7 +599,7 @@ function renderGenericProviderFrame(config: RenderFrameConfig): ImageGenerationO
       ${engineBadge}
     </text>
     <text x="346" y="40" font-family="monospace" font-size="10" fill="#cbd5e1" text-anchor="end">
-      MODEL: ${model} &bull; REQ: ${requestId.slice(-10)}
+      MODEL: ${model} • REQ: ${requestId.slice(-10)}
     </text>
   </g>
 

@@ -43,6 +43,17 @@ export const ShotCard: React.FC<ShotCardProps> = ({
   onViewImageOutput,
   canDelete = false,
 }) => {
+  const [hasImageError, setHasImageError] = React.useState(false);
+  const [isImageLoaded, setIsImageLoaded] = React.useState(false);
+
+  const displayImageUrl = React.useMemo(() => {
+    if (!shot.activeImageOutputUrl) return undefined;
+    let url = shot.activeImageOutputUrl;
+    if (url.includes('&bull;') || url.includes('%26bull%3B')) {
+      url = url.replaceAll('%26bull%3B', '%E2%80%A2').replaceAll('&bull;', '•');
+    }
+    return url;
+  }, [shot.activeImageOutputUrl]);
   const getShotTypeBadgeColor = (type: string) => {
     switch (type) {
       case 'Establishing Shot':
@@ -109,16 +120,28 @@ export const ShotCard: React.FC<ShotCardProps> = ({
       </div>
 
       {/* Rendered Frame Preview if Available */}
-      {shot.activeImageOutputUrl && (
+      {displayImageUrl && (
         <div
           onClick={() => onViewImageOutput && onViewImageOutput(shot)}
           className="relative bg-slate-950 aspect-video cursor-pointer group overflow-hidden border-b border-slate-200"
         >
-          <img
-            src={shot.activeImageOutputUrl}
-            alt={`Rendered keyframe for Shot ${shot.shotNumber}`}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          {hasImageError ? (
+            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-slate-400 p-4 text-center">
+              <ImageIcon className="w-8 h-8 text-slate-500 mb-1" />
+              <span className="text-xs font-semibold text-slate-300">Khung hình đang đồng bộ</span>
+              <span className="text-[10px] text-slate-500 mt-0.5">Nhấp để xem chi tiết kết xuất</span>
+            </div>
+          ) : (
+            <img
+              src={displayImageUrl}
+              alt={`Rendered keyframe for Shot ${shot.shotNumber}`}
+              className={`w-full h-full object-cover transition-all duration-300 group-hover:scale-105 ${
+                isImageLoaded ? 'opacity-100' : 'opacity-90'
+              }`}
+              onLoad={() => setIsImageLoaded(true)}
+              onError={() => setHasImageError(true)}
+            />
+          )}
           <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center space-x-2">
             <span className="text-xs font-bold text-white bg-slate-900/80 px-2.5 py-1 rounded-lg border border-white/20 flex items-center gap-1 shadow-lg">
               <Sparkles className="w-3.5 h-3.5 text-amber-400" />

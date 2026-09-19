@@ -1037,7 +1037,7 @@ export class ImageGenerationService {
       ${escapeXml(shotTitle.slice(0, 75))}
     </text>
     <text x="0" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="500" fill="#94a3b8" text-anchor="middle">
-      ${escapeXml(location)} &bull; ${escapeXml(lighting)} &bull; ${escapeXml(cameraAngle)}
+      ${escapeXml(location)} • ${escapeXml(lighting)} • ${escapeXml(cameraAngle)}
     </text>
 
     <!-- Dialogue Bubble If Available -->
@@ -1057,10 +1057,10 @@ export class ImageGenerationService {
   <g transform="translate(60, 85)">
     <rect x="0" y="0" width="320" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
     <text x="14" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8">
-      SCENE ${job.sceneNumber} &bull; SHOT #${job.shotNumber} (${job.shotId})
+      SCENE ${job.sceneNumber} • SHOT #${job.shotNumber} (${job.shotId})
     </text>
     <text x="14" y="40" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">
-      RUN #${iterationNumber} &bull; HASH #${deterministicHash.slice(0, 8)} &bull; 16:9
+      RUN #${iterationNumber} • HASH #${deterministicHash.slice(0, 8)} • 16:9
     </text>
   </g>
 
@@ -1071,7 +1071,7 @@ export class ImageGenerationService {
       PROVIDER: ${job.provider.toUpperCase()}
     </text>
     <text x="306" y="40" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="end">
-      SEED: #${seed} &bull; STEPS: ${job.params.steps || 30} &bull; QA VALIDATED
+      SEED: #${seed} • STEPS: ${job.params.steps || 30} • QA VALIDATED
     </text>
   </g>
 

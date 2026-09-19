@@ -205,7 +205,7 @@ export class MockStudioAdapter extends BaseImageProviderAdapter {
       ${this.escapeXml(action.slice(0, 75))}
     </text>
     <text x="0" y="44" font-family="system-ui, sans-serif" font-size="12" font-weight="500" fill="#94a3b8" text-anchor="middle">
-      ${this.escapeXml(location)} &bull; ${this.escapeXml(lighting)} &bull; ${this.escapeXml(cameraAngle)}
+      ${this.escapeXml(location)} • ${this.escapeXml(lighting)} • ${this.escapeXml(cameraAngle)}
     </text>
 
     ${
@@ -224,10 +224,10 @@ export class MockStudioAdapter extends BaseImageProviderAdapter {
   <g transform="translate(60, 85)">
     <rect x="0" y="0" width="340" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
     <text x="14" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="#38bdf8">
-      SCENE ${snapshot.sceneNumber} &bull; SHOT #${snapshot.shotNumber} (${snapshot.shotId})
+      SCENE ${snapshot.sceneNumber} • SHOT #${snapshot.shotNumber} (${snapshot.shotId})
     </text>
     <text x="14" y="40" font-family="system-ui, sans-serif" font-size="11" fill="#cbd5e1">
-      RUN #${iterationNumber} &bull; HASH #${hash.slice(0, 8)} &bull; 16:9
+      RUN #${iterationNumber} • HASH #${hash.slice(0, 8)} • 16:9
     </text>
   </g>
 
@@ -235,10 +235,10 @@ export class MockStudioAdapter extends BaseImageProviderAdapter {
   <g transform="translate(880, 85)">
     <rect x="0" y="0" width="340" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
     <text x="326" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="${accentColor}" text-anchor="end">
-      MOCK STUDIO &bull; ${model.toUpperCase()}
+      MOCK STUDIO • ${model.toUpperCase()}
     </text>
     <text x="326" y="40" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="end">
-      REQ: ${requestId.slice(-10)} &bull; SEED: #${seed} &bull; OFFLINE QA
+      REQ: ${requestId.slice(-10)} • SEED: #${seed} • OFFLINE QA
     </text>
   </g>
 

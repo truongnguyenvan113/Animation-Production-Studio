@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Character,
   CharacterVersion,
@@ -79,6 +79,13 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
 
   const referencingEpisodes = CharacterVersionService.getReferencingEpisodes(formData.id);
   const isCurrentlyActive = character.activeVersionId === formData.id;
+
+  const isDirty = useMemo(() => {
+    if (!formData) return false;
+    const stored = CharacterVersionService.getVersionById(formData.id);
+    if (!stored) return false;
+    return JSON.stringify(formData) !== JSON.stringify(stored);
+  }, [formData]);
 
   const handleFieldChange = (field: keyof CharacterVersion, value: any) => {
     setFormData((prev) => (prev ? { ...prev, [field]: value } : null));
@@ -759,6 +766,53 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
           />
         </div>
       )}
+
+      {/* Persistent Bottom Save / Persistence Action Bar */}
+      <div className="sticky bottom-0 z-20 mt-6 bg-slate-900/95 backdrop-blur-md border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-2xl">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-xs font-bold text-white">
+              {character.displayName} • {formData.version}
+            </span>
+          </div>
+          {isDirty ? (
+            <span className="text-xs text-amber-300 font-medium bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded-full">
+              {language === 'vi' ? 'Có thay đổi chưa lưu' : 'Unsaved changes pending'}
+            </span>
+          ) : (
+            <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
+              <Check className="w-3.5 h-3.5" />
+              {language === 'vi' ? 'Đã lưu trên bộ nhớ' : 'Saved to persistent storage'}
+            </span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isDirty && (
+            <button
+              type="button"
+              onClick={() => {
+                const stored = CharacterVersionService.getVersionById(formData.id);
+                if (stored) setFormData({ ...stored });
+              }}
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:bg-slate-800 transition-colors"
+            >
+              {language === 'vi' ? 'Hủy thay đổi' : 'Discard'}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleSaveCurrent}
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-md transition-all active:scale-95"
+          >
+            <Save className="w-4 h-4" />
+            <span>
+              {language === 'vi' ? `Lưu Phiên Bản DNA (${formData.version})` : `Save DNA Version (${formData.version})`}
+            </span>
+          </button>
+        </div>
+      </div>
 
       {/* Modal: Create New Version */}
       {isNewVersionModalOpen && (

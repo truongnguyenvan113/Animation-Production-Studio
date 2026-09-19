@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Sparkles,
   Info,
+  Save,
 } from 'lucide-react';
 
 interface CharacterVersionReferenceLibraryProps {
@@ -503,11 +504,11 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed'
               }`}
             >
-              <Upload className="w-4 h-4" />
+              <Save className="w-4 h-4" />
               <span>
                 {isUploading
-                  ? language === 'vi' ? 'Đang lưu...' : 'Saving...'
-                  : language === 'vi' ? 'Lưu Vào Thư Viện Phiên Bản' : 'Upload & Save to Version'}
+                  ? language === 'vi' ? 'Đang lưu vào kho...' : 'Persisting to Storage...'
+                  : language === 'vi' ? 'Lưu & Khóa Vào Phiên Bản' : 'Save & Persist to Version'}
               </span>
             </button>
           </div>

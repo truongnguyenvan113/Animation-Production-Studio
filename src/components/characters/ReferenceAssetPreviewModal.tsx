@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CharacterReference, Character, CharacterVersion } from '../../types';
-import { CharacterReferenceService } from '../../services/characterReferenceService';
+import { CharacterReference, Character, CharacterVersion, ReferenceType } from '../../types';
+import { CharacterReferenceService, CANONICAL_REFERENCE_TYPES } from '../../services/characterReferenceService';
 import {
   X,
   Star,
@@ -15,6 +15,8 @@ import {
   ExternalLink,
   Layers,
   Image as ImageIcon,
+  Save,
+  Edit2,
 } from 'lucide-react';
 import { ReferenceCardPreview } from '../shared/ReferenceCardPreview';
 
@@ -38,6 +40,24 @@ export const ReferenceAssetPreviewModal: React.FC<ReferenceAssetPreviewModalProp
   onDelete,
 }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editDescription, setEditDescription] = useState(reference.description || '');
+  const [editType, setEditType] = useState<ReferenceType>(reference.type);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  const handleSaveAsset = () => {
+    try {
+      CharacterReferenceService.updateReference(reference.id, {
+        description: editDescription,
+        type: editType,
+      });
+      setSaveSuccess(true);
+      setIsEditing(false);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: any) {
+      console.error(err);
+    }
+  };
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -245,14 +265,76 @@ export const ReferenceAssetPreviewModal: React.FC<ReferenceAssetPreviewModalProp
                   </div>
                 </div>
 
-                {/* Description & Model Sheet Notes */}
-                <div className="bg-slate-900 p-2.5 rounded-lg border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-slate-500 block uppercase font-medium">
-                    {isVi ? 'Mô tả góc chiếu & Ghi chú Model Sheet' : 'Pose Description & Notes'}
-                  </span>
-                  <p className="text-xs text-slate-200 leading-relaxed">
-                    {reference.description || (isVi ? 'Chưa có ghi chú chi tiết' : 'No description provided')}
-                  </p>
+                {/* Description & Model Sheet Notes with Save / Persist Action */}
+                <div className="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-500 block uppercase font-medium">
+                      {isVi ? 'Mô tả góc chiếu & Ghi chú Model Sheet' : 'Pose Description & Notes'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsEditing(!isEditing)}
+                      className="text-[10px] font-semibold text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                    >
+                      <Edit2 className="w-3 h-3" />
+                      <span>{isEditing ? (isVi ? 'Hủy sửa' : 'Cancel') : (isVi ? 'Chỉnh sửa' : 'Edit')}</span>
+                    </button>
+                  </div>
+
+                  {isEditing ? (
+                    <div className="space-y-2 pt-1">
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[10px] text-slate-400 block mb-0.5">
+                            {isVi ? 'Loại tham chiếu' : 'Reference Type'}
+                          </label>
+                          <select
+                            value={editType}
+                            onChange={(e) => setEditType(e.target.value as ReferenceType)}
+                            className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 focus:outline-none"
+                          >
+                            {CANONICAL_REFERENCE_TYPES.map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-400 block mb-0.5">
+                          {isVi ? 'Ghi chú chi tiết' : 'Description Notes'}
+                        </label>
+                        <textarea
+                          rows={2}
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value)}
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white focus:border-amber-400 focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex justify-end pt-1">
+                        <button
+                          type="button"
+                          onClick={handleSaveAsset}
+                          className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition-colors shadow-sm"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>{isVi ? 'Lưu Thay Đổi Tham Chiếu' : 'Save Reference Asset'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-200 leading-relaxed">
+                      {editDescription || (isVi ? 'Chưa có ghi chú chi tiết' : 'No description provided')}
+                    </p>
+                  )}
+
+                  {saveSuccess && (
+                    <div className="p-2 rounded bg-emerald-950/80 border border-emerald-500/40 text-emerald-300 text-[11px] flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>{isVi ? 'Đã lưu thay đổi vào kho tham chiếu!' : 'Reference asset changes saved and persisted!'}</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

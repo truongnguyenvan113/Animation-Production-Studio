@@ -24,6 +24,15 @@ import {
 
 const STORAGE_KEY = 'pikem_animation_studio_v2';
 
+function sanitizeImageUri(uri?: string): string | undefined {
+  if (!uri) return uri;
+  if (typeof uri !== 'string') return uri;
+  if (uri.includes('&bull;') || uri.includes('%26bull%3B')) {
+    return uri.replaceAll('%26bull%3B', '%E2%80%A2').replaceAll('&bull;', '•');
+  }
+  return uri;
+}
+
 export interface StudioDatabase {
   project: Project;
   characters: Character[];
@@ -107,6 +116,62 @@ export class StorageService {
               parsed.imageGenerationJobs = [];
             }
 
+            // Sanitize all stored image URLs in jobs
+            if (Array.isArray(parsed.imageGenerationJobs)) {
+              for (const job of parsed.imageGenerationJobs) {
+                if (Array.isArray(job.outputAssets)) {
+                  for (const asset of job.outputAssets) {
+                    if (asset.imageUrl) asset.imageUrl = sanitizeImageUri(asset.imageUrl) || asset.imageUrl;
+                    if (asset.thumbnailUrl) asset.thumbnailUrl = sanitizeImageUri(asset.thumbnailUrl) || asset.thumbnailUrl;
+                  }
+                }
+              }
+            }
+
+            // Sanitize all activeImageOutputUrl in storyboards
+            if (Array.isArray(parsed.storyboards)) {
+              for (const sb of parsed.storyboards) {
+                if (Array.isArray(sb.scenes)) {
+                  for (const sc of sb.scenes) {
+                    if (Array.isArray(sc.shots)) {
+                      for (const shot of sc.shots) {
+                        if (shot.activeImageOutputUrl) {
+                          shot.activeImageOutputUrl = sanitizeImageUri(shot.activeImageOutputUrl);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+
+            // Audit and heal orphan / broken references
+            if (Array.isArray(parsed.characterVersions) && Array.isArray(parsed.characterReferences)) {
+              const validVersionIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
+              const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
+
+              // Filter out references pointing to non-existent versions or characters
+              parsed.characterReferences = parsed.characterReferences.filter(
+                (ref: CharacterReference) => ref && ref.id && validCharIds.has(ref.characterId) && validVersionIds.has(ref.characterVersionId)
+              );
+
+              const existingRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
+
+              // Clean broken reference IDs from versions
+              parsed.characterVersions = parsed.characterVersions.map((ver: CharacterVersion) => {
+                const validRefIds = (ver.referenceAssetIds || []).filter((id: string) => existingRefIds.has(id));
+                let primaryId = ver.primaryReferenceAssetId;
+                if (primaryId && !existingRefIds.has(primaryId)) {
+                  primaryId = validRefIds[0];
+                }
+                return {
+                  ...ver,
+                  referenceAssetIds: validRefIds,
+                  primaryReferenceAssetId: primaryId,
+                };
+              });
+            }
+
             return parsed;
           }
         }
@@ -144,7 +209,9 @@ export class StorageService {
       updatedAt: new Date().toISOString(),
     };
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+      }
     } catch (e) {
       console.error('Failed to save to localStorage:', e);
     }
@@ -154,7 +221,9 @@ export class StorageService {
   public resetToSeed(): void {
     this.db = this.getInitialSeedDatabase();
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+      }
     } catch (e) {
       console.error('Failed to reset localStorage:', e);
     }
