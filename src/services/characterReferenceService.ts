@@ -63,17 +63,12 @@ export class CharacterReferenceService {
     filenameOrId: string,
     ext: string = 'png',
   ): string {
-    const basename = filenameOrId.replace(/^.*[\\/]/, '');
-    const dotIndex = basename.lastIndexOf('.');
-    let nameWithoutExt = basename;
-    let actualExt = ext;
-    if (dotIndex > 0) {
-      nameWithoutExt = basename.substring(0, dotIndex);
-      actualExt = basename.substring(dotIndex + 1);
-    }
-    const cleanName = nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase();
-    const cleanExt = (actualExt || ext).replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'png';
-    return `characters/${characterId}/${versionId}/${cleanName}.${cleanExt}`;
+    const cleanName = filenameOrId
+      .replace(/^.*[\\/]/, '')
+      .replace(/[^a-zA-Z0-9_-]/g, '_')
+      .toLowerCase();
+    const finalName = cleanName.endsWith(`.${ext}`) ? cleanName : `${cleanName}.${ext}`;
+    return `characters/${characterId}/${versionId}/${finalName}`;
   }
 
   /**

@@ -424,9 +424,6 @@ export interface ImageGenerationOutputAsset {
   height: number;
   fileSize?: number;
   seed?: number;
-  provider?: ImageGenerationProvider;
-  model?: string;
-  requestId?: string;
   createdAt: string;
 }
 
@@ -576,107 +573,12 @@ export interface ImageGenerationJob {
   };
 
   // OUTPUTS & AUDIT TIMESTAMPS
-  requestId?: string; // Provider request/generation ID
-  rateLimitInfo?: ProviderRateLimitInfo;
   outputAssets: ImageGenerationOutputAsset[];
   error: string | null;
   createdAt: string;
   startedAt?: string;
   completedAt?: string;
   executionDurationMs?: number;
-}
-
-export interface ProviderRateLimitInfo {
-  isRateLimited: boolean;
-  retryAfterSeconds?: number;
-  quotaExceeded?: boolean;
-  failedModel?: string;
-  suggestedAlternativeModel?: string;
-  suggestedProvider?: ImageGenerationProvider;
-  attemptCount?: number;
-  rawErrorMessage?: string;
-}
-
-export interface ImmutableJobSnapshot {
-  jobId: string;
-  shotId: string;
-  episodeId: string;
-  storyboardId: string;
-  sceneNumber: number;
-  shotNumber: number;
-  iterationNumber: number;
-  deterministicPayloadHash: string;
-
-  // STRICT IMMUTABILITY CONTRACT:
-  // Provider receives ONLY frozen snapshot parameters - NEVER active Character/Style state
-  prompt: string;
-  negativePrompt?: string;
-  characterVersionIds: Record<string, string>; // characterId -> frozen CharacterVersionId
-  referenceAssetIds: string[];
-  referenceAssetUrls: Record<string, string>; // refId -> storagePath or canonical URI
-  styleSnapshot: {
-    id: string;
-    versionNumber: string;
-    name: string;
-    positivePrompt: string;
-    negativePrompt: string;
-    colorPaletteRule: string;
-    lightingRule: string;
-  };
-  camera: {
-    shotType: string;
-    framing: string;
-    cameraAngle?: string;
-    cameraMovement?: string;
-    cameraDirection?: string;
-  };
-  lighting: string;
-  composition: {
-    location: string;
-    action: string;
-    emotion: string;
-    visualPurpose: string;
-    dialogue?: string;
-    speakerCharacterName?: string;
-    characterIds: string[];
-  };
-  params: {
-    aspectRatio: string;
-    resolution: string;
-    seed?: number;
-    steps?: number;
-    guidanceScale?: number;
-    sampler?: string;
-  };
-  provider: ImageGenerationProvider;
-  modelName: string;
-}
-
-export interface ProviderGenerationResult {
-  provider: ImageGenerationProvider;
-  model: string;
-  requestId: string;
-  outputAsset?: ImageGenerationOutputAsset;
-  timestamp: string;
-  status: 'completed' | 'failed';
-  error?: string | null;
-  rateLimitInfo?: ProviderRateLimitInfo;
-  executionDurationMs?: number;
-}
-
-export interface ImageProviderAdapter {
-  readonly providerId: ImageGenerationProvider;
-  readonly defaultModel: string;
-  readonly supportedModels: string[];
-
-  /**
-   * Generates an image using ONLY the immutable job snapshot.
-   * STRICT CONTRACT: Never read active Character or Style state during generation.
-   */
-  generateImage(
-    jobSnapshot: ImmutableJobSnapshot,
-    options?: any
-  ): Promise<ProviderGenerationResult>;
 }
 
 export interface ImageProviderSpec {

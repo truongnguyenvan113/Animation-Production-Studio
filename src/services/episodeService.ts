@@ -116,18 +116,6 @@ export class EpisodeService {
       updatedAt: new Date().toISOString(),
     };
 
-    const existingIndex = db.episodes.findIndex((e) => e.id === newEpisode.id);
-    if (existingIndex >= 0) {
-      const updatedEpisodes = [...db.episodes];
-      updatedEpisodes[existingIndex] = {
-        ...db.episodes[existingIndex],
-        ...newEpisode,
-        createdAt: db.episodes[existingIndex].createdAt,
-      };
-      storageService.saveDatabase({ episodes: updatedEpisodes });
-      return updatedEpisodes[existingIndex];
-    }
-
     storageService.saveDatabase({ episodes: [...db.episodes, newEpisode] });
     return newEpisode;
   }

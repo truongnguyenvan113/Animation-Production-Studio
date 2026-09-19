@@ -78,9 +78,7 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const character = CharacterService.getCharacterById(characterId);
 
-  const [references, setReferences] = useState<CharacterReference[]>(() =>
-    CharacterReferenceService.getReferencesForVersion(characterVersionId),
-  );
+  const [references, setReferences] = useState<CharacterReference[]>([]);
   const [selectedFilterType, setSelectedFilterType] = useState<string>('all');
   const [activePreviewRef, setActivePreviewRef] = useState<CharacterReference | null>(null);
 

@@ -56,9 +56,6 @@ export class StorageService {
 
   private loadFromStorage(): StudioDatabase {
     try {
-      if (typeof localStorage === 'undefined') {
-        return this.getInitialSeedDatabase();
-      }
       const data = localStorage.getItem(STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);

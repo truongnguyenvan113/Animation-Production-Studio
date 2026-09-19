@@ -12,12 +12,9 @@ import {
   GenerationInputSnapshot,
   GenerationIntegrityAuditResult,
   OutputApprovalStatus,
-  ImmutableJobSnapshot,
-  ProviderGenerationResult,
 } from '../types';
 import { StorageService } from './storageService';
 import { StoryboardService } from './storyboardService';
-import { ImageAdapterRegistry } from './adapters';
 
 /**
  * Deterministic hash function for image generation payloads and inputs
@@ -215,8 +212,8 @@ export class ImageGenerationService {
         characterName: char?.displayName || cId,
         characterVersionId: vId,
         versionNumber: ver?.version || '1.0',
-        visualPromptSnippet: ver?.characterPrompt || ver?.visualIdentity || '',
-        canonicalAppearance: ver?.clothing || ver?.bodyProportions || '',
+        visualPromptSnippet: ver?.characterPrompt || '',
+        canonicalAppearance: ver?.visualIdentity || '',
       };
     });
 
@@ -235,7 +232,7 @@ export class ImageGenerationService {
     const resolvedStyleSnapshot = {
       id: styleVersionSnapshotId,
       versionNumber: styleVersion?.version || '1.0',
-      name: styleVersion?.animationStyle || 'Default 3D CGI',
+      name: styleVersion?.version || 'Default 3D CGI',
       positivePrompt: styleVersion?.globalPrompt || '',
       negativePrompt: styleVersion?.negativePrompt || '',
       colorPaletteRule: styleVersion?.colorPalette || '',
@@ -387,77 +384,9 @@ export class ImageGenerationService {
   }
 
   /**
-   * CRITICAL IMMUTABILITY MANDATE:
-   * Extracts an immutable Job Snapshot containing ONLY frozen parameters.
-   * NEVER queries active Character or Style state repositories during generation.
+   * Run an Image Generation Job through the provider adapter / mock execution layer.
    */
-  public buildImmutableJobSnapshot(job: ImageGenerationJob): ImmutableJobSnapshot {
-    const inputSnap = job.inputSnapshot;
-    const shotPayload = inputSnap?.shotPayload;
-    const styleSnap = inputSnap?.resolvedStyleSnapshot;
-
-    return {
-      jobId: job.id,
-      shotId: job.shotId,
-      episodeId: job.episodeId,
-      storyboardId: job.storyboardId,
-      sceneNumber: job.sceneNumber,
-      shotNumber: job.shotNumber,
-      iterationNumber: job.iterationNumber || 1,
-      deterministicPayloadHash:
-        inputSnap?.deterministicPayloadHash ||
-        computeDeterministicPayloadHash({
-          shotId: job.shotId,
-          seed: job.params.seed,
-          prompt: job.prompt,
-        }),
-      prompt: job.prompt,
-      negativePrompt: job.negativePrompt,
-      characterVersionIds: { ...job.characterDnaSnapshots },
-      referenceAssetIds: [...job.referenceAssetIds],
-      referenceAssetUrls: { ...job.referenceAssetPaths },
-      styleSnapshot: {
-        id: styleSnap?.id || job.styleVersionSnapshotId,
-        versionNumber: styleSnap?.versionNumber || job.styleVersionName || 'v1.0',
-        name: styleSnap?.name || 'Default Visual Style',
-        positivePrompt: styleSnap?.positivePrompt || '',
-        negativePrompt: styleSnap?.negativePrompt || job.negativePrompt || '',
-        colorPaletteRule: styleSnap?.colorPaletteRule || '',
-        lightingRule: styleSnap?.lightingRule || '',
-      },
-      camera: {
-        shotType: shotPayload?.shotType || 'Cinematic Wide',
-        framing: shotPayload?.framing || 'Rule of Thirds',
-        cameraAngle: shotPayload?.cameraAngle,
-        cameraMovement: shotPayload?.cameraMovement,
-        cameraDirection: shotPayload?.cameraDirection,
-      },
-      lighting: shotPayload?.lighting || 'Volumetric Studio 3D Light',
-      composition: {
-        location: shotPayload?.location || 'Studio Set',
-        action: shotPayload?.action || 'Keyframe Action',
-        emotion: shotPayload?.emotion || 'Neutral',
-        visualPurpose: shotPayload?.visualPurpose || 'Keyframe',
-        dialogue: shotPayload?.dialogue,
-        speakerCharacterName: shotPayload?.speakerCharacterName,
-        characterIds: shotPayload?.characterIds || Object.keys(job.characterDnaSnapshots),
-      },
-      params: { ...job.params },
-      provider: job.provider,
-      modelName: job.modelName || ImageAdapterRegistry.getInstance().getActiveModel(job.provider),
-    };
-  }
-
-  /**
-   * Run an Image Generation Job through the provider adapter layer.
-   * STRICT CONTRACT: Provider receives ONLY the immutable Job Snapshot.
-   * Stores provider/model, request ID, output asset, timestamp, status, and error.
-   */
-  public async runJob(
-    jobId: string,
-    simulateFailure: boolean = false,
-    simulateRateLimit: boolean = false
-  ): Promise<ImageGenerationJob> {
+  public async runJob(jobId: string, simulateFailure: boolean = false): Promise<ImageGenerationJob> {
     const db = this.storage.getDatabase();
     const jobIndex = (db.imageGenerationJobs || []).findIndex((j) => j.id === jobId);
     if (jobIndex === -1) {
@@ -469,42 +398,31 @@ export class ImageGenerationService {
 
     // Set processing state
     job.status = 'processing';
-    job.progress = 25;
+    job.progress = 20;
     job.startedAt = new Date().toISOString();
     job.error = null;
-    job.rateLimitInfo = undefined;
 
     db.imageGenerationJobs[jobIndex] = job;
     this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
 
-    // Step 1: Build immutable snapshot containing frozen DNA, styles, and shot parameters ONLY
-    const snapshot = this.buildImmutableJobSnapshot(job);
-
-    // Intermediate progress update for smooth UI
-    await new Promise((r) => setTimeout(r, 250));
-    job.progress = 65;
+    // Simulate pipeline stage progression
+    await new Promise((r) => setTimeout(r, 600));
+    job.progress = 55;
     this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
 
-    // Step 2: Execute via decoupled Provider Adapter Layer
-    const registry = ImageAdapterRegistry.getInstance();
-    const result: ProviderGenerationResult = await registry.executeGeneration(snapshot, {
-      simulateError: simulateFailure,
-      simulateRateLimit,
-      maxRetries: 2,
-    });
+    await new Promise((r) => setTimeout(r, 700));
+    job.progress = 85;
+    this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
 
-    // Step 3: Store provider, model, request ID, timestamp, status, and error
-    job.provider = result.provider;
-    job.modelName = result.model;
-    job.requestId = result.requestId;
-    job.completedAt = result.timestamp;
-    job.executionDurationMs = result.executionDurationMs || Date.now() - startTime;
-    job.rateLimitInfo = result.rateLimitInfo;
+    await new Promise((r) => setTimeout(r, 500));
 
-    if (result.status === 'failed') {
+    if (simulateFailure) {
       job.status = 'failed';
-      job.progress = 65;
-      job.error = result.error || 'Provider generation failed.';
+      job.progress = 85;
+      job.error =
+        'Mock Pipeline Error: Tensor consistency verification failed for locked reference assets. Provider timed out during cross-attention alignment.';
+      job.completedAt = new Date().toISOString();
+      job.executionDurationMs = Date.now() - startTime;
 
       // Update shot generation status
       this.updateShotStatus(job.storyboardId, job.shotId, 'Flagged');
@@ -514,23 +432,21 @@ export class ImageGenerationService {
       return job;
     }
 
-    // Step 4: Success - store output asset & update shot status
+    // Generate high quality mock output asset SVG
+    const outputAsset = this.generateMockOutputAsset(job);
+
     job.status = 'completed';
     job.progress = 100;
+    job.outputAssets = [outputAsset, ...(job.outputAssets || [])];
+    job.completedAt = new Date().toISOString();
+    job.executionDurationMs = Date.now() - startTime;
     job.error = null;
 
-    if (result.outputAsset) {
-      job.outputAssets = [result.outputAsset, ...(job.outputAssets || [])];
-      this.updateShotStatus(
-        job.storyboardId,
-        job.shotId,
-        'Generated',
-        result.outputAsset.imageUrl,
-        job.id
-      );
-    }
-
     db.imageGenerationJobs[jobIndex] = job;
+
+    // Update Shot with active output image
+    this.updateShotStatus(job.storyboardId, job.shotId, 'Generated', outputAsset.imageUrl, job.id);
+
     this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
     return job;
   }
