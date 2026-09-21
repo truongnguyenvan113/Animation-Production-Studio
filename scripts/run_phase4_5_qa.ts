@@ -100,6 +100,8 @@ async function runPhase4_5_QA() {
   // Record initial immutability baselines
   const initialCharacters = JSON.parse(JSON.stringify(db.characters));
   const initialPi = initialCharacters.find((c: any) => c.id === 'char_pi');
+  const initialCharacterVersions = JSON.parse(JSON.stringify(db.characterVersions || []));
+  const initialPiVersion = initialCharacterVersions.find((v: any) => v.id === 'ver_pi_v1');
   const initialEpisodeJson = JSON.stringify(ep9);
   const initialStoryboardJson = JSON.stringify(sb);
 
@@ -217,7 +219,7 @@ async function runPhase4_5_QA() {
   // --------------------------------------------------------------------------
   console.log('\n--- Step 4: Output Validation Service Inspection ---');
   const prodValidation = validateProductionImageOutput(realOutput);
-  console.log(`validateProductionImageOutput: isValid=${prodValidation.isValid}, mime=${prodValidation.detectedMime}, isRaster=${prodValidation.isRaster}`);
+  console.log(`validateProductionImageOutput: isValid=${prodValidation.isValid}, isRasterMime=${prodValidation.details.isRasterMime}, notMock=${prodValidation.details.notMock}`);
 
   // --------------------------------------------------------------------------
   // STEP 5: Shot Approval
@@ -325,8 +327,9 @@ async function runPhase4_5_QA() {
   console.log('\n--- Step 10: Verifying Immutability of Characters, Episode, Storyboard ---');
   const postDb = storageService.getDatabase();
   const currentPi = postDb.characters.find((c) => c.id === 'char_pi');
+  const currentPiVersion = (postDb.characterVersions || []).find((v) => v.id === 'ver_pi_v1');
 
-  const charDnaUnchanged = JSON.stringify(currentPi?.dna) === JSON.stringify(initialPi.dna);
+  const charDnaUnchanged = JSON.stringify(currentPiVersion) === JSON.stringify(initialPiVersion);
   const charVerUnchanged = currentPi?.activeVersionId === initialPi.activeVersionId;
   const currentEp = postDb.episodes.find((e) => e.id === 'ep_009');
   const epUnchanged = JSON.stringify(currentEp) === initialEpisodeJson;
