@@ -8,6 +8,7 @@ import {
   EffectiveSettingsSnapshot,
   ProviderExecutionMode,
   Shot,
+  LanguageMode,
 } from '../types';
 import { storageService } from './storageService';
 
@@ -20,6 +21,9 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     autoSave: true,
   },
   language: {
+    language: 'vi',
+    activeLanguage: 'vi',
+    locale: 'vi-VN',
     primaryLocale: 'vi-VN',
     bilingualMode: true,
     fallbackLocale: 'en-US',

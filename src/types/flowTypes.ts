@@ -212,9 +212,12 @@ export interface SystemSettings {
     autoSave: boolean;
   };
   language: {
-    primaryLocale: 'vi-VN';
+    language?: 'vi' | 'en' | 'bilingual';
+    activeLanguage?: 'vi' | 'en' | 'bilingual';
+    locale?: string;
+    primaryLocale: 'vi-VN' | 'en-US' | string;
     bilingualMode: boolean;
-    fallbackLocale: 'en-US';
+    fallbackLocale: 'en-US' | 'vi-VN' | string;
   };
   aiModel: {
     defaultImageModel: string;
