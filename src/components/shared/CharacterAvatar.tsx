@@ -1,19 +1,27 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
+import { CharacterImageResolver } from '../../services/characterImageResolver';
 
-interface CharacterAvatarProps {
+export interface CharacterAvatarProps {
   characterId: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  versionId?: string;
+  imageUrl?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
   showBadge?: boolean;
 }
 
 export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
   characterId,
+  versionId,
+  imageUrl,
   size = 'md',
   className = '',
   showBadge = false,
 }) => {
+  const [hasImageError, setHasImageError] = useState(false);
+
   const sizeClasses = {
+    xs: 'w-6 h-6',
     sm: 'w-8 h-8',
     md: 'w-11 h-11',
     lg: 'w-16 h-16',
@@ -21,7 +29,52 @@ export const CharacterAvatar: React.FC<CharacterAvatarProps> = ({
     '2xl': 'w-32 h-32',
   }[size];
 
-  // Specific SVGs for Pi & Kem universe
+  const resolvedImageUrl = useMemo(() => {
+    if (imageUrl) return imageUrl;
+    if (versionId) {
+      return CharacterImageResolver.resolveVersionVisual(versionId).imageUrl;
+    }
+    return CharacterImageResolver.resolveActiveVisual(characterId).imageUrl;
+  }, [characterId, versionId, imageUrl]);
+
+  const characterTitle = useMemo(() => {
+    switch (characterId) {
+      case 'char_pi':
+        return 'Pi (Nancy) - Older Sister';
+      case 'char_kem':
+        return 'Kem (Leo) - Younger Brother';
+      case 'char_ethan':
+        return 'Ethan (Ba Trường) - Father';
+      case 'char_emma':
+        return 'Emma (Mẹ Vân) - Mother';
+      case 'char_mochi':
+        return 'Mochi - Fluffy Puppy';
+      default:
+        return characterId;
+    }
+  }, [characterId]);
+
+  // If a real visual image (uploaded artwork or model sheet) is available, render authentic image
+  if (resolvedImageUrl && !hasImageError) {
+    return (
+      <div
+        className={`relative inline-flex items-center justify-center rounded-2xl overflow-hidden shadow-md bg-slate-900 border border-slate-700/60 p-0.5 ${sizeClasses} ${className}`}
+        title={characterTitle}
+      >
+        <img
+          src={resolvedImageUrl}
+          alt={characterTitle}
+          className="w-full h-full object-cover rounded-[14px]"
+          onError={() => setHasImageError(true)}
+        />
+        {showBadge && (
+          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-slate-950" />
+        )}
+      </div>
+    );
+  }
+
+  // Specific SVGs for Pi & Kem universe (deterministic fallback)
   if (characterId === 'char_pi') {
     return (
       <div

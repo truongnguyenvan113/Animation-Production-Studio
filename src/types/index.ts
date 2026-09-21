@@ -811,5 +811,8 @@ export interface ImageProviderSpec {
   isMockOnly: boolean;
 }
 
+export type StyleVersion = GlobalStyleVersion;
+export type { StudioDatabase } from '../services/storageService';
+
 export * from './flowTypes';
 

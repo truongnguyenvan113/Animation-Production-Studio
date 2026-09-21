@@ -12,6 +12,11 @@ import {
 import { storageService } from '../../services/storageService';
 import { googleFlowDirector } from '../../services/googleFlowDirector';
 import { FlowPromptCompiler } from '../../services/flowPromptCompiler';
+import { FlowWorkspaceTab } from './FlowWorkspaceTab';
+import { MasterPromptTab } from './MasterPromptTab';
+import { DnaStyleTab } from './DnaStyleTab';
+import { TraceableReferencesTab } from './TraceableReferencesTab';
+import { AuditProvenanceTab } from './AuditProvenanceTab';
 import {
   Sparkles,
   ShieldCheck,
@@ -393,556 +398,65 @@ export const GoogleFlowDirectorView: React.FC<GoogleFlowDirectorViewProps> = ({
         </div>
       </div>
 
-      {/* TAB CONTENT: FLOW WORKFLOW */}
+      {/* TAB 1: ĐIỀU PHỐI SẢN XUẤT (FLOW WORKSPACE) */}
       {activeTab === 'flow' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Left Card: 3-Step Flow */}
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-indigo-600" />
-                  Quy Trình Google Flow
-                </h4>
-                <span className="text-[11px] font-mono text-slate-500">
-                  ID: {pack?.pack_id}
-                </span>
-              </div>
-
-              <div className="text-xs text-slate-600 space-y-3">
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    1
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block text-xs">Sao chép Prompt 14 phần đã khóa</strong>
-                    Prompt bao gồm đầy đủ DNA nhân vật bất biến (Kem tóc húi cua cực ngắn, Mẹ Vân v1), quy tắc 16:9 và vùng an toàn 9:16 Shorts.
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    2
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block text-xs">Mở Google Flow Studio</strong>
-                    Chuyển sang workspace sáng tạo của Google Flow và dán prompt cùng tài liệu tham chiếu đính kèm.
-                  </div>
-                </div>
-
-                <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100 flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">
-                    3
-                  </span>
-                  <div>
-                    <strong className="text-slate-900 block text-xs">Nhập Kết Quả & Kiểm Định QA</strong>
-                    Nhập tệp hình ảnh (JPEG/PNG) hoặc video (MP4) kết xuất từ Flow để lưu trữ xuất xứ và bàn giao sang QA.
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-3 flex flex-wrap gap-2">
-                <a
-                  href="https://labs.google/flow"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-sm transition-colors"
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                  Mở Google Flow Studio
-                </a>
-
-                <button
-                  type="button"
-                  onClick={() => setShowImportModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-sm transition-colors"
-                >
-                  <Upload className="w-3.5 h-3.5" />
-                  Nhập Kết Quả Flow (Import Asset)
-                </button>
-              </div>
-            </div>
-
-            {/* Right Card: Current Shot Frame & Local Asset */}
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                    <Eye className="w-4 h-4 text-emerald-600" />
-                    Khung Hình Hiện Tại Của Shot
-                  </h4>
-                  {latestAsset ? (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-200">
-                      {latestAsset.execution_mode}
-                    </span>
-                  ) : (
-                    <span className="text-[10px] font-semibold text-slate-400">Chưa có kết xuất</span>
-                  )}
-                </div>
-
-                <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200 flex items-center justify-center shadow-inner">
-                  {activeShot?.activeImageOutputUrl ? (
-                    <img
-                      src={activeShot.activeImageOutputUrl}
-                      alt={activeShot.id}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="text-center p-4 text-slate-500 text-xs">
-                      Chưa có khung hình cho shot này
-                    </div>
-                  )}
-
-                  {activeShot?.activeImageOutputUrl && (
-                    <div className="absolute top-2 left-2 flex items-center gap-1.5">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-950/80 text-white border border-white/20">
-                        {latestAsset?.execution_mode === 'LOCAL_ASSET'
-                          ? 'LOCAL DEVELOPMENT ASSET'
-                          : latestAsset?.execution_mode === 'ASSISTED_FLOW'
-                          ? 'GOOGLE FLOW IMPORTED'
-                          : 'PREVIEW'}
-                      </span>
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-500/30">
-                        {activeShot.outputMimeType?.toUpperCase() || 'JPEG'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-xs text-slate-500">
-                  Hoặc thực thi bản xem trước cục bộ:
-                </span>
-                <button
-                  type="button"
-                  onClick={handleRunLocalAsset}
-                  disabled={isExecutingLocal}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs inline-flex items-center gap-1.5 transition-colors"
-                >
-                  <Play className="w-3 h-3 text-blue-600" />
-                  {isExecutingLocal ? 'Đang nạp...' : 'Nạp Local Preview'}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* Structured Scene Brief & Production Guidance */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <Film className="w-4 h-4 text-indigo-600" />
-                  Bản Tóm Tắt Phân Cảnh (Structured Scene Brief)
-                </h4>
-                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
-                  {pack?.scene_brief?.sceneTitle || `Cảnh #${activeShot?.sceneNumber}`}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                <div>
-                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
-                    Ý đồ phân cảnh (Scene Intent)
-                  </span>
-                  <p className="text-slate-800 font-medium leading-relaxed">
-                    {pack?.scene_brief?.sceneIntent || 'Thiết lập không gian sân chơi nghệ thuật'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
-                    Trạng thái cảm xúc (Emotion)
-                  </span>
-                  <p className="text-slate-800 font-medium">
-                    {pack?.scene_brief?.emotion || activeShot?.emotion || 'Tự nhiên, ấm áp'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
-                    Ý đồ âm thanh (Sound Intent)
-                  </span>
-                  <p className="text-slate-700 leading-relaxed flex items-start gap-1.5">
-                    <Music className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
-                    <span>{pack?.scene_brief?.soundIntent || 'Âm thanh nền tự nhiên sống động'}</span>
-                  </p>
-                </div>
-                <div>
-                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
-                    Ghi chú đặc biệt (Special Notes)
-                  </span>
-                  <p className="text-slate-700 leading-relaxed">
-                    {pack?.scene_brief?.specialNotes || 'Bảo toàn liên tục đạo cụ và trang phục'}
-                  </p>
-                </div>
-              </div>
-
-              {/* Action and Dialogue summary */}
-              <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
-                <div>
-                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
-                    Diễn tiến hành động (Action)
-                  </span>
-                  <p className="text-slate-900 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed">
-                    {pack?.scene_brief?.action || activeShot?.action}
-                  </p>
-                </div>
-                {pack?.scene_brief?.dialogue && (
-                  <div>
-                    <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
-                      Thoại (Dialogue)
-                    </span>
-                    <p className="text-indigo-900 bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100 font-medium">
-                      {pack.scene_brief.dialogue}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Camera Timeline / Beats */}
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
-                  <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                    <Camera className="w-4 h-4 text-emerald-600" />
-                    Chuyển Động Camera
-                  </h4>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    {activeShot?.durationSeconds}s
-                  </span>
-                </div>
-
-                {pack?.camera_timeline && pack.camera_timeline.length > 0 ? (
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                      Camera Timeline Beats:
-                    </span>
-                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                      {pack.camera_timeline.map((beat, idx) => (
-                        <div
-                          key={idx}
-                          className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-1"
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-mono font-bold text-indigo-600 text-[11px]">
-                              {beat.timeRange}
-                            </span>
-                            {beat.movement && (
-                              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
-                                {beat.movement}
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-slate-800 text-[11px] leading-snug">{beat.description}</p>
-                          {beat.focus && (
-                            <span className="text-[10px] text-slate-500 block">
-                              Trọng tâm: {beat.focus}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-2 text-xs text-slate-600">
-                    <div><strong className="text-slate-800">Góc quay:</strong> {activeShot?.cameraAngle || 'Eye-level 0°'}</div>
-                    <div><strong className="text-slate-800">Cỡ cảnh:</strong> {activeShot?.shotType}</div>
-                    <div><strong className="text-slate-800">Khung hình:</strong> {activeShot?.framing || 'Rule of Thirds'}</div>
-                    <div><strong className="text-slate-800">Chuyển động:</strong> {activeShot?.cameraMovement || 'Static'}</div>
-                  </div>
-                )}
-              </div>
-
-              {/* Storyboard spatial blocking indicator */}
-              {pack?.references.some((r) => r.reference_type === 'STORYBOARD_REFERENCE') && (
-                <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200 text-[11px] text-emerald-900 flex items-start gap-2">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>
-                    <strong>Khóa Bố Cục Storyboard:</strong> Keyframe đã duyệt được đưa vào gói tham chiếu để khóa trục không gian và tỷ lệ nhân vật (Spatial Blocking Guide).
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Precedence Hierarchy Diagram */}
-          <div className="p-6 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
-            <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-              <Sliders className="w-4 h-4 text-indigo-600" />
-              Chuỗi Thứ Bậc Kế Thừa Cài Đặt (Effective Settings Precedence)
-            </h4>
-
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              {pack?.effective_settings.appliedHierarchy.map((lvl, i) => (
-                <React.Fragment key={lvl}>
-                  <span className="font-mono text-[11px] font-bold px-3 py-1 rounded-lg bg-white text-slate-700 border border-slate-200 shadow-2xs">
-                    {lvl}
-                  </span>
-                  {i < pack.effective_settings.appliedHierarchy.length - 1 && (
-                    <span className="text-slate-400 font-bold">&rarr;</span>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs pt-1">
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Tỷ lệ khung hình</span>
-                <span className="font-bold text-slate-800">16:9 (Chuẩn điện ảnh)</span>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Shorts-Safe Crop</span>
-                <span className="font-bold text-emerald-700">9:16 Cắt Dọc An Toàn</span>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Vùng an toàn</span>
-                <span className="font-bold text-slate-800">CENTER (33% - 66%)</span>
-              </div>
-              <div className="bg-white p-3 rounded-xl border border-slate-200">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Độ phân giải đích</span>
-                <span className="font-bold text-slate-800">{pack?.effective_settings.defaultResolution || '1376x768'}</span>
-              </div>
-            </div>
-
-            <div className="text-[11px] text-amber-800 bg-amber-50 p-3 rounded-xl border border-amber-200 flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>
-                <strong>Bảo Toàn Bất Biến:</strong> Cài đặt hệ thống chỉ chi phối tham số môi trường và bố cục. Bản sắc nhân vật (Character DNA) và phong cách nghệ thuật (Style DNA) là Source of Truth tối cao và không bao giờ bị ghi đè.
-              </span>
-            </div>
-          </div>
-        </div>
+        <FlowWorkspaceTab
+          shot={activeShot}
+          episode={activeEpisode}
+          pack={pack}
+          activeJob={activeJob}
+          latestAsset={latestAsset}
+          executionMode={executionMode}
+          isExecutingLocal={isExecutingLocal}
+          copiedPrompt={copiedPrompt}
+          onCopyPrompt={handleCopyPrompt}
+          onDownloadPack={handleDownloadPack}
+          onOpenImportModal={() => setShowImportModal(true)}
+          onRunLocalAsset={handleRunLocalAsset}
+          onSelectTab={setActiveTab}
+        />
       )}
 
-      {/* TAB 2: PROMPT */}
+
+
+      {/* TAB 2: MASTER PROMPT (15 PHẦN) */}
       {activeTab === 'prompt' && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="text-sm font-bold text-slate-900">Google Flow Master Production Prompt (15 Phần Chuẩn Hóa)</h4>
-              <p className="text-xs text-slate-500">Được biên dịch tất định từ Production Pack, kiểm soát tuyệt đối tính nhất quán hình ảnh và vùng an toàn 9:16 Shorts.</p>
-            </div>
-            <button
-              type="button"
-              onClick={handleCopyPrompt}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-sm"
-            >
-              {copiedPrompt ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copiedPrompt ? 'Đã sao chép' : 'Sao chép toàn bộ Prompt'}
-            </button>
-          </div>
-
-          <div className="p-4 rounded-xl bg-slate-900 text-slate-100 font-mono text-xs overflow-x-auto border border-slate-800 max-h-[60vh] leading-relaxed whitespace-pre-wrap selection:bg-indigo-500 selection:text-white">
-            {fullPrompt}
-          </div>
-        </div>
+        <MasterPromptTab
+          pack={pack}
+          copiedPrompt={copiedPrompt}
+          onCopyPrompt={handleCopyPrompt}
+          onDownloadPack={handleDownloadPack}
+        />
       )}
 
-      {/* TAB 3: DNA */}
+      {/* TAB 3: DNA & STYLE (SOURCE OF TRUTH) */}
       {activeTab === 'dna' && (
-        <div className="space-y-6">
-          <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-xs text-emerald-900 flex items-center gap-3">
-            <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-            <div>
-              <strong className="block text-emerald-950 font-bold">Khóa Nhận Diện Nhân Vật (Immutable Character DNA Lock)</strong>
-              Hệ thống bảo đảm mọi chỉ dẫn tạo hình cho Google Flow đều khóa cứng nhận dạng theo phiên bản duyệt (Version Snapshot).
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {pack?.characters.map((char) => (
-              <div key={char.characterId} className="p-5 rounded-2xl border border-slate-200 bg-white space-y-3 shadow-sm">
-                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                  <div className="flex items-center space-x-2">
-                    <span className="w-3 h-3 rounded-full bg-emerald-500" />
-                    <h5 className="font-bold text-sm text-slate-900">{char.displayName}</h5>
-                  </div>
-                  <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-emerald-100 text-emerald-800 border border-emerald-300">
-                    {char.versionNumber} [{char.activeVersionId}]
-                  </span>
-                </div>
-
-                <div className="text-xs space-y-2 text-slate-600">
-                  <div><strong className="text-slate-800">Kiểu tóc & Tông màu:</strong> {char.hairStyle}</div>
-                  <div><strong className="text-slate-800">Gương mặt & Ánh mắt:</strong> {char.facialFeatures}</div>
-                  <div><strong className="text-slate-800">Trang phục:</strong> {char.outfit}</div>
-                  <div><strong className="text-slate-800">Tông da:</strong> {char.skinTone}</div>
-
-                  {char.dnaConstraints.length > 0 && (
-                    <div className="pt-2 border-t border-slate-100">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-rose-700 block mb-1">
-                        Ràng buộc DNA bất biến:
-                      </span>
-                      <ul className="list-disc pl-4 space-y-0.5 text-[11px] text-slate-700">
-                        {char.dnaConstraints.map((c, i) => (
-                          <li key={i}>{c}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {pack?.style && (
-            <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-2 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                <h5 className="font-bold text-sm text-slate-900 flex items-center gap-2">
-                  <Layers className="w-4 h-4 text-indigo-600" />
-                  Khóa Phong Cách Toàn Cục (Style DNA Lock)
-                </h5>
-                <span className="text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg bg-indigo-100 text-indigo-800 border border-indigo-300">
-                  {pack.style.versionNumber} [{pack.style.styleVersionId}]
-                </span>
-              </div>
-              <div className="text-xs space-y-1.5 text-slate-600">
-                <div><strong className="text-slate-800">Tên phong cách:</strong> {pack.style.name}</div>
-                <div><strong className="text-slate-800">Quy tắc màu sắc:</strong> {pack.style.colorPaletteRule}</div>
-                <div><strong className="text-slate-800">Quy tắc ánh sáng:</strong> {pack.style.lightingRule}</div>
-              </div>
-            </div>
-          )}
-        </div>
+        <DnaStyleTab
+          shot={activeShot}
+          pack={pack}
+          db={db}
+        />
       )}
 
-      {/* TAB 4: REFS */}
+      {/* TAB 4: TRACEABLE REFERENCES */}
       {activeTab === 'refs' && (
-        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-          <div>
-            <h4 className="text-sm font-bold text-slate-900">Danh Mục Tài Liệu Tham Chiếu Có Nguồn Gốc (Traceable References)</h4>
-            <p className="text-xs text-slate-500">Mỗi tham chiếu đính kèm đều có ID định danh, kiểu tham chiếu và mục đích rõ ràng.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {pack?.references.map((ref) => (
-              <div key={ref.reference_id} className="p-3.5 rounded-xl border border-slate-200 bg-white space-y-2 shadow-2xs">
-                <div className="aspect-square rounded-lg overflow-hidden bg-slate-100 border border-slate-200">
-                  <img src={ref.thumbnailUrl || ref.url} alt={ref.reference_id} className="w-full h-full object-cover" />
-                </div>
-                <div className="text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] font-bold text-slate-500">{ref.reference_id}</span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
-                      {ref.reference_type}
-                    </span>
-                  </div>
-                  <p className="text-slate-700 font-medium text-[11px] line-clamp-2">{ref.purpose}</p>
-                  <span className="text-[10px] text-slate-400 block font-mono truncate">{ref.source}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TraceableReferencesTab
+          pack={pack}
+          shot={activeShot}
+          db={db}
+        />
       )}
 
-      {/* TAB 5: PROVENANCE */}
+      {/* TAB 5: AUDIT & PROVENANCE QA */}
       {activeTab === 'provenance' && (
-        <div className="space-y-6">
-          <div className="p-5 bg-slate-900 text-white rounded-2xl space-y-2 border border-slate-800">
-            <h4 className="text-sm font-bold flex items-center gap-2 text-indigo-300">
-              <ShieldCheck className="w-4 h-4" />
-              Bảng Đối Soát Kỹ Thuật (Technical Audit Checklist)
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-300 pt-1">
-              <div>
-                <span className="text-slate-400">Target Provider:</span> <strong className="text-white">Google Flow</strong>
-              </div>
-              <div>
-                <span className="text-slate-400">Execution Mode:</span> <strong className="text-indigo-400">{activeJob?.execution_mode || executionMode}</strong>
-              </div>
-              <div>
-                <span className="text-slate-400">External Google API Request:</span> <strong className="text-amber-400">NO (Assisted Workflow / Local Asset)</strong>
-              </div>
-              <div>
-                <span className="text-slate-400">Input Hash:</span> <code className="font-mono text-emerald-400">{activeJob?.input_hash || 'N/A'}</code>
-              </div>
-              <div>
-                <span className="text-slate-400">Production Pack ID:</span> <code className="font-mono text-slate-300">{pack?.pack_id}</code>
-              </div>
-              <div>
-                <span className="text-slate-400">Canon Version:</span> <strong className="text-white">Episode Canon v{pack?.canon_snapshot.canonVersion}</strong>
-              </div>
-            </div>
-          </div>
-
-          {latestAsset ? (
-            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h5 className="font-bold text-sm text-slate-900">Hồ Sơ Nguồn Gốc Asset (Asset Provenance)</h5>
-                <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                  latestAsset.qa_status === 'PASSED'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : latestAsset.qa_status === 'FLAGGED'
-                    ? 'bg-amber-100 text-amber-800'
-                    : latestAsset.qa_status === 'REJECTED'
-                    ? 'bg-rose-100 text-rose-800'
-                    : 'bg-blue-100 text-blue-800'
-                }`}>
-                  QA: {latestAsset.qa_status}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Asset ID</span>
-                  <span className="font-mono font-bold text-slate-800">{latestAsset.asset_id}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Định dạng MIME</span>
-                  <span className="font-mono font-bold text-slate-800">{latestAsset.mimeType}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Kích thước raster</span>
-                  <span className="font-mono font-bold text-slate-800">{latestAsset.width} x {latestAsset.height} px</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Dung lượng tệp</span>
-                  <span className="font-mono font-bold text-slate-800">{(latestAsset.fileSize / 1024).toFixed(1)} KB</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Thời gian nạp</span>
-                  <span className="text-slate-700">{new Date(latestAsset.created_at).toLocaleString()}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px]">Xác thực Real Google API</span>
-                  <span className="font-bold text-slate-700">
-                    {latestAsset.isRealGoogleExecution ? 'Có (Authenticated)' : 'Không (Assisted / Local)'}
-                  </span>
-                </div>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 flex items-center justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    googleFlowDirector.updateQAStatus(latestAsset.asset_id, 'PASSED', 'Đạt chuẩn hình ảnh sản xuất.');
-                    setDb(storageService.getDatabase());
-                  }}
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  Phê Duyệt QA (Pass)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    googleFlowDirector.updateQAStatus(latestAsset.asset_id, 'FLAGGED', 'Cần kiểm tra lại biểu cảm.');
-                    setDb(storageService.getDatabase());
-                  }}
-                  className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1.5"
-                >
-                  <AlertTriangle className="w-4 h-4" />
-                  Gắn Cờ (Flag)
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-500">
-              Chưa có Asset nào được nhập hoặc kết xuất cho shot này.
-            </div>
-          )}
-        </div>
+        <AuditProvenanceTab
+          shot={activeShot}
+          pack={pack}
+          activeJob={activeJob}
+          latestAsset={latestAsset}
+          db={db}
+          onRefresh={() => setDb(storageService.getDatabase())}
+        />
       )}
 
       {/* ASSET IMPORT MODAL */}

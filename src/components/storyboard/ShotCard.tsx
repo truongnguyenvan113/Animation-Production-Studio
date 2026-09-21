@@ -5,6 +5,7 @@ import {
   CharacterVersion,
 } from '../../types';
 import { CharacterReferenceService } from '../../services/characterReferenceService';
+import { CharacterAvatar } from '../shared/CharacterAvatar';
 import {
   Camera,
   Clock,
@@ -289,19 +290,20 @@ export const ShotCard: React.FC<ShotCardProps> = ({
               return (
                 <div
                   key={charId}
-                  className="inline-flex items-center text-[11px] bg-emerald-50 border border-emerald-200 text-emerald-900 px-2 py-0.5 rounded font-mono"
+                  className="inline-flex items-center text-[11px] bg-emerald-50 border border-emerald-200 text-emerald-900 px-2 py-1 rounded-lg font-mono gap-1.5"
                   title={`Character DNA Snapshot: ${char?.displayName || charId} locked to ${versionId}${primaryRef ? ` | Ref: ${primaryRef.storagePath}` : ''}`}
                 >
-                  <span className="font-sans font-semibold mr-1">
+                  <CharacterAvatar characterId={charId} versionId={versionId} size="xs" className="shrink-0 rounded-md" />
+                  <span className="font-sans font-semibold">
                     {char?.displayName || charId}:
                   </span>
-                  <span className="text-emerald-700">
+                  <span className="text-emerald-700 font-bold">
                     {ver ? `v${ver.version}` : versionId || 'locked'}
                   </span>
-                  <Lock className="w-2.5 h-2.5 ml-1 text-emerald-600" />
+                  <Lock className="w-2.5 h-2.5 text-emerald-600 shrink-0" />
                   {primaryRef && (
                     <span
-                      className="ml-1 text-[9px] bg-amber-100 text-amber-900 border border-amber-300 px-1 rounded flex items-center gap-0.5 font-sans capitalize"
+                      className="text-[9px] bg-amber-100 text-amber-900 border border-amber-300 px-1 rounded flex items-center gap-0.5 font-sans capitalize"
                       title={`Resolved Reference: ${primaryRef.storagePath}`}
                     >
                       <ImageIcon className="w-2 h-2 text-amber-700" />

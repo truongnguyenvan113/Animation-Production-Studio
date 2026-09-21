@@ -42,7 +42,7 @@ export const CharacterCard: React.FC<CharacterCardProps> = ({
         {/* Top bar with role & version pill */}
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex items-center gap-3">
-            <CharacterAvatar characterId={character.id} size="xl" />
+            <CharacterAvatar characterId={character.id} versionId={activeVersion?.id} size="xl" />
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold text-white tracking-tight">

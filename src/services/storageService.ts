@@ -179,7 +179,16 @@ export class StorageService {
               // Filter out references pointing to non-existent versions or characters
               parsed.characterReferences = parsed.characterReferences.filter(
                 (ref: CharacterReference) => ref && ref.id && validCharIds.has(ref.characterId) && validVersionIds.has(ref.characterVersionId)
-              );
+              ).map((ref: CharacterReference) => {
+                if (ref.id === 'ref_pi_front' && (!ref.image || ref.image === 'pi_front')) {
+                  return {
+                    ...ref,
+                    image: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+                    thumbnail: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+                  };
+                }
+                return ref;
+              });
 
               const existingRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
 

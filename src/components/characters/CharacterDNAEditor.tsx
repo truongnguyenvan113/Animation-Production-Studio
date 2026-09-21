@@ -158,7 +158,7 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
             <ArrowLeft className="w-5 h-5" />
           </button>
 
-          <CharacterAvatar characterId={character.id} size="lg" />
+          <CharacterAvatar characterId={character.id} versionId={formData.id} size="lg" />
 
           <div>
             <div className="flex items-center gap-2">

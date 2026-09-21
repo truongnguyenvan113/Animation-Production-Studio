@@ -93,6 +93,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
               >
                 <div className="flex items-start justify-between gap-3 mb-2">
                   <div className="flex items-center gap-2.5">
+                    <CharacterAvatar characterId={character.id} versionId={ver.id} size="sm" />
                     <span className="text-base font-mono font-bold text-amber-400">
                       {ver.version}
                     </span>
