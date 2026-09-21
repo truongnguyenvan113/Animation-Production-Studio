@@ -74,9 +74,11 @@ export class GoogleFlowDirector {
     executionMode: ProviderExecutionMode = 'ASSISTED_FLOW'
   ): FlowGenerationJob {
     const prompt = FlowPromptCompiler.compile(pack);
-    const inputHash = simpleHash(
-      `${pack.pack_id}_${prompt}_${pack.characters.map((c) => c.activeVersionId).join(',')}_${pack.style.styleVersionId}`
-    );
+    const inputHash =
+      pack.canonical_input_hash ||
+      simpleHash(
+        `${pack.pack_id}_${prompt}_${pack.characters.map((c) => c.activeVersionId).join(',')}_${pack.style.styleVersionId}`
+      );
 
     const jobId = `flow_job_${pack.shot_id}_${Date.now()}`;
     const initialStatus = executionMode === 'LOCAL_ASSET' ? 'READY' : 'WAITING_FOR_FLOW';

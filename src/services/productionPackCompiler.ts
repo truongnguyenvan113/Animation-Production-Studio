@@ -16,11 +16,49 @@ import {
   TraceableReference,
   ProviderExecutionMode,
   SceneBrief,
+  ProjectReference,
 } from '../types';
 import { storageService } from './storageService';
 import { systemSettingsService } from './systemSettingsService';
 import { CharacterService } from './characterService';
-import { StyleService } from './styleService';
+import { computeDeterministicPayloadHash } from './imageGenerationService';
+
+/**
+ * Resolves the real version or content-addressable checksum for a reference.
+ * Strictly prevents hardcoded static '1.0' placeholders.
+ */
+function resolveReferenceVersion(
+  ref: {
+    id: string;
+    version?: string;
+    characterVersionId?: string;
+    styleVersionId?: string;
+    outputAssetId?: string;
+    jobId?: string;
+    storagePath?: string;
+    uri?: string;
+    url?: string;
+  },
+  knownVersion?: string
+): string {
+  if (ref.characterVersionId) return ref.characterVersionId;
+  if (ref.styleVersionId) return ref.styleVersionId;
+  if (ref.outputAssetId) return ref.outputAssetId;
+  if (ref.jobId) return ref.jobId;
+  if (knownVersion && knownVersion !== '1.0' && knownVersion !== 'v1.0') {
+    return knownVersion;
+  }
+  if (ref.version && ref.version !== '1.0' && ref.version !== 'v1.0') {
+    return ref.version;
+  }
+  if (knownVersion) return knownVersion;
+  // Compute deterministic content-addressable checksum from reference identity and path
+  const hash = computeDeterministicPayloadHash({
+    id: ref.id,
+    path: ref.storagePath || ref.uri || ref.url || '',
+  });
+  return `chk_${hash.slice(0, 8)}`;
+}
 
 export class ProductionPackCompiler {
   /**
@@ -85,17 +123,37 @@ export class ProductionPackCompiler {
 
     for (const charId of charIds) {
       const char = db.characters.find((c) => c.id === charId);
-      if (!char) continue;
+      if (!char) {
+        throw new Error(`PRODUCTION_PACK_INVALID: Character "${charId}" not found in database.`);
+      }
 
-      // Resolve locked version ID from Shot (NEVER rely solely on activeVersionId if shot or episode has snapshot)
+      // 1. Resolve locked version ID ONLY from explicit locked Shot or Episode snapshot
       const lockedVersionId =
         shot.characterDnaReferences?.[charId] ||
-        episodeCharSnapshots[charId] ||
-        char.activeVersionId;
+        episodeCharSnapshots[charId];
 
-      const charVersion: CharacterVersion | undefined = db.characterVersions.find(
-        (v) => v.id === lockedVersionId || (v.characterId === charId && v.version === 'v1.0')
-      );
+      let charVersion: CharacterVersion | undefined;
+
+      if (lockedVersionId) {
+        charVersion = db.characterVersions.find(
+          (v) => v.id === lockedVersionId && v.characterId === charId
+        );
+        if (!charVersion) {
+          throw new Error(
+            `PRODUCTION_PACK_INVALID: Locked CharacterVersion "${lockedVersionId}" for character "${charId}" not found in database.`
+          );
+        }
+      } else {
+        // If no snapshot exists, use the canonical baseline version only if guaranteed by data model
+        charVersion = db.characterVersions.find(
+          (v) => v.characterId === charId && v.version === 'v1.0'
+        );
+        if (!charVersion) {
+          throw new Error(
+            `PRODUCTION_PACK_INVALID: No explicit snapshot found for character "${charId}" in shot or episode, and canonical baseline "v1.0" does not exist.`
+          );
+        }
+      }
 
       // Character-specific DNA Constraints derived dynamically from CharacterVersion
       const dnaConstraints: string[] = [];
@@ -125,7 +183,7 @@ export class ProductionPackCompiler {
 
       // Primary reference asset URL if available
       let primaryRefUrl: string | undefined;
-      const primaryRef = CharacterService.getPrimaryReference(charVersion?.id || lockedVersionId);
+      const primaryRef = CharacterService.getPrimaryReference(charVersion.id);
       if (primaryRef) {
         primaryRefUrl = primaryRef.image;
       }
@@ -133,30 +191,46 @@ export class ProductionPackCompiler {
       charactersData.push({
         characterId: char.id,
         displayName: char.displayName || char.vietnameseName,
-        activeVersionId: lockedVersionId,
-        versionNumber: charVersion?.version || 'v1.0',
+        activeVersionId: charVersion.id, // Strictly locked snapshot/baseline version ID
+        versionNumber: charVersion.version,
         dnaConstraints,
-        outfit: charVersion?.clothing || 'Trang phục chuẩn theo Canon Version',
-        facialFeatures: `${charVersion?.faceShape || 'Cân đối'}, mắt: ${charVersion?.eyes || 'sáng to'}, biểu cảm: ${charVersion?.facialExpression || 'tươi vui'}`,
-        hairStyle: charVersion?.hair || 'Kiểu tóc chuẩn theo Canon Version',
-        skinTone: charVersion?.skinTone || 'Trắng sáng tự nhiên Đông Nam Á',
+        outfit: charVersion.clothing || 'Trang phục chuẩn theo Canon Version',
+        facialFeatures: `${charVersion.faceShape || 'Cân đối'}, mắt: ${charVersion.eyes || 'sáng to'}, biểu cảm: ${charVersion.facialExpression || 'tươi vui'}`,
+        hairStyle: charVersion.hair || 'Kiểu tóc chuẩn theo Canon Version',
+        skinTone: charVersion.skinTone || 'Trắng sáng tự nhiên Đông Nam Á',
         primaryReferenceAssetUrl: primaryRefUrl,
       });
     }
 
-    // 5. Resolve Style DNA (Strictly Source of Truth)
-    const styleVersionId =
+    // 5. Resolve Style DNA (Strictly Source of Truth: Shot snapshot -> Episode snapshot -> Canonical Baseline v1.0)
+    const lockedStyleVersionId =
       shot.styleVersionSnapshotId ||
-      episode?.styleVersionSnapshotId ||
-      'style_ver_1_0';
+      episode?.styleVersionSnapshotId;
 
-    const styleVer: GlobalStyleVersion | undefined =
-      db.globalStyleVersions?.find((s) => s.id === styleVersionId) ||
-      StyleService.getActiveStyleVersion();
+    let styleVer: GlobalStyleVersion | undefined;
+
+    if (lockedStyleVersionId) {
+      styleVer = db.globalStyleVersions?.find((s) => s.id === lockedStyleVersionId);
+      if (!styleVer) {
+        throw new Error(
+          `PRODUCTION_PACK_INVALID: Locked StyleVersion "${lockedStyleVersionId}" not found in database.`
+        );
+      }
+    } else {
+      // If no snapshot exists, use canonical baseline version guaranteed by data model
+      styleVer = db.globalStyleVersions?.find(
+        (s) => s.id === 'style_ver_1_0' || s.version === 'v1.0'
+      );
+      if (!styleVer) {
+        throw new Error(
+          'PRODUCTION_PACK_INVALID: No explicit style snapshot found in shot or episode, and canonical baseline "v1.0" does not exist.'
+        );
+      }
+    }
 
     const styleData: ProductionPack['style'] = {
-      styleVersionId: styleVer?.id || 'style_ver_1_0',
-      versionNumber: styleVer?.version || 'v1.0',
+      styleVersionId: styleVer.id,
+      versionNumber: styleVer.version || 'v1.0',
       name: (styleVer as any)?.name || styleVer?.animationStyle || 'Default 3D CGI Animation',
       positivePrompt:
         styleVer?.globalPrompt ||
@@ -305,10 +379,15 @@ export class ProductionPackCompiler {
 
     // A. Storyboard Reference (Keyframe Spatial Blocking Guide)
     if (shot.activeImageOutputUrl) {
+      const sbVersion =
+        shot.activeImageJobId ||
+        shot.activeOutputAssetId ||
+        `chk_${computeDeterministicPayloadHash({ shotId: shot.id, url: shot.activeImageOutputUrl }).slice(0, 8)}`;
+
       references.push({
         reference_id: shot.activeOutputAssetId || `ref_sb_${shot.id}`,
         reference_type: 'STORYBOARD_REFERENCE',
-        version: shot.activeImageJobId || 'v1.0',
+        version: sbVersion,
         source: `Storyboard/${foundStoryboard?.id || 'sb'}/Shot/${shot.id}`,
         purpose:
           'Tham chiếu Storyboard Keyframe đã duyệt: Sử dụng làm hướng dẫn bố cục không gian, tỷ lệ và chặn vị trí nhân vật (spatial blocking guide)',
@@ -339,60 +418,146 @@ export class ProductionPackCompiler {
       }
     }
 
-    // C. Project references (Style, Location, Prop, Continuity)
+    // C. Project references (Style, Location, Prop, Continuity) - Deterministic Filtering
     if (db.projectReferences) {
       for (const pr of db.projectReferences) {
         if (pr.type === 'style') {
-          references.push({
-            reference_id: pr.id,
-            reference_type: 'STYLE',
-            version: '1.0',
-            source: `ProjectReference/${pr.id}`,
-            purpose: `Tham chiếu phong cách mỹ thuật: ${pr.name}`,
-            url: pr.uri,
-            thumbnailUrl: pr.thumbnail || pr.uri,
-            isLocked: true,
-          });
+          // Relevant only if matches the locked style version and episode
+          const isStyleMatch =
+            !pr.styleVersionId || pr.styleVersionId === styleData.styleVersionId;
+          const isEpisodeMatch = !pr.episodeId || pr.episodeId === episodeId;
+          if (isStyleMatch && isEpisodeMatch) {
+            references.push({
+              reference_id: pr.id,
+              reference_type: 'STYLE',
+              version: resolveReferenceVersion(pr, styleData.versionNumber),
+              source: `ProjectReference/${pr.id}`,
+              purpose: `Tham chiếu phong cách mỹ thuật: ${pr.name}`,
+              url: pr.uri,
+              thumbnailUrl: pr.thumbnail || pr.uri,
+              isLocked: true,
+            });
+          }
         } else if (pr.type === 'location') {
-          references.push({
-            reference_id: pr.id,
-            reference_type: 'LOCATION',
-            version: '1.0',
-            source: `ProjectReference/${pr.id}`,
-            purpose: `Tham chiếu bối cảnh không gian: ${pr.name}`,
-            url: pr.uri,
-            thumbnailUrl: pr.thumbnail || pr.uri,
-            isLocked: true,
-          });
+          // Relevant only if matches current shot/scene location and current episode
+          const isEpisodeMatch = !pr.episodeId || pr.episodeId === episodeId;
+          const isShotMatch = !pr.shotId || pr.shotId === shot.id;
+          const shotLocation = (
+            shot.location ||
+            foundScene?.location ||
+            episodeScene?.location ||
+            ''
+          ).toLowerCase();
+          const prTags = (pr.tags || []).map((t) => t.toLowerCase());
+          const isLocationMatch =
+            !pr.episodeId ||
+            shotLocation.includes(pr.name.toLowerCase()) ||
+            pr.name.toLowerCase().includes(shotLocation) ||
+            prTags.some(
+              (t) =>
+                shotLocation.includes(t) ||
+                t.includes('location') ||
+                t.includes('living room') ||
+                t.includes('studio') ||
+                t.includes('phòng khách')
+            );
+
+          if (isEpisodeMatch && isShotMatch && isLocationMatch) {
+            references.push({
+              reference_id: pr.id,
+              reference_type: 'LOCATION',
+              version: resolveReferenceVersion(pr),
+              source: `ProjectReference/${pr.id}`,
+              purpose: `Tham chiếu bối cảnh không gian: ${pr.name}`,
+              url: pr.uri,
+              thumbnailUrl: pr.thumbnail || pr.uri,
+              isLocked: true,
+            });
+          }
         } else if (pr.type === 'prop') {
-          references.push({
-            reference_id: pr.id,
-            reference_type: 'PROP',
-            version: '1.0',
-            source: `ProjectReference/${pr.id}`,
-            purpose: `Tham chiếu đạo cụ sản xuất: ${pr.name}`,
-            url: pr.uri,
-            thumbnailUrl: pr.thumbnail || pr.uri,
-            isLocked: true,
-          });
+          // Relevant only if matches props specified for this shot or continuity
+          const currentProps = [
+            ...(continuity.props || []),
+            ...(shot.continuityNotes?.propContinuity
+              ? [shot.continuityNotes.propContinuity]
+              : []),
+          ].map((p) => p.toLowerCase());
+
+          const isEpisodeMatch = !pr.episodeId || pr.episodeId === episodeId;
+          const isShotMatch = !pr.shotId || pr.shotId === shot.id;
+          const prTags = (pr.tags || []).map((t) => t.toLowerCase());
+
+          const isPropMatch =
+            (pr.shotId && pr.shotId === shot.id) ||
+            currentProps.some(
+              (cp) =>
+                cp.includes(pr.name.toLowerCase()) ||
+                pr.name.toLowerCase().includes(cp) ||
+                prTags.some((t) => cp.includes(t))
+            );
+
+          if (isEpisodeMatch && isShotMatch && isPropMatch) {
+            references.push({
+              reference_id: pr.id,
+              reference_type: 'PROP',
+              version: resolveReferenceVersion(pr),
+              source: `ProjectReference/${pr.id}`,
+              purpose: `Tham chiếu đạo cụ sản xuất: ${pr.name}`,
+              url: pr.uri,
+              thumbnailUrl: pr.thumbnail || pr.uri,
+              isLocked: true,
+            });
+          }
         } else if (
           pr.tags?.includes('continuity') ||
           (pr.shotId && pr.shotId !== shot.id && pr.episodeId === episodeId)
         ) {
-          references.push({
-            reference_id: pr.id,
-            reference_type: 'CONTINUITY',
-            version: '1.0',
-            source: `ProjectReference/${pr.id}`,
-            purpose: `Tham chiếu tính liên tục cảnh phim: ${pr.name}`,
-            url: pr.uri,
-            thumbnailUrl: pr.thumbnail || pr.uri,
-            shotId: pr.shotId,
-            isLocked: true,
-          });
+          // Relevant only if belongs to current episode continuity and linked sequence
+          const isEpisodeMatch = pr.episodeId === episodeId;
+          const isPreviousShotMatch =
+            continuity.previousShotId && pr.shotId === continuity.previousShotId;
+          const isSceneMatch =
+            foundScene?.shots?.some((s) => s.id === pr.shotId) &&
+            pr.shotId !== shot.id;
+
+          if (
+            isEpisodeMatch &&
+            (isPreviousShotMatch || isSceneMatch || pr.tags?.includes('continuity'))
+          ) {
+            references.push({
+              reference_id: pr.id,
+              reference_type: 'CONTINUITY',
+              version: resolveReferenceVersion(pr),
+              source: `ProjectReference/${pr.id}`,
+              purpose: `Tham chiếu tính liên tục cảnh phim: ${pr.name}`,
+              url: pr.uri,
+              thumbnailUrl: pr.thumbnail || pr.uri,
+              shotId: pr.shotId,
+              isLocked: true,
+            });
+          }
         }
       }
     }
+
+    // Deterministically sort all references by canonical type order, then stable reference_id
+    const REFERENCE_TYPE_ORDER: Record<string, number> = {
+      STORYBOARD_REFERENCE: 1,
+      CHARACTER: 2,
+      STYLE: 3,
+      LOCATION: 4,
+      PROP: 5,
+      CONTINUITY: 6,
+    };
+
+    references.sort((a, b) => {
+      const orderA = REFERENCE_TYPE_ORDER[a.reference_type] ?? 99;
+      const orderB = REFERENCE_TYPE_ORDER[b.reference_type] ?? 99;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+      return a.reference_id.localeCompare(b.reference_id);
+    });
 
     // 9. Negative Constraints Compilation
     const negativeConstraints = [
@@ -419,10 +584,75 @@ export class ProductionPackCompiler {
       ],
     };
 
-    // 11. Assemble ProductionPack
-    const packId = `pack_${shot.id}_${Date.now()}`;
+    // 11. Derive Deterministic Production Pack Identity from Immutable Inputs
+    const canonicalPayload = {
+      canonVersion: (episode as any)?.version ? String((episode as any).version) : '1.0',
+      episodeId,
+      sceneId: foundScene?.id || shot.storyboardSceneId,
+      shotId: shot.id,
+      sceneNumber: foundScene?.sceneNumber || shot.sceneNumber,
+      shotNumber: shot.shotNumber,
+      sceneCanon: {
+        location: foundScene?.location || shot.location || 'Phòng khách gia đình Pi Kem',
+        lighting: foundScene?.lighting || shot.lighting || 'Ánh ban mai chiếu xiên ấm áp',
+        timeOfDay: foundScene?.timeOfDay || shot.timeOfDay || 'Buổi sáng',
+        weather: 'Trời nắng trong veo',
+      },
+      effectiveSettings: {
+        aspectRatio: effectiveSettings.aspectRatio,
+        safeArea: effectiveSettings.safeArea,
+        executionMode: effectiveSettings.executionMode,
+        targetProvider: effectiveSettings.targetProvider,
+        enforceDnaLock: effectiveSettings.enforceDnaLock,
+        enforceStyleLock: effectiveSettings.enforceStyleLock,
+      },
+      shot: {
+        action: shot.action,
+        dialogue: shot.dialogue,
+        emotion: shot.emotion,
+        shotType: shot.shotType,
+        framing: shot.framing,
+        cameraMovement: shot.cameraMovement,
+        cameraAngle: shot.cameraAngle,
+        cameraDirection: shot.cameraDirection,
+        lighting: shot.lighting,
+        location: shot.location,
+        characterIds: [...(shot.characterIds || [])].sort(),
+      },
+      characters: charactersData
+        .map((c) => ({
+          characterId: c.characterId,
+          lockedVersionId: c.activeVersionId,
+          versionNumber: c.versionNumber,
+        }))
+        .sort((a, b) => a.characterId.localeCompare(b.characterId)),
+      style: {
+        styleVersionId: styleData.styleVersionId,
+        versionNumber: styleData.versionNumber,
+      },
+      continuity: {
+        allowedCharacters: [...(continuity.allowedCharacters || [])].sort(),
+        excludedCharacters: [...(continuity.excludedCharacters || [])].sort(),
+        props: [...(continuity.props || [])].sort(),
+        location: continuity.location,
+        environment: continuity.environment,
+        lighting: continuity.lighting,
+      },
+      references: references.map((r) => ({
+        id: r.reference_id,
+        type: r.reference_type,
+        version: r.version,
+        url: r.url,
+      })),
+      negativeConstraints,
+    };
+
+    const canonicalInputHash = computeDeterministicPayloadHash(canonicalPayload);
+    const packId = `pack_${shot.id}_${canonicalInputHash.slice(0, 12)}`;
+
     const pack: ProductionPack = {
       pack_id: packId,
+      canonical_input_hash: canonicalInputHash,
       project_id: (episode as any)?.projectId || 'proj_pikem_s01',
       episode_id: episodeId,
       scene_id: foundScene?.id || shot.storyboardSceneId,

@@ -78,6 +78,7 @@ export interface EffectiveSettingsSnapshot {
 
 export interface ProductionPack {
   pack_id: string;
+  canonical_input_hash: string;
   project_id: string;
   episode_id: string;
   scene_id: string;
