@@ -65,7 +65,9 @@ export class ImageAdapterRegistry {
   public getAdapter(providerId: ImageGenerationProvider): ImageProviderAdapter {
     const adapter = this.adapters.get(providerId);
     if (!adapter) {
-      // Fallback to Mock Studio if unknown provider
+      if (providerId !== 'mock-studio') {
+        throw new Error(`REAL_PROVIDER_UNAVAILABLE: Image provider adapter for "${providerId}" is not registered.`);
+      }
       return this.adapters.get('mock-studio')!;
     }
     return adapter;

@@ -81,8 +81,8 @@ export class GeminiImagenAdapter extends BaseImageProviderAdapter {
         timestamp: new Date().toISOString(),
         status: 'failed',
         error: isRateLimit
-          ? `Quota/Rate limit exceeded for [${model}]: ${err.message || 'Rate limit reached'}. Consider switching to ${alt.model} or Mock Studio.`
-          : `Imagen 3 Provider Error: ${err.message || 'Unknown generation error'}`,
+          ? `REAL_PROVIDER_UNAVAILABLE: Quota/Rate limit exceeded for [${model}]: ${err.message || 'Rate limit reached'}. Consider switching to ${alt.model}.`
+          : `REAL_PROVIDER_UNAVAILABLE: Imagen 3 Provider Error: ${err.message || 'Unknown generation error'}`,
         rateLimitInfo: isRateLimit
           ? {
               isRateLimited: true,

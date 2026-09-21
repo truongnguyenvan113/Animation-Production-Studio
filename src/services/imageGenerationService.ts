@@ -555,8 +555,19 @@ export class ImageGenerationService {
     job.error = null;
 
     if (result.outputAsset) {
-      job.outputAssets = [result.outputAsset, ...(job.outputAssets || [])];
       const isMock = isMockOutput(result.outputAsset);
+      // STRICT MOCK ISOLATION: A real provider job must never succeed with a Mock asset
+      if (job.provider !== 'mock-studio' && isMock) {
+        job.status = 'failed';
+        job.progress = 65;
+        job.error = 'REAL_PROVIDER_UNAVAILABLE: Provider returned a Mock SVG asset for a real-image job request.';
+        this.updateShotStatus(job.storyboardId, job.shotId, 'Flagged');
+        db.imageGenerationJobs[jobIndex] = job;
+        this.storage.saveDatabase({ imageGenerationJobs: [...db.imageGenerationJobs] });
+        return job;
+      }
+
+      job.outputAssets = [result.outputAsset, ...(job.outputAssets || [])];
       const isProdValid = validateProductionImageOutput(result.outputAsset).isValid;
       this.updateShotStatus(
         job.storyboardId,

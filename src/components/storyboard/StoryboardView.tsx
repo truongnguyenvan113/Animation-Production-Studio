@@ -7,6 +7,7 @@ import {
   Character,
   CharacterVersion,
   GlobalStyleVersion,
+  ImageGenerationProvider,
 } from '../../types';
 import { StoryboardService, PromptPreviewResult } from '../../services/storyboardService';
 import { ImageGenerationService } from '../../services/imageGenerationService';
@@ -110,11 +111,13 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
   const handleGenerateShotImage = async (shot: Shot) => {
     if (!storyboard) return;
     try {
+      // If shot is currently mock, 'Tạo Ảnh Thật (Real Image)' requests gemini-imagen
+      const targetProvider: ImageGenerationProvider = shot.isMockOutput ? 'gemini-imagen' : 'mock-studio';
       const job = imageGenService.createJobFromShot(
         shot,
         selectedEpisodeId,
         storyboard.id,
-        'mock-studio'
+        targetProvider
       );
       await imageGenService.runJob(job.id);
       setDb(storage.getDatabase());
