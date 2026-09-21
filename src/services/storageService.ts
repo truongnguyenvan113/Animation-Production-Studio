@@ -183,15 +183,25 @@ export class StorageService {
 
               const existingRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
 
-              // Clean broken reference IDs from versions
+              // Clean broken reference IDs from versions and ensure Master DNA outfit consistency
               parsed.characterVersions = parsed.characterVersions.map((ver: CharacterVersion) => {
                 const validRefIds = (ver.referenceAssetIds || []).filter((id: string) => existingRefIds.has(id));
                 let primaryId = ver.primaryReferenceAssetId;
                 if (primaryId && !existingRefIds.has(primaryId)) {
                   primaryId = validRefIds[0];
                 }
+
+                // Authoritative Master DNA Outfit Synchronization for Canonical v1.0 Locks
+                let clothing = ver.clothing;
+                if (ver.id === 'ver_ethan_v1') {
+                  clothing = 'Light blue polo shirt and grey shorts';
+                } else if (ver.id === 'ver_emma_v1') {
+                  clothing = 'PURPLE FLORAL COLLARED SHIRT and blue jeans';
+                }
+
                 return {
                   ...ver,
+                  clothing,
                   referenceAssetIds: validRefIds,
                   primaryReferenceAssetId: primaryId,
                 };

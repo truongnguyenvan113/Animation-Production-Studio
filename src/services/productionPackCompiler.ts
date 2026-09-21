@@ -17,6 +17,7 @@ import {
   ProviderExecutionMode,
   SceneBrief,
   ProjectReference,
+  CameraTimelineEntry,
 } from '../types';
 import { storageService } from './storageService';
 import { systemSettingsService } from './systemSettingsService';
@@ -587,6 +588,22 @@ export class ProductionPackCompiler {
       ],
     };
 
+    // 10.5 Camera Timeline Resolution & Normalization (Aligned with Master Prompt Sections 8 & 15)
+    const resolvedCameraTimeline: CameraTimelineEntry[] =
+      shot.cameraTimeline && shot.cameraTimeline.length > 0
+        ? shot.cameraTimeline
+        : sceneBrief?.cameraTimeline && sceneBrief.cameraTimeline.length > 0
+        ? sceneBrief.cameraTimeline
+        : [];
+
+    const normalizedCameraTimeline: CameraTimelineEntry[] = resolvedCameraTimeline.map((beat) => ({
+      timeRange: (beat.timeRange || '').trim(),
+      description: (beat.description || '').trim(),
+      movement: beat.movement ? beat.movement.trim() : undefined,
+      framing: beat.framing ? beat.framing.trim() : undefined,
+      focus: beat.focus ? beat.focus.trim() : undefined,
+    }));
+
     // 11. Derive Deterministic Production Pack Identity from Immutable Inputs
     const canonicalPayload = {
       canonVersion: (episode as any)?.version ? String((episode as any).version) : '1.0',
@@ -622,6 +639,13 @@ export class ProductionPackCompiler {
         location: shot.location,
         characterIds: [...(shot.characterIds || [])].sort(),
       },
+      cameraTimeline: normalizedCameraTimeline.map((b) => ({
+        timeRange: b.timeRange,
+        description: b.description,
+        movement: b.movement || '',
+        framing: b.framing || '',
+        focus: b.focus || '',
+      })),
       characters: charactersData
         .map((c) => ({
           characterId: c.characterId,
@@ -677,9 +701,7 @@ export class ProductionPackCompiler {
       shot,
       scene_brief: sceneBrief,
       camera_timeline:
-        shot.cameraTimeline && shot.cameraTimeline.length > 0
-          ? shot.cameraTimeline
-          : undefined,
+        normalizedCameraTimeline.length > 0 ? normalizedCameraTimeline : undefined,
       characters: charactersData,
       style: styleData,
       continuity,
