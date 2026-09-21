@@ -535,6 +535,8 @@ export class ImageGenerationService {
     job.completedAt = result.timestamp;
     job.executionDurationMs = result.executionDurationMs || Date.now() - startTime;
     job.rateLimitInfo = result.rateLimitInfo;
+    job.executionMode = result.outputAsset?.executionMode || (job.provider === 'mock-studio' ? 'SIMULATED' : 'LOCAL_ASSET');
+    job.isRealGoogleExecution = false;
 
     if (result.status === 'failed') {
       job.status = 'failed';

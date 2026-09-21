@@ -1,3 +1,5 @@
+import { ProviderExecutionMode } from './flowTypes';
+
 export type ReferenceType =
   | 'front'
   | '3/4'
@@ -494,6 +496,8 @@ export interface ImageGenerationOutputAsset {
   createdAt: string;
   isProductionReady?: boolean;
   isMock?: boolean;
+  executionMode?: ProviderExecutionMode;
+  isRealGoogleExecution?: boolean;
 }
 
 export interface ImageGenerationPromptBreakdown {
@@ -652,6 +656,8 @@ export interface ImageGenerationJob {
 
   // PROVIDER & EXECUTION
   provider: ImageGenerationProvider;
+  executionMode?: ProviderExecutionMode;
+  isRealGoogleExecution?: boolean;
   modelName?: string;
   status: ImageGenerationJobStatus;
   progress: number; // 0 to 100
@@ -792,4 +798,6 @@ export interface ImageProviderSpec {
   promptSyntax: string;
   isMockOnly: boolean;
 }
+
+export * from './flowTypes';
 

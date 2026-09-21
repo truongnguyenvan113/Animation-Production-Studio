@@ -24,6 +24,8 @@ import { StoryboardView } from './components/storyboard/StoryboardView';
 import { ImageGenerationQueueView } from './components/generation/ImageGenerationQueueView';
 import { ProjectReferenceLibraryView } from './components/references/ProjectReferenceLibraryView';
 import { ProviderAdaptersView } from './components/providers/ProviderAdaptersView';
+import { GoogleFlowDirectorView } from './components/flow/GoogleFlowDirectorView';
+import { SystemSettingsView } from './components/settings/SystemSettingsView';
 import { BackupModal } from './components/shared/BackupModal';
 
 export default function App() {
@@ -55,6 +57,8 @@ export default function App() {
     } else if (view === 'episodes' && id) {
       setSelectedSeasonId(id);
     } else if (view === 'storyboard' && id) {
+      setSelectedEpisodeId(id);
+    } else if (view === 'google-flow-director' && id) {
       setSelectedEpisodeId(id);
     }
   };
@@ -207,6 +211,21 @@ export default function App() {
 
           {currentView === 'providers' && (
             <ProviderAdaptersView language={language} />
+          )}
+
+          {currentView === 'google-flow-director' && (
+            <GoogleFlowDirectorView
+              language={language}
+              initialEpisodeId={selectedEpisodeId}
+              onNavigateToStoryboard={(epId) => {
+                if (epId) setSelectedEpisodeId(epId);
+                setCurrentView('storyboard');
+              }}
+            />
+          )}
+
+          {currentView === 'system-settings' && (
+            <SystemSettingsView language={language} />
           )}
         </main>
       </div>

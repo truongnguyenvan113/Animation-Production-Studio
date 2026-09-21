@@ -10,6 +10,10 @@ import {
   Storyboard,
   ImageGenerationJob,
   ProjectReference,
+  SystemSettings,
+  ProductionPack,
+  FlowGenerationJob,
+  ProductionAsset,
 } from '../types';
 import {
   SEED_PROJECT,
@@ -47,6 +51,10 @@ export interface StudioDatabase {
   storyboards: Storyboard[];
   imageGenerationJobs: ImageGenerationJob[];
   projectReferences: ProjectReference[];
+  systemSettings?: SystemSettings;
+  productionPacks?: ProductionPack[];
+  flowGenerationJobs?: FlowGenerationJob[];
+  productionAssets?: ProductionAsset[];
   updatedAt: string;
 }
 
@@ -225,6 +233,9 @@ export class StorageService {
       storyboards: SEED_STORYBOARDS,
       imageGenerationJobs: [],
       projectReferences: SEED_PROJECT_REFERENCES,
+      productionPacks: [],
+      flowGenerationJobs: [],
+      productionAssets: [],
       updatedAt: new Date().toISOString(),
     };
   }

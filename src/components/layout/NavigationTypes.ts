@@ -11,6 +11,8 @@ export type NavigationId =
   | 'story-generator'
   | 'storyboard'
   | 'storyboard-images'
+  | 'google-flow-director'
+  | 'system-settings'
   | 'master-prompts'
   | 'video-production'
   | 'video-production-google-flow'

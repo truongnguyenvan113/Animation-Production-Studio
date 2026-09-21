@@ -26,6 +26,7 @@ interface ShotCardProps {
   characters: Character[];
   characterVersions: CharacterVersion[];
   onOpenPromptPreview: (shot: Shot) => void;
+  onOpenFlowDirector?: (shot: Shot) => void;
   onEditShot: (shot: Shot) => void;
   onDeleteShot?: (shot: Shot) => void;
   onGenerateImage?: (shot: Shot) => void;
@@ -38,6 +39,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
   characters,
   characterVersions,
   onOpenPromptPreview,
+  onOpenFlowDirector,
   onEditShot,
   onDeleteShot,
   onGenerateImage,
@@ -189,8 +191,8 @@ export const ShotCard: React.FC<ShotCardProps> = ({
           ) : (
             <>
               <div className="absolute top-2 left-2 flex items-center gap-1">
-                <span className="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">
-                  Production Image
+                <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm" title="Khung hình phát triển cục bộ / Local Development Asset">
+                  Local Dev Asset
                 </span>
                 {shot.outputMimeType && (
                   <span className="bg-slate-900/80 text-emerald-300 text-[9px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30">
@@ -346,6 +348,19 @@ export const ShotCard: React.FC<ShotCardProps> = ({
             Prompt
           </button>
 
+          {onOpenFlowDirector && (
+            <button
+              id={`btn-flow-director-${shot.id}`}
+              type="button"
+              onClick={() => onOpenFlowDirector(shot)}
+              className="inline-flex items-center text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 px-2.5 py-1.5 rounded-lg transition-colors shadow-2xs"
+              title="Mở Google Flow Director: Điều phối sản xuất, đóng gói Production Pack và xuất prompt 14 phần"
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-1 text-amber-300" />
+              Flow Director
+            </button>
+          )}
+
           {onGenerateImage && (
             <button
               id={`btn-generate-shot-image-${shot.id}`}
@@ -355,21 +370,16 @@ export const ShotCard: React.FC<ShotCardProps> = ({
                 isMock
                   ? 'text-amber-900 bg-amber-100 hover:bg-amber-200 border-amber-300 font-bold shadow-xs'
                   : shot.activeImageOutputUrl
-                  ? 'text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border-emerald-200 font-medium'
-                  : 'text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 border-amber-200 font-bold'
+                  ? 'text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 border-slate-300 font-medium'
+                  : 'text-blue-700 hover:text-blue-900 bg-blue-50 hover:bg-blue-100 border-blue-200 font-bold'
               }`}
-              title={
-                isMock
-                  ? 'Tạo ảnh thật từ Provider (Google Imagen / Flux) để thay thế bản Mock'
-                  : undefined
-              }
+              title="Thực thi bản xem trước cục bộ (Local Asset Preview)"
             >
-              <Sparkles className="w-3.5 h-3.5 mr-1" />
               {isMock
-                ? 'Tạo Ảnh Thật (Real Image)'
+                ? 'Nạp Preview Cục Bộ'
                 : shot.activeImageOutputUrl
-                ? 'Tạo Lại'
-                : 'Render Frame'}
+                ? 'Render Lại Cục Bộ'
+                : 'Render Cục Bộ'}
             </button>
           )}
 

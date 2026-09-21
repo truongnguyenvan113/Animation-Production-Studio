@@ -22,6 +22,7 @@ import {
   ExternalLink,
   Film,
   FolderArchive,
+  Settings,
 } from 'lucide-react';
 import { Character, LanguageMode } from '../../types';
 
@@ -290,6 +291,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     Phase 4.4
                   </span>
                 </button>
+
+                <button
+                  onClick={() => onNavigate('google-flow-director')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('google-flow-director')
+                      ? 'bg-indigo-600 text-white font-semibold shadow-sm'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span className="truncate">{formatLabel('Google Flow Director', 'Điều Phối Google Flow')}</span>
+                  <span className="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded font-bold">
+                    Phase 4.7
+                  </span>
+                </button>
               </div>
             )}
           </div>
@@ -310,6 +326,26 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <span className="ml-auto text-[10px] bg-orange-500/20 text-orange-300 border border-orange-500/30 px-1.5 py-0.5 rounded font-mono">
                 Decoupled
+              </span>
+            </button>
+          </div>
+
+          {/* System Settings */}
+          <div className="pt-1.5">
+            <button
+              onClick={() => onNavigate('system-settings')}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-left font-medium transition-all ${
+                isActive('system-settings')
+                  ? 'bg-indigo-600 text-white shadow-sm font-semibold'
+                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+              }`}
+            >
+              <Settings className="w-4 h-4 text-indigo-400 shrink-0" />
+              <div className="truncate">
+                <span className="block truncate">{formatLabel('System Settings', 'Cài Đặt Hệ Thống')}</span>
+              </div>
+              <span className="ml-auto text-[10px] bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded font-mono">
+                13 Mục
               </span>
             </button>
           </div>

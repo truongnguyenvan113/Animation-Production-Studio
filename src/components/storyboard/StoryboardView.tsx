@@ -17,6 +17,7 @@ import { ShotEditorModal } from './ShotEditorModal';
 import { ShotPromptPreviewModal } from './ShotPromptPreviewModal';
 import { ImmutabilityAuditModal } from './ImmutabilityAuditModal';
 import { StoryboardRevisionHistoryModal } from './StoryboardRevisionHistoryModal';
+import { GoogleFlowDirectorModal } from '../flow/GoogleFlowDirectorModal';
 import {
   Film,
   Plus,
@@ -70,6 +71,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
 
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [showRevisionModal, setShowRevisionModal] = useState(false);
+  const [flowDirectorShot, setFlowDirectorShot] = useState<Shot | null>(null);
 
   // Sync DB on changes
   useEffect(() => {
@@ -327,6 +329,20 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                   >
                     <RotateCcw className="w-3.5 h-3.5 mr-1" />
                     Tạo lại (Lưu Revision)
+                  </button>
+
+                  <button
+                    id="btn-header-google-flow-director"
+                    type="button"
+                    onClick={() => {
+                      const targetShot = currentScene?.shots[0] || storyboard.scenes[0]?.shots[0];
+                      if (targetShot) setFlowDirectorShot(targetShot);
+                    }}
+                    className="inline-flex items-center text-xs font-bold px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors"
+                    title="Mở Google Flow Director: Điều phối sản xuất, khóa DNA & xuất Production Pack"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5 text-amber-300" />
+                    Google Flow Director
                   </button>
                 </>
               ) : (
@@ -601,6 +617,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                     characters={db.characters}
                     characterVersions={db.characterVersions}
                     onOpenPromptPreview={handleOpenPromptPreview}
+                    onOpenFlowDirector={(s) => setFlowDirectorShot(s)}
                     onEditShot={(s) => setEditingShot({ shot: s, sceneId: currentScene.id })}
                     onDeleteShot={(s) => handleDeleteShot(currentScene.id, s)}
                     onGenerateImage={handleGenerateShotImage}
@@ -680,6 +697,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
                         characters={db.characters}
                         characterVersions={db.characterVersions}
                         onOpenPromptPreview={handleOpenPromptPreview}
+                        onOpenFlowDirector={(s) => setFlowDirectorShot(s)}
                         onEditShot={(s) => setEditingShot({ shot: s, sceneId: scene.id })}
                         onDeleteShot={(s) => handleDeleteShot(scene.id, s)}
                         onGenerateImage={handleGenerateShotImage}
@@ -762,6 +780,19 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
           onClose={() => setShowRevisionModal(false)}
           storyboard={storyboard}
           onRestoreRevision={handleRestoreRevision}
+        />
+      )}
+
+      {/* 5. Google Flow Director Modal */}
+      {flowDirectorShot && (
+        <GoogleFlowDirectorModal
+          shot={flowDirectorShot}
+          episodeId={selectedEpisodeId}
+          storyboardId={storyboard?.id}
+          onClose={() => setFlowDirectorShot(null)}
+          onAssetUpdated={() => {
+            setDb(storage.getDatabase());
+          }}
         />
       )}
     </div>

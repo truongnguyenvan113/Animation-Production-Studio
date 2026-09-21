@@ -190,6 +190,8 @@ export function renderRealProductionFrame(params: {
       createdAt: new Date().toISOString(),
       isProductionReady: true,
       isMock: false,
+      executionMode: 'LOCAL_ASSET',
+      isRealGoogleExecution: false,
     };
   }
 
@@ -229,5 +231,7 @@ export function renderRealProductionFrame(params: {
     createdAt: new Date().toISOString(),
     isProductionReady: true,
     isMock: false,
+    executionMode: 'LOCAL_ASSET',
+    isRealGoogleExecution: false,
   };
 }
