@@ -1,4 +1,4 @@
-import { ProviderExecutionMode } from './flowTypes';
+import { ProviderExecutionMode, CameraTimelineEntry, SceneBrief } from './flowTypes';
 
 export type ReferenceType =
   | 'front'
@@ -247,6 +247,8 @@ export interface Scene {
   storyPurpose: string;
   educationalPurpose: string;
   cameraDirection?: string;
+  soundIntent?: string;
+  specialNotes?: string;
   estimatedDurationSeconds?: number;
 }
 
@@ -292,6 +294,12 @@ export interface Episode {
   additionalNotes?: string;
   characterIds: string[];
   supportingCharacterIds: string[];
+  allowedCharacters?: string[];
+  excludedCharacters?: string[];
+  props?: string[];
+  language?: string;
+  durationLimit?: string | number;
+  continuityRules?: string[];
   location: string;
   duration: string;
   targetPlatform: string;
@@ -367,6 +375,10 @@ export interface Shot {
   speakerCharacterName?: string;
   emotion: string;
   visualPurpose: string;
+  sceneIntent?: string;
+  soundIntent?: string;
+  specialNotes?: string;
+  cameraTimeline?: CameraTimelineEntry[];
   continuityNotes: ShotContinuityNotes;
   generationStatus: ShotGenerationStatus;
   activeImageOutputUrl?: string;

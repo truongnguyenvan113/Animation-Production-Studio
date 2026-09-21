@@ -90,7 +90,7 @@ export class StorageService {
           const isMochiPuppy = mochiVer?.species?.toLowerCase().includes('puppy') || mochiVer?.visualIdentity?.toLowerCase().includes('puppy');
           
           if (isEthanValid && isMochiPuppy) {
-            // Ensure Episode 9 has canonical storyDraft & scenes if missing
+            // Ensure Episode 9 has canonical storyDraft, scenes, and continuity fields if missing
             const ep9 = parsed.episodes?.find((e: Episode) => e.id === 'ep_009');
             if (ep9) {
               const seedEp9 = SEED_EPISODES.find((e) => e.id === 'ep_009');
@@ -102,23 +102,38 @@ export class StorageService {
                 if (!ep9.additionalNotes) ep9.additionalNotes = seedEp9.additionalNotes;
                 if (!ep9.duration || ep9.duration.trim() === '') ep9.duration = seedEp9.duration;
                 if (!ep9.storyboardId) ep9.storyboardId = seedEp9.storyboardId;
+                if (!ep9.allowedCharacters || ep9.allowedCharacters.length === 0) ep9.allowedCharacters = seedEp9.allowedCharacters;
+                if (!ep9.excludedCharacters) ep9.excludedCharacters = seedEp9.excludedCharacters;
+                if (!ep9.props || ep9.props.length === 0) ep9.props = seedEp9.props;
+                if (!ep9.language) ep9.language = seedEp9.language;
+                if (!ep9.durationLimit) ep9.durationLimit = seedEp9.durationLimit;
+                if (!ep9.continuityRules || ep9.continuityRules.length === 0) ep9.continuityRules = seedEp9.continuityRules;
               }
-            }
-
-            // Ensure characterReferences array exists and contains seed data if empty
-            if (!Array.isArray(parsed.characterReferences) || parsed.characterReferences.length === 0) {
-              parsed.characterReferences = SEED_CHARACTER_REFERENCES;
             }
 
             // Ensure storyboards array exists and contains seed storyboards if empty
             if (!Array.isArray(parsed.storyboards) || parsed.storyboards.length === 0) {
               parsed.storyboards = SEED_STORYBOARDS;
             } else {
-              // Ensure ep_009 storyboard is present
-              const hasEp9Sb = parsed.storyboards.some((sb: Storyboard) => sb.episodeId === 'ep_009');
-              if (!hasEp9Sb) {
-                const seedSb9 = SEED_STORYBOARDS.find((sb) => sb.episodeId === 'ep_009');
-                if (seedSb9) parsed.storyboards.push(seedSb9);
+              // Ensure ep_009 storyboard has latest shot brief and keyframe data synced
+              const ep9Sb = parsed.storyboards.find((sb: Storyboard) => sb.episodeId === 'ep_009');
+              const seedSb9 = SEED_STORYBOARDS.find((sb) => sb.episodeId === 'ep_009');
+              if (!ep9Sb && seedSb9) {
+                parsed.storyboards.push(seedSb9);
+              } else if (ep9Sb && seedSb9) {
+                // Sync shot_ep009_s01_01 brief and keyframe if missing
+                const storedShot = ep9Sb.scenes?.[0]?.shots?.find((s: any) => s.id === 'shot_ep009_s01_01');
+                const seedShot = seedSb9.scenes?.[0]?.shots?.find((s: any) => s.id === 'shot_ep009_s01_01');
+                if (storedShot && seedShot) {
+                  if (!storedShot.cameraTimeline) storedShot.cameraTimeline = seedShot.cameraTimeline;
+                  if (!storedShot.sceneIntent) storedShot.sceneIntent = seedShot.sceneIntent;
+                  if (!storedShot.soundIntent) storedShot.soundIntent = seedShot.soundIntent;
+                  if (!storedShot.specialNotes) storedShot.specialNotes = seedShot.specialNotes;
+                  if (!storedShot.activeImageOutputUrl) storedShot.activeImageOutputUrl = seedShot.activeImageOutputUrl;
+                  if (!storedShot.activeImageJobId) storedShot.activeImageJobId = seedShot.activeImageJobId;
+                  if (!storedShot.activeOutputAssetId) storedShot.activeOutputAssetId = seedShot.activeOutputAssetId;
+                  if (storedShot.isProductionReadyKeyframe === undefined) storedShot.isProductionReadyKeyframe = seedShot.isProductionReadyKeyframe;
+                }
               }
             }
 

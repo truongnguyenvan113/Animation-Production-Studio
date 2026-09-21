@@ -15,6 +15,7 @@ import {
   GlobalStyleVersion,
   TraceableReference,
   ProviderExecutionMode,
+  SceneBrief,
 } from '../types';
 import { storageService } from './storageService';
 import { systemSettingsService } from './systemSettingsService';
@@ -63,6 +64,11 @@ export class ProductionPackCompiler {
     const episodeId = options?.episodeId || foundStoryboard?.episodeId || 'ep_009';
     const episode: Episode | undefined = db.episodes.find((ep) => ep.id === episodeId);
 
+    // Locate Episode Scene Canon if available
+    const episodeScene = episode?.scenes?.find(
+      (s) => s.id === foundScene?.episodeSceneId || s.sceneNumber === (foundScene?.sceneNumber || shot.sceneNumber)
+    );
+
     // 3. Resolve Effective Settings Snapshot
     const effectiveSettings = systemSettingsService.resolveEffectiveSettings(
       shot,
@@ -73,57 +79,48 @@ export class ProductionPackCompiler {
     const charactersData: ProductionPack['characters'] = [];
     const charIds = shot.characterIds && shot.characterIds.length > 0
       ? shot.characterIds
-      : ['char_van']; // Default to Mẹ Vân if none listed
+      : ['char_pi'];
+
+    const episodeCharSnapshots = episode?.characterVersionSnapshots || {};
 
     for (const charId of charIds) {
       const char = db.characters.find((c) => c.id === charId);
       if (!char) continue;
 
-      // Resolve locked version ID from Shot (NEVER rely solely on activeVersionId if shot has snapshot)
-      const lockedVersionId = shot.characterDnaReferences?.[charId] || char.activeVersionId;
+      // Resolve locked version ID from Shot (NEVER rely solely on activeVersionId if shot or episode has snapshot)
+      const lockedVersionId =
+        shot.characterDnaReferences?.[charId] ||
+        episodeCharSnapshots[charId] ||
+        char.activeVersionId;
+
       const charVersion: CharacterVersion | undefined = db.characterVersions.find(
         (v) => v.id === lockedVersionId || (v.characterId === charId && v.version === 'v1.0')
       );
 
-      // Character-specific DNA Constraints
+      // Character-specific DNA Constraints derived dynamically from CharacterVersion
       const dnaConstraints: string[] = [];
 
-      if (charId === 'char_kem') {
-        // Canon rule for Kem
-        dnaConstraints.push(
-          'Extremely short hair.',
-          'Hair tightly cropped close to the scalp.',
-          'No bangs.',
-          'No fringe.',
-          'No fluffy hair.',
-          'No spikes.',
-          'No hair tuft.',
-          'No long hair.'
-        );
-      } else if (charId === 'char_van') {
-        // Canon rule for Mẹ Vân
-        dnaConstraints.push(
-          'Gương mặt hiền hậu, nét đẹp người mẹ Việt Nam hiện đại.',
-          'Tóc đen dài vừa phải, buộc gọn thấp sau gáy nhã nhặn.',
-          'Trang phục áo thun màu kem ấm, quần ống suông thoải mái gia đình.',
-          'Tông da sáng tự nhiên, ánh mắt ấm áp yêu thương con cái.'
-        );
-      } else if (charId === 'char_pi') {
-        // Canon rule for Pi
-        dnaConstraints.push(
-          'Bé trai 5 tuổi năng động, đôi mắt to sáng thông minh.',
-          'Tóc đen ngắn cắt gọn gàng ôm sát đầu cậu bé.',
-          'Áo phông vàng tươi in họa tiết chú cún, quần soóc xanh biển.'
-        );
-      } else if (charId === 'char_quang') {
-        // Canon rule for Bố Quang
-        dnaConstraints.push(
-          'Gương mặt trí thức, kính mắt gọng vuông đen mỏng.',
-          'Nụ cười ấm áp, phong thái điềm đạm.',
-          'Áo polo xanh navy chỉn chu, tóc rẽ ngôi 7/3 gọn gàng.'
-        );
-      } else if (charVersion?.characterPrompt) {
-        dnaConstraints.push(charVersion.characterPrompt);
+      if (charVersion) {
+        if (charVersion.hair) {
+          dnaConstraints.push(`Kiểu tóc bất biến: ${charVersion.hair}`);
+        }
+        if (charVersion.faceShape || charVersion.eyes) {
+          dnaConstraints.push(
+            `Khuôn mặt & ánh mắt: ${charVersion.faceShape || ''}${charVersion.eyes ? ` | mắt: ${charVersion.eyes}` : ''}`
+          );
+        }
+        if (charVersion.clothing) {
+          dnaConstraints.push(`Trang phục đặc trưng: ${charVersion.clothing}`);
+        }
+        if (charVersion.bodyProportions) {
+          dnaConstraints.push(`Tỷ lệ cơ thể: ${charVersion.bodyProportions}`);
+        }
+        if (charVersion.characterPrompt) {
+          dnaConstraints.push(`Đặc tả tạo hình Canon: ${charVersion.characterPrompt}`);
+        }
+        if (charVersion.negativePrompt) {
+          dnaConstraints.push(`Tránh sai lệch: ${charVersion.negativePrompt}`);
+        }
       }
 
       // Primary reference asset URL if available
@@ -139,44 +136,190 @@ export class ProductionPackCompiler {
         activeVersionId: lockedVersionId,
         versionNumber: charVersion?.version || 'v1.0',
         dnaConstraints,
-        outfit: charVersion?.clothing || (charId === 'char_van' ? 'Áo thun cotton màu kem, quần vải mềm thoải mái' : 'Trang phục chuẩn Canon'),
-        facialFeatures: `${charVersion?.faceShape || 'Thon gọn'}, mắt: ${charVersion?.eyes || 'đen ấm áp'}, nụ cười: ${charVersion?.mouth || 'hiền từ'}`,
-        hairStyle: charVersion?.hair || (charId === 'char_van' ? 'Tóc buộc thấp sau gáy' : 'Tóc ngắn gọn gàng'),
+        outfit: charVersion?.clothing || 'Trang phục chuẩn theo Canon Version',
+        facialFeatures: `${charVersion?.faceShape || 'Cân đối'}, mắt: ${charVersion?.eyes || 'sáng to'}, biểu cảm: ${charVersion?.facialExpression || 'tươi vui'}`,
+        hairStyle: charVersion?.hair || 'Kiểu tóc chuẩn theo Canon Version',
         skinTone: charVersion?.skinTone || 'Trắng sáng tự nhiên Đông Nam Á',
         primaryReferenceAssetUrl: primaryRefUrl,
       });
     }
 
     // 5. Resolve Style DNA (Strictly Source of Truth)
-    const styleVersionId = shot.styleVersionSnapshotId || 'style_ver_1_0';
-    const styleVer: GlobalStyleVersion | undefined = db.globalStyleVersions?.find(
-      (s) => s.id === styleVersionId
-    ) || StyleService.getActiveStyleVersion();
+    const styleVersionId =
+      shot.styleVersionSnapshotId ||
+      episode?.styleVersionSnapshotId ||
+      'style_ver_1_0';
+
+    const styleVer: GlobalStyleVersion | undefined =
+      db.globalStyleVersions?.find((s) => s.id === styleVersionId) ||
+      StyleService.getActiveStyleVersion();
 
     const styleData: ProductionPack['style'] = {
       styleVersionId: styleVer?.id || 'style_ver_1_0',
       versionNumber: styleVer?.version || 'v1.0',
       name: (styleVer as any)?.name || styleVer?.animationStyle || 'Default 3D CGI Animation',
-      positivePrompt: styleVer?.globalPrompt || (styleVer as any)?.positivePrompt || 'Pixar and Disney modern 3D CGI animation aesthetic, subsurface scattering on skin, rich vibrant palette',
-      negativePrompt: styleVer?.negativePrompt || 'photorealistic live action, 2D flat, low poly, oversaturated, deformed hands, distorted anatomy',
-      colorPaletteRule: styleVer?.colorPalette || (styleVer as any)?.colorPaletteRule || 'Bảng màu ấm áp, tươi vui, độ bão hòa vừa phải',
-      lightingRule: styleVer?.lighting || (styleVer as any)?.lightingRule || 'Ánh sáng tự nhiên dịu nhẹ với soft bounce lights',
+      positivePrompt:
+        styleVer?.globalPrompt ||
+        (styleVer as any)?.positivePrompt ||
+        'Pixar and Disney modern 3D CGI animation aesthetic, subsurface scattering on skin, rich vibrant palette',
+      negativePrompt:
+        styleVer?.negativePrompt ||
+        'photorealistic live action, 2D flat, low poly, oversaturated, deformed hands, distorted anatomy',
+      colorPaletteRule:
+        styleVer?.colorPalette ||
+        (styleVer as any)?.colorPaletteRule ||
+        'Bảng màu ấm áp, tươi vui, độ bão hòa vừa phải',
+      lightingRule:
+        styleVer?.lighting ||
+        (styleVer as any)?.lightingRule ||
+        'Ánh sáng tự nhiên dịu nhẹ với soft bounce lights',
     };
 
-    // 6. Resolve Continuity
+    // 6. Compile Structured Scene Brief (7 canonical production fields)
+    const sceneBrief: SceneBrief = {
+      sceneTitle:
+        foundScene?.title ||
+        episodeScene?.title ||
+        `Cảnh #${foundScene?.sceneNumber || shot.sceneNumber}`,
+      sceneIntent:
+        shot.sceneIntent ||
+        episodeScene?.storyPurpose ||
+        episodeScene?.educationalPurpose ||
+        'Thiết lập bối cảnh và cảm xúc câu chuyện',
+      action: shot.action || episodeScene?.action || '',
+      dialogue: shot.dialogue
+        ? `${shot.speakerCharacterName ? shot.speakerCharacterName + ': ' : ''}"${shot.dialogue}"`
+        : episodeScene?.dialogue?.length
+        ? episodeScene.dialogue.map((d: any) => `${d.characterName}: "${d.line}"`).join(' | ')
+        : undefined,
+      emotion: shot.emotion || episodeScene?.emotion || 'Tự nhiên, ấm áp',
+      soundIntent:
+        shot.soundIntent ||
+        (episodeScene as any)?.soundIntent ||
+        (shot.dialogue
+          ? 'Thu âm hội thoại rõ nét, âm thanh nền gia đình sống động'
+          : 'Âm thanh môi trường và tiếng động tự nhiên (foley)'),
+      specialNotes:
+        shot.specialNotes ||
+        (episodeScene as any)?.specialNotes ||
+        shot.continuityNotes?.propContinuity ||
+        '',
+      cameraTimeline:
+        shot.cameraTimeline && shot.cameraTimeline.length > 0
+          ? shot.cameraTimeline
+          : undefined,
+    };
+
+    // 7. Resolve Continuity (Dynamically Derived from Episode Canon & Shot)
     const continuityNotes = shot.continuityNotes || {};
+
+    const allowedCharacters =
+      episode?.allowedCharacters && episode.allowedCharacters.length > 0
+        ? episode.allowedCharacters
+        : Array.from(
+            new Set([...(episode?.characterIds || []), ...(episode?.supportingCharacterIds || [])])
+          );
+
+    const excludedCharacters = episode?.excludedCharacters || [];
+
+    const characterAppearanceLocks: string[] = [];
+    const outfitLocks: string[] = [];
+    for (const c of charactersData) {
+      characterAppearanceLocks.push(
+        `${c.displayName}: ${c.hairStyle}; ${c.facialFeatures}; tông da ${c.skinTone}`
+      );
+      outfitLocks.push(`${c.displayName}: ${c.outfit}`);
+    }
+
+    const props =
+      episode?.props && episode.props.length > 0
+        ? episode.props
+        : continuityNotes.propContinuity
+        ? [continuityNotes.propContinuity]
+        : [];
+
+    const location =
+      shot.location || foundScene?.location || episode?.location || 'Phòng khách gia đình Pi Kem';
+    const environment =
+      continuityNotes.environmentContinuity ||
+      foundScene?.timeOfDay ||
+      shot.timeOfDay ||
+      'Ban mai ngập tràn ánh sáng';
+    const lighting =
+      shot.lighting || foundScene?.lighting || 'Ánh nắng 5600K rọi từ cửa sổ lớn, chiếu ấm các vật thể';
+    const language = episode?.language || 'Tiếng Việt (Vietnamese)';
+    const dialogueRequirements = shot.dialogue
+      ? `Thoại khớp với nhân vật ${shot.speakerCharacterName || 'diễn viên'}, giữ đúng lời thoại: "${shot.dialogue}".`
+      : 'Không có thoại bắt buộc (Visual / Non-verbal Action).';
+    const durationLimit = shot.durationSeconds
+      ? `${shot.durationSeconds}s`
+      : episode?.durationLimit || episode?.targetDuration || episode?.duration || '10s';
+
+    const continuityRules = [
+      ...(episode?.continuityRules || []),
+      ...(continuityNotes.actionContinuity
+        ? [`Hành động liên tục: ${continuityNotes.actionContinuity}`]
+        : []),
+      ...(continuityNotes.previousShotRelationship
+        ? [`Mối quan hệ với shot trước: ${continuityNotes.previousShotRelationship}`]
+        : []),
+    ];
+
+    const relevantExclusions = [
+      ...excludedCharacters.map((cId) => {
+        const c = db.characters.find((ch) => ch.id === cId);
+        return `Không xuất hiện nhân vật: ${c?.displayName || cId}`;
+      }),
+    ];
+
     const continuity: ProductionPack['continuity'] = {
-      previousShotId: shot.shotNumber > 1 ? `shot_ep${foundScene?.sceneNumber || 1}_s${shot.shotNumber - 1}` : undefined,
-      previousAction: continuityNotes.previousShotRelationship || 'Thiết lập ban đầu cảnh phim',
-      characterPositions: continuityNotes.characterPositions || 'Mẹ Vân ở trung tâm tấm bạt sàn phòng khách',
-      propContinuity: continuityNotes.propContinuity || 'Tấm bạt trắng phẳng phiu, các khay màu và cọ vẽ xung quanh',
-      environmentContinuity: continuityNotes.environmentContinuity || 'Phòng khách chung cư tràn ngập ánh ban mai từ cửa sổ lớn',
+      previousShotId:
+        shot.shotNumber > 1
+          ? `shot_ep${foundScene?.sceneNumber || 1}_s${shot.shotNumber - 1}`
+          : undefined,
+      previousAction:
+        continuityNotes.previousShotRelationship || 'Thiết lập ban đầu cảnh phim',
+      characterPositions:
+        continuityNotes.characterPositions || 'Trung tâm không gian cảnh quay',
+      propContinuity:
+        continuityNotes.propContinuity || 'Đạo cụ duy trì trạng thái hiện hữu',
+      environmentContinuity:
+        continuityNotes.environmentContinuity || 'Môi trường ánh sáng giữ nguyên tính liên tục',
+      allowedCharacters,
+      excludedCharacters,
+      characterAppearanceLocks,
+      outfitLocks,
+      props,
+      location,
+      environment,
+      lighting,
+      language,
+      dialogueRequirements,
+      durationLimit,
+      continuityRules,
+      relevantExclusions,
     };
 
-    // 7. Resolve Traceable References
+    // 8. Resolve Traceable References (CHARACTER, STYLE, STORYBOARD_REFERENCE, LOCATION, PROP, CONTINUITY)
     const references: TraceableReference[] = [];
 
-    // Character references
+    // A. Storyboard Reference (Keyframe Spatial Blocking Guide)
+    if (shot.activeImageOutputUrl) {
+      references.push({
+        reference_id: shot.activeOutputAssetId || `ref_sb_${shot.id}`,
+        reference_type: 'STORYBOARD_REFERENCE',
+        version: shot.activeImageJobId || 'v1.0',
+        source: `Storyboard/${foundStoryboard?.id || 'sb'}/Shot/${shot.id}`,
+        purpose:
+          'Tham chiếu Storyboard Keyframe đã duyệt: Sử dụng làm hướng dẫn bố cục không gian, tỷ lệ và chặn vị trí nhân vật (spatial blocking guide)',
+        url: shot.activeImageOutputUrl,
+        thumbnailUrl: shot.activeImageOutputUrl,
+        shotId: shot.id,
+        isLocked: true,
+      });
+    }
+
+    // B. Character references
     for (const charData of charactersData) {
       const charRefs = CharacterService.getReferencesForVersion(charData.activeVersionId);
       for (const cr of charRefs) {
@@ -186,46 +329,85 @@ export class ProductionPackCompiler {
             reference_type: 'CHARACTER',
             version: charData.versionNumber,
             source: `CharacterReference/${cr.characterId}`,
-            purpose: `Tham chiếu góc ${cr.type} cho ${charData.displayName}`,
+            purpose: `Tham chiếu tạo hình góc ${cr.type} cho ${charData.displayName}`,
             url: cr.image,
             thumbnailUrl: cr.thumbnail || cr.image,
             characterId: cr.characterId,
+            isLocked: true,
           });
         }
       }
     }
 
-    // Style references from ProjectReferenceLibrary if available
+    // C. Project references (Style, Location, Prop, Continuity)
     if (db.projectReferences) {
-      const styleRefs = db.projectReferences.filter((pr) => pr.type === 'style');
-      for (const sr of styleRefs) {
-        references.push({
-          reference_id: sr.id,
-          reference_type: 'STYLE',
-          version: '1.0',
-          source: `ProjectReference/${sr.id}`,
-          purpose: `Tham chiếu phong cách: ${sr.name}`,
-          url: sr.uri,
-          thumbnailUrl: sr.thumbnail || sr.uri,
-        });
+      for (const pr of db.projectReferences) {
+        if (pr.type === 'style') {
+          references.push({
+            reference_id: pr.id,
+            reference_type: 'STYLE',
+            version: '1.0',
+            source: `ProjectReference/${pr.id}`,
+            purpose: `Tham chiếu phong cách mỹ thuật: ${pr.name}`,
+            url: pr.uri,
+            thumbnailUrl: pr.thumbnail || pr.uri,
+            isLocked: true,
+          });
+        } else if (pr.type === 'location') {
+          references.push({
+            reference_id: pr.id,
+            reference_type: 'LOCATION',
+            version: '1.0',
+            source: `ProjectReference/${pr.id}`,
+            purpose: `Tham chiếu bối cảnh không gian: ${pr.name}`,
+            url: pr.uri,
+            thumbnailUrl: pr.thumbnail || pr.uri,
+            isLocked: true,
+          });
+        } else if (pr.type === 'prop') {
+          references.push({
+            reference_id: pr.id,
+            reference_type: 'PROP',
+            version: '1.0',
+            source: `ProjectReference/${pr.id}`,
+            purpose: `Tham chiếu đạo cụ sản xuất: ${pr.name}`,
+            url: pr.uri,
+            thumbnailUrl: pr.thumbnail || pr.uri,
+            isLocked: true,
+          });
+        } else if (
+          pr.tags?.includes('continuity') ||
+          (pr.shotId && pr.shotId !== shot.id && pr.episodeId === episodeId)
+        ) {
+          references.push({
+            reference_id: pr.id,
+            reference_type: 'CONTINUITY',
+            version: '1.0',
+            source: `ProjectReference/${pr.id}`,
+            purpose: `Tham chiếu tính liên tục cảnh phim: ${pr.name}`,
+            url: pr.uri,
+            thumbnailUrl: pr.thumbnail || pr.uri,
+            shotId: pr.shotId,
+            isLocked: true,
+          });
+        }
       }
     }
 
-    // 8. Negative Constraints Compilation
+    // 9. Negative Constraints Compilation
     const negativeConstraints = [
       'photorealistic humans, live action movie, uncanny valley',
       '2D vector, flat cartoon, anime lineart, sketch, watercolor',
       'distorted hands, extra fingers, malformed limbs, fused bodies',
       'dark gritty atmosphere, horror, excessive grain, compression artifacts',
-      'spikes, fringe, fluffy hair or bangs for character Kem',
-      'deviations from approved Character DNA facial features',
+      'deviations from approved Character DNA facial features and hair style',
       'elements outside safe action area in 9:16 vertical crop',
     ];
     if (styleData.negativePrompt) {
       negativeConstraints.push(styleData.negativePrompt);
     }
 
-    // 9. Constraints (16:9 Canvas + 9:16 Shorts Safe + Center Safe Area)
+    // 10. Constraints (16:9 Canvas + 9:16 Shorts Safe + Center Safe Area)
     const constraints: ProductionPack['constraints'] = {
       aspectRatio: '16:9',
       shortsCropSafe: true,
@@ -237,7 +419,7 @@ export class ProductionPackCompiler {
       ],
     };
 
-    // 10. Assemble ProductionPack
+    // 11. Assemble ProductionPack
     const packId = `pack_${shot.id}_${Date.now()}`;
     const pack: ProductionPack = {
       pack_id: packId,
@@ -260,6 +442,11 @@ export class ProductionPackCompiler {
       },
       effective_settings: effectiveSettings,
       shot,
+      scene_brief: sceneBrief,
+      camera_timeline:
+        shot.cameraTimeline && shot.cameraTimeline.length > 0
+          ? shot.cameraTimeline
+          : undefined,
       characters: charactersData,
       style: styleData,
       continuity,

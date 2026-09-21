@@ -32,6 +32,9 @@ import {
   Compass,
   Film,
   X,
+  Camera,
+  Music,
+  Video,
 } from 'lucide-react';
 
 interface GoogleFlowDirectorViewProps {
@@ -521,6 +524,144 @@ export const GoogleFlowDirectorView: React.FC<GoogleFlowDirectorViewProps> = ({
                   {isExecutingLocal ? 'Đang nạp...' : 'Nạp Local Preview'}
                 </button>
               </div>
+            </div>
+          </div>
+
+          {/* Structured Scene Brief & Production Guidance */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                  <Film className="w-4 h-4 text-indigo-600" />
+                  Bản Tóm Tắt Phân Cảnh (Structured Scene Brief)
+                </h4>
+                <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  {pack?.scene_brief?.sceneTitle || `Cảnh #${activeShot?.sceneNumber}`}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                <div>
+                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
+                    Ý đồ phân cảnh (Scene Intent)
+                  </span>
+                  <p className="text-slate-800 font-medium leading-relaxed">
+                    {pack?.scene_brief?.sceneIntent || 'Thiết lập không gian sân chơi nghệ thuật'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
+                    Trạng thái cảm xúc (Emotion)
+                  </span>
+                  <p className="text-slate-800 font-medium">
+                    {pack?.scene_brief?.emotion || activeShot?.emotion || 'Tự nhiên, ấm áp'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
+                    Ý đồ âm thanh (Sound Intent)
+                  </span>
+                  <p className="text-slate-700 leading-relaxed flex items-start gap-1.5">
+                    <Music className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" />
+                    <span>{pack?.scene_brief?.soundIntent || 'Âm thanh nền tự nhiên sống động'}</span>
+                  </p>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
+                    Ghi chú đặc biệt (Special Notes)
+                  </span>
+                  <p className="text-slate-700 leading-relaxed">
+                    {pack?.scene_brief?.specialNotes || 'Bảo toàn liên tục đạo cụ và trang phục'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action and Dialogue summary */}
+              <div className="pt-3 border-t border-slate-100 space-y-2 text-xs">
+                <div>
+                  <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
+                    Diễn tiến hành động (Action)
+                  </span>
+                  <p className="text-slate-900 bg-slate-50 p-2.5 rounded-xl border border-slate-100 leading-relaxed">
+                    {pack?.scene_brief?.action || activeShot?.action}
+                  </p>
+                </div>
+                {pack?.scene_brief?.dialogue && (
+                  <div>
+                    <span className="text-slate-400 font-bold uppercase text-[10px] block mb-0.5">
+                      Thoại (Dialogue)
+                    </span>
+                    <p className="text-indigo-900 bg-indigo-50/60 p-2.5 rounded-xl border border-indigo-100 font-medium">
+                      {pack.scene_brief.dialogue}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Camera Timeline / Beats */}
+            <div className="p-6 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-sm flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-3">
+                  <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+                    <Camera className="w-4 h-4 text-emerald-600" />
+                    Chuyển Động Camera
+                  </h4>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {activeShot?.durationSeconds}s
+                  </span>
+                </div>
+
+                {pack?.camera_timeline && pack.camera_timeline.length > 0 ? (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
+                      Camera Timeline Beats:
+                    </span>
+                    <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                      {pack.camera_timeline.map((beat, idx) => (
+                        <div
+                          key={idx}
+                          className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs space-y-1"
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-mono font-bold text-indigo-600 text-[11px]">
+                              {beat.timeRange}
+                            </span>
+                            {beat.movement && (
+                              <span className="text-[10px] font-medium px-1.5 py-0.2 rounded bg-slate-200 text-slate-700">
+                                {beat.movement}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-slate-800 text-[11px] leading-snug">{beat.description}</p>
+                          {beat.focus && (
+                            <span className="text-[10px] text-slate-500 block">
+                              Trọng tâm: {beat.focus}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2 text-xs text-slate-600">
+                    <div><strong className="text-slate-800">Góc quay:</strong> {activeShot?.cameraAngle || 'Eye-level 0°'}</div>
+                    <div><strong className="text-slate-800">Cỡ cảnh:</strong> {activeShot?.shotType}</div>
+                    <div><strong className="text-slate-800">Khung hình:</strong> {activeShot?.framing || 'Rule of Thirds'}</div>
+                    <div><strong className="text-slate-800">Chuyển động:</strong> {activeShot?.cameraMovement || 'Static'}</div>
+                  </div>
+                )}
+              </div>
+
+              {/* Storyboard spatial blocking indicator */}
+              {pack?.references.some((r) => r.reference_type === 'STORYBOARD_REFERENCE') && (
+                <div className="p-3 bg-emerald-50/80 rounded-xl border border-emerald-200 text-[11px] text-emerald-900 flex items-start gap-2">
+                  <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Khóa Bố Cục Storyboard:</strong> Keyframe đã duyệt được đưa vào gói tham chiếu để khóa trục không gian và tỷ lệ nhân vật (Spatial Blocking Guide).
+                  </span>
+                </div>
+              )}
             </div>
           </div>
 

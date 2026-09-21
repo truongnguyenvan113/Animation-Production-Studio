@@ -25,7 +25,27 @@ export type ReferencePurpose =
   | 'STYLE'
   | 'LOCATION'
   | 'PROP'
-  | 'CONTINUITY';
+  | 'CONTINUITY'
+  | 'STORYBOARD_REFERENCE';
+
+export interface CameraTimelineEntry {
+  timeRange: string; // e.g. "0-2s", "2-5s"
+  description: string;
+  movement?: string;
+  framing?: string;
+  focus?: string;
+}
+
+export interface SceneBrief {
+  sceneTitle?: string;
+  sceneIntent?: string;
+  action: string;
+  dialogue?: string;
+  emotion: string;
+  soundIntent?: string;
+  specialNotes?: string;
+  cameraTimeline?: CameraTimelineEntry[];
+}
 
 export interface TraceableReference {
   reference_id: string;
@@ -36,6 +56,8 @@ export interface TraceableReference {
   url: string;
   thumbnailUrl?: string;
   characterId?: string;
+  shotId?: string;
+  isLocked?: boolean;
 }
 
 export interface EffectiveSettingsSnapshot {
@@ -75,6 +97,8 @@ export interface ProductionPack {
   };
   effective_settings: EffectiveSettingsSnapshot;
   shot: Shot;
+  scene_brief?: SceneBrief;
+  camera_timeline?: CameraTimelineEntry[];
   characters: Array<{
     characterId: string;
     displayName: string;
@@ -102,6 +126,19 @@ export interface ProductionPack {
     characterPositions?: string;
     propContinuity?: string;
     environmentContinuity?: string;
+    allowedCharacters?: string[];
+    excludedCharacters?: string[];
+    characterAppearanceLocks?: string[];
+    outfitLocks?: string[];
+    props?: string[];
+    location?: string;
+    environment?: string;
+    lighting?: string;
+    language?: string;
+    dialogueRequirements?: string;
+    durationLimit?: string | number;
+    continuityRules?: string[];
+    relevantExclusions?: string[];
   };
   references: TraceableReference[];
   constraints: {
