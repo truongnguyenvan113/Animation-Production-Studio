@@ -235,7 +235,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
               }`}
             >
               <FileCode className="w-3.5 h-3.5" />
-              Prompt 14 Phần Chuẩn
+              Master Prompt (15 Phần)
             </button>
             <button
               onClick={() => setActiveTab('dna')}
@@ -535,8 +535,8 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-sm font-bold text-slate-900">Google Flow Prompt Đầy Đủ (14 Phần)</h4>
-                  <p className="text-xs text-slate-500">Được biên dịch tất định từ Production Pack, kiểm soát chặt chẽ từng chiều kích thị giác.</p>
+                  <h4 className="text-sm font-bold text-slate-900">Google Flow Master Production Prompt (15 Phần Chuẩn Hóa)</h4>
+                  <p className="text-xs text-slate-500">Được biên dịch tất định từ Production Pack, kiểm soát tuyệt đối tính nhất quán hình ảnh và vùng an toàn 9:16 Shorts.</p>
                 </div>
                 <button
                   type="button"

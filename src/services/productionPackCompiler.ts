@@ -559,27 +559,30 @@ export class ProductionPackCompiler {
       return a.reference_id.localeCompare(b.reference_id);
     });
 
-    // 9. Negative Constraints Compilation
+    // 9. Negative Constraints Compilation (Aligned with Master Production Prompt Section 12)
     const negativeConstraints = [
-      'photorealistic humans, live action movie, uncanny valley',
-      '2D vector, flat cartoon, anime lineart, sketch, watercolor',
+      'Duplicate characters, extra family members, random people, random children, unrequested pets',
+      'Character redesigns, different hairstyles, different outfits, age changes, incorrect body proportions',
+      'Kem with long, fluffy, spiky, or tufted hair (MUST BE VERY SHORT BUZZ CUT, almost bald, no bangs/fringe)',
+      'Text, subtitles, logos, watermarks, UI elements, unrequested objects, unrequested environmental changes',
+      'Important subjects outside the central 40% safe zone, camera movement that causes main subject to leave safe zone',
+      'photorealistic humans, live action movie, uncanny valley, 2D vector, flat cartoon, anime lineart',
       'distorted hands, extra fingers, malformed limbs, fused bodies',
-      'dark gritty atmosphere, horror, excessive grain, compression artifacts',
-      'deviations from approved Character DNA facial features and hair style',
-      'elements outside safe action area in 9:16 vertical crop',
+      'deviations from approved Character Master DNA',
     ];
     if (styleData.negativePrompt) {
       negativeConstraints.push(styleData.negativePrompt);
     }
 
-    // 10. Constraints (16:9 Canvas + 9:16 Shorts Safe + Center Safe Area)
+    // 10. Constraints (16:9 Canvas + 9:16 Shorts Safe + Center Safe Area 40%)
     const constraints: ProductionPack['constraints'] = {
       aspectRatio: '16:9',
       shortsCropSafe: true,
       safeArea: 'CENTER',
       compositionRules: [
-        'Central action safe zone (33% to 66% width) to guarantee 9:16 Shorts vertical crop compatibility',
-        'Eye-level camera alignment with subject focus in lower two-thirds',
+        'Central 40% horizontal safe zone mandatory for 9:16 vertical center crop simulation',
+        'Keep main characters fully visible from head to feet whenever reasonably possible',
+        'Center-safe composition has absolute priority over wide cinematic composition',
         'Balanced negative space around main action, soft warm background bokeh',
       ],
     };

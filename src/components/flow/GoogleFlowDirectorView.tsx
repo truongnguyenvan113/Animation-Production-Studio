@@ -221,7 +221,7 @@ export const GoogleFlowDirectorView: React.FC<GoogleFlowDirectorViewProps> = ({
               className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs inline-flex items-center gap-1.5 transition-colors"
             >
               {copiedPrompt ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              {copiedPrompt ? 'Đã chép Prompt' : 'Chép Prompt 14 Phần'}
+              {copiedPrompt ? 'Đã chép Prompt' : 'Chép Master Prompt (15 Phần)'}
             </button>
 
             <button
@@ -355,7 +355,7 @@ export const GoogleFlowDirectorView: React.FC<GoogleFlowDirectorViewProps> = ({
             }`}
           >
             <FileCode className="w-4 h-4" />
-            Prompt 14 Phần Chuẩn
+            Master Prompt (15 Phần)
           </button>
           <button
             onClick={() => setActiveTab('dna')}
@@ -719,8 +719,8 @@ export const GoogleFlowDirectorView: React.FC<GoogleFlowDirectorViewProps> = ({
         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-sm font-bold text-slate-900">Google Flow Prompt Đầy Đủ (14 Phần)</h4>
-              <p className="text-xs text-slate-500">Được biên dịch tất định từ Production Pack, kiểm soát chặt chẽ từng chiều kích thị giác.</p>
+              <h4 className="text-sm font-bold text-slate-900">Google Flow Master Production Prompt (15 Phần Chuẩn Hóa)</h4>
+              <p className="text-xs text-slate-500">Được biên dịch tất định từ Production Pack, kiểm soát tuyệt đối tính nhất quán hình ảnh và vùng an toàn 9:16 Shorts.</p>
             </div>
             <button
               type="button"
