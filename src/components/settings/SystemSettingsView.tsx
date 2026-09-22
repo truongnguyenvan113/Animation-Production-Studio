@@ -301,7 +301,7 @@ export const SystemSettingsView: React.FC = () => {
                         general: { ...settings.general, studioName: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900"
                   />
                 </div>
                 <div className="space-y-1">
@@ -315,7 +315,7 @@ export const SystemSettingsView: React.FC = () => {
                         general: { ...settings.general, projectName: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900"
                   />
                 </div>
                 <div className="space-y-1">
@@ -329,7 +329,7 @@ export const SystemSettingsView: React.FC = () => {
                         general: { ...settings.general, timezone: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
               </div>
@@ -385,7 +385,7 @@ export const SystemSettingsView: React.FC = () => {
                         language: { ...settings.language, fallbackLocale: e.target.value as any },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900"
                   >
                     <option value="en-US">English (en-US)</option>
                     <option value="vi-VN">Tiếng Việt (vi-VN)</option>
@@ -427,7 +427,7 @@ export const SystemSettingsView: React.FC = () => {
                         aiModel: { ...settings.aiModel, defaultImageModel: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
                 <div className="space-y-1">
@@ -441,7 +441,7 @@ export const SystemSettingsView: React.FC = () => {
                         aiModel: { ...settings.aiModel, defaultVideoModel: e.target.value },
                       })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
               </div>

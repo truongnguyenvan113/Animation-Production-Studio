@@ -383,7 +383,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="e.g. Tập 10 – Trận bóng mini và tinh thần đồng đội"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-600 transition-all font-medium"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-400 transition-all font-medium"
                 />
               </div>
 
@@ -397,7 +397,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                   value={storyIdea}
                   onChange={(e) => setStoryIdea(e.target.value)}
                   placeholder="Mô tả bối cảnh và hoạt động cốt lõi của tập phim..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-600 transition-all leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-400 transition-all leading-relaxed"
                 />
               </div>
 
@@ -412,7 +412,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                   value={theme}
                   onChange={(e) => setTheme(e.target.value)}
                   placeholder="e.g. Thể thao gia đình & Tinh thần đồng đội"
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-600 transition-all"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-400 transition-all"
                 />
               </div>
 
@@ -427,7 +427,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                   value={educationalLesson}
                   onChange={(e) => setEducationalLesson(e.target.value)}
                   placeholder="Thông điệp giáo dục giúp bé hình thành nhân cách tốt..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-600 transition-all leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-white text-xs placeholder:text-slate-400 transition-all leading-relaxed"
                 />
               </div>
 
@@ -442,7 +442,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
                     placeholder="e.g. Sân sau, Phòng khách, v.v."
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white text-xs"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 text-white text-xs placeholder:text-slate-400"
                   />
                 </div>
 
@@ -455,7 +455,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                     value={targetAudience}
                     onChange={(e) => setTargetAudience(e.target.value)}
                     placeholder="e.g. 3–7 tuổi"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white text-xs"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 text-white text-xs placeholder:text-slate-400"
                   />
                 </div>
 
@@ -468,7 +468,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                     value={targetDuration}
                     onChange={(e) => setTargetDuration(e.target.value)}
                     placeholder="e.g. 07:00 (Phút)"
-                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white text-xs"
+                    className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 text-white text-xs placeholder:text-slate-400"
                   />
                 </div>
               </div>
@@ -483,7 +483,7 @@ export const StoryGeneratorView: React.FC<StoryGeneratorViewProps> = ({
                   value={additionalNotes}
                   onChange={(e) => setAdditionalNotes(e.target.value)}
                   placeholder="Ghi chú thêm về lời thoại, cử chỉ hài hước của Mochi hay ba mẹ..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:border-amber-500 text-white text-xs placeholder:text-slate-600 transition-all leading-relaxed"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-950 border border-slate-700 focus:border-amber-500 text-white text-xs placeholder:text-slate-400 transition-all leading-relaxed"
                 />
               </div>
 

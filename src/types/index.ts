@@ -8,6 +8,12 @@ export type ReferenceType =
   | 'expressions'
   | 'full-body'
   | 'custom'
+  | 'three_quarter_left'
+  | 'three_quarter_right'
+  | 'left_side'
+  | 'right_side'
+  | 'back'
+  | 'hero_three_quarter'
   | 'Front'
   | 'Side'
   | 'Full Body'
@@ -17,7 +23,8 @@ export type ReferenceType =
   | 'Clothing'
   | 'Pose'
   | 'Custom'
-  | 'Other';
+  | 'Other'
+  | (string & {});
 
 export type CharacterStatus = 'Active' | 'Draft' | 'Archived' | 'Deprecated';
 

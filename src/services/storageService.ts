@@ -29,6 +29,7 @@ import {
 import { SEED_PROJECT_REFERENCES } from './projectReferenceService';
 
 const STORAGE_KEY = 'pikem_animation_studio_v2';
+const ALT_STORAGE_KEY = 'pi_kem_animation_studio_db';
 
 function sanitizeImageUri(uri?: string): string | undefined {
   if (!uri) return uri;
@@ -79,173 +80,203 @@ export class StorageService {
       if (typeof localStorage === 'undefined') {
         return this.getInitialSeedDatabase();
       }
-      const data = localStorage.getItem(STORAGE_KEY);
+      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(ALT_STORAGE_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        if (parsed.project && parsed.characters && parsed.characterVersions) {
-          // Verify canonical character compliance
+        if (parsed.project && Array.isArray(parsed.characters) && Array.isArray(parsed.characterVersions)) {
+          // Verify canonical character compliance and gently guarantee defaults without destroying database
           const ethanVer = parsed.characterVersions.find((v: CharacterVersion) => v.characterId === 'char_ethan');
+          if (ethanVer && (!ethanVer.occupation || !ethanVer.occupation.includes('Programmer'))) {
+            ethanVer.occupation = 'Senior Lead Software Architect & Full-Stack Programmer';
+          }
           const mochiVer = parsed.characterVersions.find((v: CharacterVersion) => v.characterId === 'char_mochi');
-          const isEthanValid = ethanVer?.occupation?.includes('Programmer') || ethanVer?.occupation?.includes('Software');
-          const isMochiPuppy = mochiVer?.species?.toLowerCase().includes('puppy') || mochiVer?.visualIdentity?.toLowerCase().includes('puppy');
-          
-          if (isEthanValid && isMochiPuppy) {
-            // Ensure Episode 9 has canonical storyDraft, scenes, and continuity fields if missing
-            const ep9 = parsed.episodes?.find((e: Episode) => e.id === 'ep_009');
-            if (ep9) {
-              const seedEp9 = SEED_EPISODES.find((e) => e.id === 'ep_009');
-              if (seedEp9) {
-                if (!ep9.storyDraft) ep9.storyDraft = seedEp9.storyDraft;
-                if (!ep9.scenes) ep9.scenes = seedEp9.scenes;
-                if (!ep9.targetAudience) ep9.targetAudience = seedEp9.targetAudience;
-                if (!ep9.targetDuration) ep9.targetDuration = seedEp9.targetDuration;
-                if (!ep9.additionalNotes) ep9.additionalNotes = seedEp9.additionalNotes;
-                if (!ep9.duration || ep9.duration.trim() === '') ep9.duration = seedEp9.duration;
-                if (!ep9.storyboardId) ep9.storyboardId = seedEp9.storyboardId;
-                if (!ep9.allowedCharacters || ep9.allowedCharacters.length === 0) ep9.allowedCharacters = seedEp9.allowedCharacters;
-                if (!ep9.excludedCharacters) ep9.excludedCharacters = seedEp9.excludedCharacters;
-                if (!ep9.props || ep9.props.length === 0) ep9.props = seedEp9.props;
-                if (!ep9.language) ep9.language = seedEp9.language;
-                if (!ep9.durationLimit) ep9.durationLimit = seedEp9.durationLimit;
-                if (!ep9.continuityRules || ep9.continuityRules.length === 0) ep9.continuityRules = seedEp9.continuityRules;
+          if (mochiVer && (!mochiVer.species || !mochiVer.species.toLowerCase().includes('puppy'))) {
+            mochiVer.species = 'Golden-cream fluffy puppy dog (CANONICAL PUPPY DOG, NOT A CAT)';
+          }
+
+          // Ensure Episode 9 has canonical storyDraft, scenes, and continuity fields if missing
+          const ep9 = parsed.episodes?.find((e: Episode) => e.id === 'ep_009');
+          if (ep9) {
+            const seedEp9 = SEED_EPISODES.find((e) => e.id === 'ep_009');
+            if (seedEp9) {
+              if (!ep9.storyDraft) ep9.storyDraft = seedEp9.storyDraft;
+              if (!ep9.scenes) ep9.scenes = seedEp9.scenes;
+              if (!ep9.targetAudience) ep9.targetAudience = seedEp9.targetAudience;
+              if (!ep9.targetDuration) ep9.targetDuration = seedEp9.targetDuration;
+              if (!ep9.additionalNotes) ep9.additionalNotes = seedEp9.additionalNotes;
+              if (!ep9.duration || ep9.duration.trim() === '') ep9.duration = seedEp9.duration;
+              if (!ep9.storyboardId) ep9.storyboardId = seedEp9.storyboardId;
+              if (!ep9.allowedCharacters || ep9.allowedCharacters.length === 0) ep9.allowedCharacters = seedEp9.allowedCharacters;
+              if (!ep9.excludedCharacters) ep9.excludedCharacters = seedEp9.excludedCharacters;
+              if (!ep9.props || ep9.props.length === 0) ep9.props = seedEp9.props;
+              if (!ep9.language) ep9.language = seedEp9.language;
+              if (!ep9.durationLimit) ep9.durationLimit = seedEp9.durationLimit;
+              if (!ep9.continuityRules || ep9.continuityRules.length === 0) ep9.continuityRules = seedEp9.continuityRules;
+            }
+          }
+
+          // Ensure storyboards array exists and contains seed storyboards if empty
+          if (!Array.isArray(parsed.storyboards) || parsed.storyboards.length === 0) {
+            parsed.storyboards = SEED_STORYBOARDS;
+          } else {
+            // Ensure ep_009 storyboard has latest shot brief and keyframe data synced
+            const ep9Sb = parsed.storyboards.find((sb: Storyboard) => sb.episodeId === 'ep_009');
+            const seedSb9 = SEED_STORYBOARDS.find((sb) => sb.episodeId === 'ep_009');
+            if (!ep9Sb && seedSb9) {
+              parsed.storyboards.push(seedSb9);
+            } else if (ep9Sb && seedSb9) {
+              // Sync shot_ep009_s01_01 brief and keyframe if missing
+              const storedShot = ep9Sb.scenes?.[0]?.shots?.find((s: any) => s.id === 'shot_ep009_s01_01');
+              const seedShot = seedSb9.scenes?.[0]?.shots?.find((s: any) => s.id === 'shot_ep009_s01_01');
+              if (storedShot && seedShot) {
+                if (!storedShot.cameraTimeline) storedShot.cameraTimeline = seedShot.cameraTimeline;
+                if (!storedShot.sceneIntent) storedShot.sceneIntent = seedShot.sceneIntent;
+                if (!storedShot.soundIntent) storedShot.soundIntent = seedShot.soundIntent;
+                if (!storedShot.specialNotes) storedShot.specialNotes = seedShot.specialNotes;
+                if (!storedShot.activeImageOutputUrl) storedShot.activeImageOutputUrl = seedShot.activeImageOutputUrl;
+                if (!storedShot.activeImageJobId) storedShot.activeImageJobId = seedShot.activeImageJobId;
+                if (!storedShot.activeOutputAssetId) storedShot.activeOutputAssetId = seedShot.activeOutputAssetId;
+                if (storedShot.isProductionReadyKeyframe === undefined) storedShot.isProductionReadyKeyframe = seedShot.isProductionReadyKeyframe;
               }
             }
+          }
 
-            // Ensure storyboards array exists and contains seed storyboards if empty
-            if (!Array.isArray(parsed.storyboards) || parsed.storyboards.length === 0) {
-              parsed.storyboards = SEED_STORYBOARDS;
-            } else {
-              // Ensure ep_009 storyboard has latest shot brief and keyframe data synced
-              const ep9Sb = parsed.storyboards.find((sb: Storyboard) => sb.episodeId === 'ep_009');
-              const seedSb9 = SEED_STORYBOARDS.find((sb) => sb.episodeId === 'ep_009');
-              if (!ep9Sb && seedSb9) {
-                parsed.storyboards.push(seedSb9);
-              } else if (ep9Sb && seedSb9) {
-                // Sync shot_ep009_s01_01 brief and keyframe if missing
-                const storedShot = ep9Sb.scenes?.[0]?.shots?.find((s: any) => s.id === 'shot_ep009_s01_01');
-                const seedShot = seedSb9.scenes?.[0]?.shots?.find((s: any) => s.id === 'shot_ep009_s01_01');
-                if (storedShot && seedShot) {
-                  if (!storedShot.cameraTimeline) storedShot.cameraTimeline = seedShot.cameraTimeline;
-                  if (!storedShot.sceneIntent) storedShot.sceneIntent = seedShot.sceneIntent;
-                  if (!storedShot.soundIntent) storedShot.soundIntent = seedShot.soundIntent;
-                  if (!storedShot.specialNotes) storedShot.specialNotes = seedShot.specialNotes;
-                  if (!storedShot.activeImageOutputUrl) storedShot.activeImageOutputUrl = seedShot.activeImageOutputUrl;
-                  if (!storedShot.activeImageJobId) storedShot.activeImageJobId = seedShot.activeImageJobId;
-                  if (!storedShot.activeOutputAssetId) storedShot.activeOutputAssetId = seedShot.activeOutputAssetId;
-                  if (storedShot.isProductionReadyKeyframe === undefined) storedShot.isProductionReadyKeyframe = seedShot.isProductionReadyKeyframe;
+          // Ensure imageGenerationJobs array exists
+          if (!Array.isArray(parsed.imageGenerationJobs)) {
+            parsed.imageGenerationJobs = [];
+          }
+
+          // Sanitize all stored image URLs in jobs
+          if (Array.isArray(parsed.imageGenerationJobs)) {
+            for (const job of parsed.imageGenerationJobs) {
+              if (Array.isArray(job.outputAssets)) {
+                for (const asset of job.outputAssets) {
+                  if (asset.imageUrl) asset.imageUrl = sanitizeImageUri(asset.imageUrl) || asset.imageUrl;
+                  if (asset.thumbnailUrl) asset.thumbnailUrl = sanitizeImageUri(asset.thumbnailUrl) || asset.thumbnailUrl;
                 }
               }
             }
+          }
 
-            // Ensure imageGenerationJobs array exists
-            if (!Array.isArray(parsed.imageGenerationJobs)) {
-              parsed.imageGenerationJobs = [];
-            }
-
-            // Sanitize all stored image URLs in jobs
-            if (Array.isArray(parsed.imageGenerationJobs)) {
-              for (const job of parsed.imageGenerationJobs) {
-                if (Array.isArray(job.outputAssets)) {
-                  for (const asset of job.outputAssets) {
-                    if (asset.imageUrl) asset.imageUrl = sanitizeImageUri(asset.imageUrl) || asset.imageUrl;
-                    if (asset.thumbnailUrl) asset.thumbnailUrl = sanitizeImageUri(asset.thumbnailUrl) || asset.thumbnailUrl;
-                  }
-                }
-              }
-            }
-
-            // Sanitize all activeImageOutputUrl in storyboards
-            if (Array.isArray(parsed.storyboards)) {
-              for (const sb of parsed.storyboards) {
-                if (Array.isArray(sb.scenes)) {
-                  for (const sc of sb.scenes) {
-                    if (Array.isArray(sc.shots)) {
-                      for (const shot of sc.shots) {
-                        if (shot.activeImageOutputUrl) {
-                          shot.activeImageOutputUrl = sanitizeImageUri(shot.activeImageOutputUrl);
-                        }
+          // Sanitize all activeImageOutputUrl in storyboards
+          if (Array.isArray(parsed.storyboards)) {
+            for (const sb of parsed.storyboards) {
+              if (Array.isArray(sb.scenes)) {
+                for (const sc of sb.scenes) {
+                  if (Array.isArray(sc.shots)) {
+                    for (const shot of sc.shots) {
+                      if (shot.activeImageOutputUrl) {
+                        shot.activeImageOutputUrl = sanitizeImageUri(shot.activeImageOutputUrl);
                       }
                     }
                   }
                 }
               }
             }
-
-            // Audit and heal orphan / broken references
-            if (Array.isArray(parsed.characterVersions) && Array.isArray(parsed.characterReferences)) {
-              const validVersionIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
-              const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
-
-              // Filter out references pointing to non-existent versions or characters
-              parsed.characterReferences = parsed.characterReferences.filter(
-                (ref: CharacterReference) => ref && ref.id && validCharIds.has(ref.characterId) && validVersionIds.has(ref.characterVersionId)
-              ).map((ref: CharacterReference) => {
-                if (ref.id === 'ref_pi_front' && (!ref.image || ref.image === 'pi_front')) {
-                  return {
-                    ...ref,
-                    image: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
-                    thumbnail: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
-                  };
-                }
-                return ref;
-              });
-
-              const existingRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
-
-              // Clean broken reference IDs from versions and ensure Master DNA outfit consistency
-              parsed.characterVersions = parsed.characterVersions.map((ver: CharacterVersion) => {
-                const validRefIds = (ver.referenceAssetIds || []).filter((id: string) => existingRefIds.has(id));
-                let primaryId = ver.primaryReferenceAssetId;
-                if (primaryId && !existingRefIds.has(primaryId)) {
-                  primaryId = validRefIds[0];
-                }
-
-                // Authoritative Master DNA Outfit Synchronization for Canonical v1.0 Locks
-                let clothing = ver.clothing;
-                if (ver.id === 'ver_ethan_v1') {
-                  clothing = 'Light blue polo shirt and grey shorts';
-                } else if (ver.id === 'ver_emma_v1') {
-                  clothing = 'PURPLE FLORAL COLLARED SHIRT and blue jeans';
-                }
-
-                return {
-                  ...ver,
-                  clothing,
-                  referenceAssetIds: validRefIds,
-                  primaryReferenceAssetId: primaryId,
-                };
-              });
-            }
-
-            // Ensure projectReferences array exists and contains seed data if empty
-            if (!Array.isArray(parsed.projectReferences) || parsed.projectReferences.length === 0) {
-              parsed.projectReferences = SEED_PROJECT_REFERENCES;
-            } else {
-              // Sanitize all image & thumbnail URIs in projectReferences
-              for (const pref of parsed.projectReferences) {
-                if (pref.uri) pref.uri = sanitizeImageUri(pref.uri) || pref.uri;
-                if (pref.thumbnail) pref.thumbnail = sanitizeImageUri(pref.thumbnail) || pref.thumbnail;
-              }
-
-              // Audit orphan character links in projectReferences
-              const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
-              const validVersionIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
-              
-              parsed.projectReferences = parsed.projectReferences.map((pref: ProjectReference) => {
-                if (pref.characterId && !validCharIds.has(pref.characterId)) {
-                  const { characterId, characterVersionId, ...rest } = pref;
-                  return rest as ProjectReference;
-                }
-                if (pref.characterVersionId && !validVersionIds.has(pref.characterVersionId)) {
-                  const { characterVersionId, ...rest } = pref;
-                  return rest as ProjectReference;
-                }
-                return pref;
-              });
-            }
-
-            return parsed;
           }
+
+          // Audit and heal character references and versions
+          if (!Array.isArray(parsed.characterReferences)) {
+            parsed.characterReferences = [...SEED_CHARACTER_REFERENCES];
+          } else {
+            // Merge any canonical seed references that are missing
+            const currentRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
+            for (const seedRef of SEED_CHARACTER_REFERENCES) {
+              if (!currentRefIds.has(seedRef.id)) {
+                parsed.characterReferences.push(seedRef);
+              }
+            }
+          }
+
+          const validVersionIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
+          const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
+
+          // Filter out truly invalid references (missing ID or pointing to non-existent characters/versions)
+          parsed.characterReferences = parsed.characterReferences.filter(
+            (ref: CharacterReference) =>
+              ref &&
+              ref.id &&
+              validCharIds.has(ref.characterId) &&
+              validVersionIds.has(ref.characterVersionId)
+          ).map((ref: CharacterReference) => {
+            if (ref.id === 'ref_pi_front' && (!ref.image || ref.image === 'pi_front')) {
+              return {
+                ...ref,
+                image: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+                thumbnail: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+              };
+            }
+            return ref;
+          });
+
+          const existingRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
+
+          // Clean and synchronize reference IDs from versions, ensuring no valid uploaded reference is lost
+          parsed.characterVersions = parsed.characterVersions.map((ver: CharacterVersion) => {
+            // Find all actual references in database belonging to this version
+            const verRefs = parsed.characterReferences.filter(
+              (r: CharacterReference) => r.characterVersionId === ver.id
+            );
+            const verRefIds = verRefs.map((r: CharacterReference) => r.id);
+
+            // Merge existing IDs with all actual refs for this version
+            const validRefIds = Array.from(
+              new Set([
+                ...verRefIds,
+                ...(ver.referenceAssetIds || []).filter((id: string) => existingRefIds.has(id)),
+              ])
+            );
+
+            let primaryId = ver.primaryReferenceAssetId;
+            if (!primaryId || !existingRefIds.has(primaryId)) {
+              const explicitPrimary = verRefs.find((r: CharacterReference) => r.isPrimary)?.id;
+              primaryId = explicitPrimary || validRefIds[0];
+            }
+
+            // Sync isPrimary flags on references for this version
+            verRefs.forEach((r: CharacterReference) => {
+              r.isPrimary = r.id === primaryId;
+            });
+
+            // Authoritative Master DNA Outfit Synchronization for Canonical v1.0 Locks
+            let clothing = ver.clothing;
+            if (ver.id === 'ver_ethan_v1') {
+              clothing = 'Light blue polo shirt and grey shorts';
+            } else if (ver.id === 'ver_emma_v1') {
+              clothing = 'PURPLE FLORAL COLLARED SHIRT and blue jeans';
+            }
+
+            return {
+              ...ver,
+              clothing,
+              referenceAssetIds: validRefIds,
+              primaryReferenceAssetId: primaryId,
+            };
+          });
+
+          // Ensure projectReferences array exists and contains seed data if empty
+          if (!Array.isArray(parsed.projectReferences) || parsed.projectReferences.length === 0) {
+            parsed.projectReferences = SEED_PROJECT_REFERENCES;
+          } else {
+            for (const pref of parsed.projectReferences) {
+              if (pref.uri) pref.uri = sanitizeImageUri(pref.uri) || pref.uri;
+              if (pref.thumbnail) pref.thumbnail = sanitizeImageUri(pref.thumbnail) || pref.thumbnail;
+            }
+
+            parsed.projectReferences = parsed.projectReferences.map((pref: ProjectReference) => {
+              if (pref.characterId && !validCharIds.has(pref.characterId)) {
+                const { characterId, characterVersionId, ...rest } = pref;
+                return rest as ProjectReference;
+              }
+              if (pref.characterVersionId && !validVersionIds.has(pref.characterVersionId)) {
+                const { characterVersionId, ...rest } = pref;
+                return rest as ProjectReference;
+              }
+              return pref;
+            });
+          }
+
+          return parsed;
         }
       }
     } catch (e) {
@@ -284,12 +315,38 @@ export class StorageService {
       ...db,
       updatedAt: new Date().toISOString(),
     };
-    try {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const payload = JSON.stringify(this.db);
+        localStorage.setItem(STORAGE_KEY, payload);
+        try {
+          localStorage.setItem(ALT_STORAGE_KEY, payload);
+        } catch {}
+      } catch (e: any) {
+        console.warn('First attempt to save database threw an error (likely quota exceeded). Pruning transient jobs cache...', e);
+        try {
+          // Prune transient large outputs from imageGenerationJobs and flowGenerationJobs without losing references
+          if (Array.isArray(this.db.imageGenerationJobs) && this.db.imageGenerationJobs.length > 5) {
+            this.db.imageGenerationJobs = this.db.imageGenerationJobs.slice(0, 5).map((job) => ({
+              ...job,
+              outputAssets: (job.outputAssets || []).slice(0, 2),
+            }));
+          }
+          if (Array.isArray(this.db.flowGenerationJobs) && this.db.flowGenerationJobs.length > 5) {
+            this.db.flowGenerationJobs = this.db.flowGenerationJobs.slice(0, 5);
+          }
+
+          const prunedPayload = JSON.stringify(this.db);
+          localStorage.setItem(STORAGE_KEY, prunedPayload);
+          try {
+            localStorage.setItem(ALT_STORAGE_KEY, prunedPayload);
+          } catch {}
+          console.info('Database successfully persisted after pruning transient render history.');
+        } catch (retryErr) {
+          console.error('Critical: Failed to save database to localStorage even after pruning:', retryErr);
+        }
       }
-    } catch (e) {
-      console.error('Failed to save to localStorage:', e);
     }
     this.notify();
   }
@@ -298,7 +355,11 @@ export class StorageService {
     this.db = this.getInitialSeedDatabase();
     try {
       if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+        const payload = JSON.stringify(this.db);
+        localStorage.setItem(STORAGE_KEY, payload);
+        try {
+          localStorage.setItem(ALT_STORAGE_KEY, payload);
+        } catch {}
       }
     } catch (e) {
       console.error('Failed to reset localStorage:', e);

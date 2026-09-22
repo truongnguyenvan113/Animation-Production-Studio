@@ -14,8 +14,8 @@
   --input-placeholder: #94a3b8;         /* slate-400: 8.0:1 contrast on #020617, distinctly secondary */
   --input-border: #334155;              /* slate-700: clear visual boundary */
   --input-border-hover: #475569;        /* slate-600 */
-  --input-focus-border: #f59e0b;        /* amber-500: signature production gold (9.1:1 contrast) */
-  --input-focus-ring: rgba(245, 158, 11, 0.3);
+  --input-focus-border: #f59e0b;        /* amber-500: signature production gold */
+  --input-focus-ring: rgba(245, 158, 11, 0.35);
   --input-disabled-foreground: #64748b; /* slate-500 */
   --input-disabled-background: #1e293b; /* slate-800 */
   --input-disabled-border: #334155;     /* slate-700 */
@@ -26,17 +26,19 @@
 }
 
 /* CONTEXTUAL LIGHT THEME
-   Automatically scoped to any light card, container, or modal across the studio
-   (System Settings, Google Flow Director import, Storyboard modals, Queue toolbar) */
-:is(.bg-white, .bg-slate-50, .bg-slate-100, .bg-slate-200, [data-theme="light"], .light-context, .light-panel) {
+   Applies to any light card, container, or modal across the studio
+   (System Settings, Google Flow Director import, Storyboard modals, Queue toolbar).
+   Scoped both globally and inside dark canvas wrappers to guarantee precedence. */
+:is(.bg-white, .bg-slate-50, .bg-slate-100, .bg-slate-200, .bg-amber-50, .bg-emerald-50, [data-theme="light"], .light-context, .light-panel),
+:is(.bg-slate-900, .bg-slate-950, .bg-\[\#0b1120\], body) :is(.bg-white, .bg-slate-50, .bg-slate-100, .bg-slate-200, .bg-amber-50, .bg-emerald-50, [data-theme="light"], .light-context, .light-panel) {
   --input-background: #ffffff;          /* Pure White */
   --input-background-elevated: #f8fafc; /* slate-50 */
   --input-foreground: #0f172a;          /* slate-900: 18.1:1 contrast on white */
   --input-placeholder: #64748b;         /* slate-500: 4.8:1 contrast on white (WCAG AA compliant) */
   --input-border: #cbd5e1;              /* slate-300: clean defined border */
   --input-border-hover: #94a3b8;        /* slate-400 */
-  --input-focus-border: #6366f1;        /* indigo-500: crisp focus indicator */
-  --input-focus-ring: rgba(99, 102, 241, 0.25);
+  --input-focus-border: #4f46e5;        /* indigo-600: crisp focus indicator */
+  --input-focus-ring: rgba(79, 70, 229, 0.25);
   --input-disabled-foreground: #64748b; /* slate-500 */
   --input-disabled-background: #f1f5f9; /* slate-100 */
   --input-disabled-border: #e2e8f0;     /* slate-200 */
@@ -48,7 +50,7 @@
 
 /* CONTEXTUAL DARK STUDIO RE-ASSERTION
    Ensures any dark modals or containers nested within light wrappers retain dark tokens */
-:is(.bg-slate-900, .bg-slate-950, .bg-[#0b1120], [data-theme="dark"], .dark-context, .dark-panel) {
+:is(.bg-white, .bg-slate-50, .bg-slate-100, .bg-slate-200, [data-theme="light"]) :is(.bg-slate-900, .bg-slate-950, .bg-black, [data-theme="dark"], .dark-context, .dark-panel) {
   --input-background: #020617;
   --input-background-elevated: #0f172a;
   --input-foreground: #f8fafc;
@@ -56,7 +58,7 @@
   --input-border: #334155;
   --input-border-hover: #475569;
   --input-focus-border: #f59e0b;
-  --input-focus-ring: rgba(245, 158, 11, 0.3);
+  --input-focus-ring: rgba(245, 158, 11, 0.35);
   --input-disabled-foreground: #64748b;
   --input-disabled-background: #1e293b;
   --input-disabled-border: #334155;
@@ -81,6 +83,7 @@
   select {
     color: var(--input-foreground);
     background-color: var(--input-background);
+    border-color: var(--input-border);
   }
 
   /* Placeholder typography: clearly secondary, but guaranteed WCAG AA contrast (>= 4.5:1) */
@@ -144,11 +147,111 @@
   }
 }
 
+/* =============================================================================
+   EXPLICIT UTILITY GUARDS
+   Prevents low-contrast clashing when explicit background or text utilities
+   are combined with unstyled backgrounds or foregrounds.
+   ============================================================================= */
+
+/* Elements with explicit white or off-white background */
+input.bg-white,
+textarea.bg-white,
+select.bg-white,
+input.bg-slate-50,
+textarea.bg-slate-50,
+select.bg-slate-50,
+input.bg-slate-100,
+textarea.bg-slate-100,
+select.bg-slate-100 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1;
+}
+
+input.bg-white::placeholder,
+textarea.bg-white::placeholder,
+input.bg-slate-50::placeholder,
+textarea.bg-slate-50::placeholder,
+input.bg-slate-100::placeholder,
+textarea.bg-slate-100::placeholder {
+  color: #64748b !important;
+  opacity: 1 !important;
+}
+
+/* Elements with explicit dark background */
+input.bg-slate-900,
+textarea.bg-slate-900,
+select.bg-slate-900,
+input.bg-slate-950,
+textarea.bg-slate-950,
+select.bg-slate-950,
+input.bg-black,
+textarea.bg-black,
+select.bg-black {
+  background-color: #020617 !important;
+  color: #f8fafc !important;
+  border-color: #334155;
+}
+
+input.bg-slate-900::placeholder,
+textarea.bg-slate-900::placeholder,
+input.bg-slate-950::placeholder,
+textarea.bg-slate-950::placeholder,
+input.bg-black::placeholder,
+textarea.bg-black::placeholder {
+  color: #94a3b8 !important;
+  opacity: 1 !important;
+}
+
+/* Explicit dark text utility on form inputs guarantees light background */
+input.text-slate-900,
+textarea.text-slate-900,
+select.text-slate-900,
+input.text-slate-800,
+textarea.text-slate-800,
+select.text-slate-800,
+input.text-slate-700,
+textarea.text-slate-700,
+select.text-slate-700 {
+  color: #0f172a !important;
+}
+
+/* Explicit light/white text utility on form inputs guarantees dark background */
+input.text-white,
+textarea.text-white,
+select.text-white,
+input.text-slate-50,
+textarea.text-slate-50,
+select.text-slate-50,
+input.text-slate-100,
+textarea.text-slate-100,
+select.text-slate-100,
+input.text-slate-200,
+textarea.text-slate-200,
+select.text-slate-200 {
+  color: #f8fafc !important;
+}
+
 /* Elevate low-contrast borders on dark theme inputs to clear structural visibility */
 input.border-slate-800,
 textarea.border-slate-800,
 select.border-slate-800 {
-  border-color: var(--input-border);
+  border-color: #334155 !important;
+}
+
+/* Option element contrast enforcement */
+:is(.bg-white, .bg-slate-50, .bg-slate-100) select option,
+select.bg-white option,
+select.bg-slate-50 option {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+:is(.bg-slate-900, .bg-slate-950, body) select option,
+select.bg-slate-900 option,
+select.bg-slate-950 option {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
 }
 
 /* Custom scrollbar for production studio UI */
@@ -166,3 +269,4 @@ select.border-slate-800 {
 ::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
+

@@ -824,7 +824,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
                   placeholder="/assets/aistudio/renders/... hoặc https://..."
                   value={importUrl}
                   onChange={(e) => setImportUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-300 font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 />
                 <span className="text-[10px] text-slate-400">
                   (Để trống sẽ dùng tệp mặc định sản xuất: <code>/assets/aistudio/renders/episodes/{episodeId}/shots/{shot.id}/{shot.id}.jpg</code>)
@@ -837,7 +837,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
                   <select
                     value={importMime}
                     onChange={(e) => setImportMime(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-semibold"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-semibold"
                   >
                     <option value="image/jpeg">image/jpeg (Ảnh chụp chuẩn)</option>
                     <option value="image/png">image/png (Raster PNG)</option>
@@ -852,7 +852,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
                     type="number"
                     value={importFileSize}
                     onChange={(e) => setImportFileSize(Number(e.target.value))}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
               </div>
@@ -864,7 +864,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
                     type="number"
                     value={importWidth}
                     onChange={(e) => setImportWidth(Number(e.target.value))}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
 
@@ -874,7 +874,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
                     type="number"
                     value={importHeight}
                     onChange={(e) => setImportHeight(Number(e.target.value))}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
               </div>
@@ -888,7 +888,7 @@ export const GoogleFlowDirectorModal: React.FC<GoogleFlowDirectorModalProps> = (
                     placeholder="4.0"
                     value={importDuration || ''}
                     onChange={(e) => setImportDuration(Number(e.target.value))}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 font-mono"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-900 font-mono"
                   />
                 </div>
               )}

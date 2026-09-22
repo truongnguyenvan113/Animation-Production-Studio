@@ -357,7 +357,7 @@ export const ProjectReferenceLibraryView: React.FC<ProjectReferenceLibraryViewPr
                   ? 'Tìm kiếm theo tên, tag, nhân vật, episode, shot...'
                   : 'Search by name, tag, character, shot, or ID...'
               }
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-slate-200 text-xs placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl pl-10 pr-4 py-2 text-white text-xs placeholder-slate-400 focus:outline-none focus:border-amber-500"
             />
             {searchQuery && (
               <button

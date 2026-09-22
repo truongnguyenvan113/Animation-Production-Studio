@@ -11,6 +11,7 @@ import {
   CANONICAL_REFERENCE_TYPES,
   REFERENCE_TYPE_LABELS,
 } from '../../services/characterReferenceService';
+import { processReferenceFile } from '../../services/imageAssetStorage';
 import { ReferenceCardPreview } from '../shared/ReferenceCardPreview';
 import { ReferenceAssetPreviewModal } from './ReferenceAssetPreviewModal';
 import { CharacterAvatar } from '../shared/CharacterAvatar';
@@ -69,6 +70,18 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
   const [uploadImagePreview, setUploadImagePreview] = useState<string>('');
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingUploads, setPendingUploads] = useState<
+    Array<{
+      file?: File;
+      name: string;
+      preview: string;
+      thumbnail?: string;
+      type: ReferenceType;
+      isPrimary?: boolean;
+      fileSize?: number;
+      mimeType?: string;
+    }>
+  >([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -158,6 +171,22 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
     });
   }, [versionReferences, selectedTypeFilter, searchQuery]);
 
+  const inferTypeFromFilename = (filename: string): ReferenceType => {
+    const lower = filename.toLowerCase();
+    if (lower.includes('three_quarter_left') || lower.includes('3_4_left') || lower.includes('34_left')) return 'three_quarter_left';
+    if (lower.includes('three_quarter_right') || lower.includes('3_4_right') || lower.includes('34_right')) return 'three_quarter_right';
+    if (lower.includes('hero_three_quarter') || lower.includes('hero_3_4') || lower.includes('hero')) return 'hero_three_quarter';
+    if (lower.includes('three_quarter') || lower.includes('3_4') || lower.includes('34') || lower.includes('beauty')) return '3/4';
+    if (lower.includes('left_side') || lower.includes('side_left')) return 'left_side';
+    if (lower.includes('right_side') || lower.includes('side_right')) return 'right_side';
+    if (lower.includes('front')) return 'front';
+    if (lower.includes('side') || lower.includes('profile')) return 'side';
+    if (lower.includes('back') || lower.includes('rear')) return 'back';
+    if (lower.includes('expression')) return 'expression';
+    if (lower.includes('full') || lower.includes('body') || lower.includes('stance')) return 'full-body';
+    return 'custom';
+  };
+
   // Handle open upload modal
   const handleOpenUpload = () => {
     setUploadCharId(selectedCharacterId);
@@ -167,6 +196,7 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
     setUploadIsPrimary(versionReferences.length === 0);
     setUploadImageFile(null);
     setUploadImagePreview('');
+    setPendingUploads([]);
     setUploadError(null);
     setIsUploadModalOpen(true);
   };
@@ -185,30 +215,51 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
     }
   }, [uploadCharId, uploadCharacterVersions, uploadVersionId]);
 
-  // Image file processing
-  const processImageFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
+  // Image file processing supporting multiple files and quota-safe compression
+  const processImageFiles = async (files: FileList | File[]) => {
+    const validFiles = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (validFiles.length === 0) {
       setUploadError(
         language === 'vi'
-          ? 'Vui lòng chọn tệp hình ảnh (PNG, JPG, WEBP, SVG).'
-          : 'Please select a valid image file (PNG, JPG, WEBP, SVG).',
+          ? 'Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP, SVG).'
+          : 'Please select valid image files (PNG, JPG, WEBP, SVG).',
       );
       return;
     }
-    setUploadError(null);
-    setUploadImageFile(file);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      setUploadImagePreview(dataUrl);
-    };
-    reader.readAsDataURL(file);
+    setUploadError(null);
+    const newItems: typeof pendingUploads = [];
+
+    for (let i = 0; i < validFiles.length; i++) {
+      const file = validFiles[i];
+      try {
+        const processed = await processReferenceFile(file);
+        newItems.push({
+          file,
+          name: file.name,
+          preview: processed.dataUrl,
+          thumbnail: processed.thumbnailUrl,
+          type: inferTypeFromFilename(file.name),
+          fileSize: processed.fileSize,
+          mimeType: processed.mimeType,
+          isPrimary: (i === 0 && versionReferences.length === 0),
+        });
+      } catch (e) {
+        console.error('Failed to process image file:', file.name, e);
+      }
+    }
+
+    if (newItems.length > 0) {
+      setPendingUploads(newItems);
+      setUploadImageFile(newItems[0].file || null);
+      setUploadImagePreview(newItems[0].preview);
+      setUploadType(newItems[0].type);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      processImageFile(e.target.files[0]);
+    if (e.target.files && e.target.files.length > 0) {
+      processImageFiles(e.target.files);
     }
   };
 
@@ -225,8 +276,8 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      processImageFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processImageFiles(e.dataTransfer.files);
     }
   };
 
@@ -250,8 +301,38 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
       return;
     }
 
-    // If no custom file was chosen, generate high-quality stylized placeholder svg as data URL
+    // If multiple files were uploaded, persist all of them atomically!
+    if (pendingUploads.length > 1) {
+      try {
+        const batchItems = pendingUploads.map((item, idx) => ({
+          characterId: uploadCharId,
+          characterVersionId: uploadVersionId,
+          type: item.type,
+          image: item.preview,
+          thumbnail: item.thumbnail || item.preview,
+          description: `${item.type} reference asset for ${uploadCharId} (${uploadVersionId})`,
+          isPrimary: idx === 0 ? uploadIsPrimary : false,
+          customFilename: item.name,
+          fileSize: item.fileSize,
+          mimeType: item.mimeType,
+        }));
+
+        CharacterReferenceService.addMultipleReferences(batchItems);
+
+        setSelectedCharacterId(uploadCharId);
+        setSelectedVersionId(uploadVersionId);
+        setIsUploadModalOpen(false);
+        return;
+      } catch (err: any) {
+        setUploadError(err.message || 'Failed to register reference assets.');
+        return;
+      }
+    }
+
+    // If single custom file or no file (fallback SVG)
     let finalImageUrl = uploadImagePreview;
+    let finalThumbnail = pendingUploads[0]?.thumbnail;
+
     if (!finalImageUrl) {
       // Create lightweight SVG data URL representing model sheet
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
@@ -269,14 +350,16 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
         <text x="300" y="580" font-family="monospace" font-size="12" fill="#94a3b8" text-anchor="middle">${previewStoragePath}</text>
       </svg>`;
       finalImageUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+      finalThumbnail = finalImageUrl;
     }
 
     try {
-      const addedRef = CharacterReferenceService.addReference({
+      CharacterReferenceService.addReference({
         characterId: uploadCharId,
         characterVersionId: uploadVersionId,
         type: uploadType,
         image: finalImageUrl,
+        thumbnail: finalThumbnail || finalImageUrl,
         description:
           uploadDescription.trim() ||
           `${uploadType} reference asset for ${uploadCharId} (${uploadVersionId})`,
@@ -379,7 +462,14 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
                 key={char.id}
                 type="button"
                 id={`char-select-${char.id}`}
-                onClick={() => setSelectedCharacterId(char.id)}
+                onClick={() => {
+                  setSelectedCharacterId(char.id);
+                  const charVersions = characterVersions.filter((v) => v.characterId === char.id);
+                  const activeVer = charVersions.find((v) => v.id === char.activeVersionId) || charVersions[0];
+                  if (activeVer) {
+                    setSelectedVersionId(activeVer.id);
+                  }
+                }}
                 className={`p-3 rounded-xl border text-left transition-all flex items-center gap-3 ${
                   isSelected
                     ? 'bg-slate-800/90 border-amber-500/60 ring-2 ring-amber-500/20 shadow-md'
@@ -551,7 +641,7 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={formatLabel('Search asset ID, path, notes...', 'Tìm asset ID, path, ghi chú...')}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-500"
             />
           </div>
         </div>
@@ -845,6 +935,7 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
                 <input
                   ref={fileInputRef}
                   type="file"
+                  multiple
                   accept="image/png,image/jpeg,image/webp,image/svg+xml"
                   onChange={handleFileChange}
                   className="hidden"
@@ -858,12 +949,46 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
                   className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 ${
                     isDragging
                       ? 'border-amber-500 bg-amber-500/10'
-                      : uploadImagePreview
+                      : pendingUploads.length > 0 || uploadImagePreview
                       ? 'border-emerald-500/50 bg-emerald-500/5'
                       : 'border-slate-700 bg-slate-950 hover:border-slate-600'
                   }`}
                 >
-                  {uploadImagePreview ? (
+                  {pendingUploads.length > 1 ? (
+                    <div className="space-y-3 w-full">
+                      <div className="text-xs font-semibold text-emerald-400 flex items-center justify-between">
+                        <span className="flex items-center gap-1.5">
+                          <FileCheck className="w-4 h-4" />
+                          <span>
+                            {pendingUploads.length} {formatLabel('reference images ready to save', 'ảnh tham chiếu sẵn sàng lưu trữ')}
+                          </span>
+                        </span>
+                        <span className="text-[11px] text-slate-400 font-normal underline hover:text-white">
+                          {formatLabel('Click to add more', 'Nhấn để thêm ảnh')}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 max-h-48 overflow-y-auto p-1">
+                        {pendingUploads.map((item, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-slate-900 rounded-lg p-1.5 border border-slate-700 flex flex-col items-center shadow-sm"
+                          >
+                            <img
+                              src={item.thumbnail || item.preview}
+                              alt={item.name}
+                              className="w-full h-16 object-contain rounded bg-slate-950 border border-slate-800"
+                            />
+                            <div className="text-[10px] font-mono text-amber-300 mt-1 truncate max-w-full font-semibold uppercase">
+                              {item.type}
+                            </div>
+                            <div className="text-[9px] text-slate-400 truncate max-w-full font-mono">
+                              {item.name}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : uploadImagePreview ? (
                     <div className="space-y-2 w-full flex flex-col items-center">
                       <img
                         src={uploadImagePreview}

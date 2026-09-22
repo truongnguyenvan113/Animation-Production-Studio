@@ -132,22 +132,37 @@ export class CharacterReferenceService {
     isPrimary?: boolean;
     customFilename?: string;
     storagePath?: string;
+    thumbnail?: string;
     fileSize?: number;
     mimeType?: string;
     width?: number;
     height?: number;
   }): CharacterReference {
     const db = storageService.getDatabase();
+    
+    // Ensure characterVersionId belongs to characterId
+    let versionId = params.characterVersionId;
+    let targetVer = db.characterVersions.find((v) => v.id === versionId && v.characterId === params.characterId);
+    if (!targetVer) {
+      // Fall back to active version or first version of this character
+      const char = db.characters.find((c) => c.id === params.characterId);
+      targetVer = db.characterVersions.find((v) => v.id === char?.activeVersionId && v.characterId === params.characterId)
+        || db.characterVersions.find((v) => v.characterId === params.characterId);
+      if (targetVer) {
+        versionId = targetVer.id;
+      }
+    }
+
     const existingVersionRefs = this.getReferencesForCharacterAndVersion(
       params.characterId,
-      params.characterVersionId,
+      versionId,
     );
 
-    // Generate stable persistent asset ID
+    // Generate stable persistent asset ID with random suffix to prevent collisions on rapid uploads
     const shortChar = params.characterId.replace('char_', '');
-    const shortVer = params.characterVersionId.replace('ver_', '');
-    const cleanType = params.type.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const timestamp = Date.now().toString(36);
+    const shortVer = versionId.replace('ver_', '');
+    const cleanType = String(params.type || 'ref').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const timestamp = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
     const assetId = `ref_${shortChar}_${shortVer}_${cleanType}_${timestamp}`;
 
     const filename = params.customFilename
@@ -158,7 +173,7 @@ export class CharacterReferenceService {
       params.storagePath ||
       this.getCanonicalStoragePath(
         params.characterId,
-        params.characterVersionId,
+        versionId,
         filename,
       );
 
@@ -169,11 +184,11 @@ export class CharacterReferenceService {
     const newRef: CharacterReference = {
       id: assetId,
       characterId: params.characterId,
-      characterVersionId: params.characterVersionId,
+      characterVersionId: versionId,
       storagePath,
       type: params.type,
       image: params.image,
-      thumbnail: params.image,
+      thumbnail: params.thumbnail || params.image,
       description: params.description || `${params.type} reference asset`,
       isPrimary: willBePrimary,
       active: true,
@@ -188,7 +203,7 @@ export class CharacterReferenceService {
     let updatedRefs = [...db.characterReferences];
     if (willBePrimary) {
       updatedRefs = updatedRefs.map((r) => {
-        if (r.characterVersionId === params.characterVersionId) {
+        if (r.characterVersionId === versionId) {
           return { ...r, isPrimary: false };
         }
         return r;
@@ -199,7 +214,7 @@ export class CharacterReferenceService {
 
     // Synchronize Character DNA (CharacterVersion references)
     const updatedVersions = db.characterVersions.map((v) => {
-      if (v.id === params.characterVersionId) {
+      if (v.id === versionId) {
         const existingIds = v.referenceAssetIds || [];
         return {
           ...v,
@@ -218,6 +233,112 @@ export class CharacterReferenceService {
     });
 
     return newRef;
+  }
+
+  /**
+   * Adds multiple reference assets atomically in a single persistence call.
+   */
+  public static addMultipleReferences(
+    items: Array<{
+      characterId: string;
+      characterVersionId: string;
+      type: ReferenceType;
+      image: string;
+      thumbnail?: string;
+      description?: string;
+      isPrimary?: boolean;
+      customFilename?: string;
+      fileSize?: number;
+      mimeType?: string;
+      width?: number;
+      height?: number;
+    }>,
+  ): CharacterReference[] {
+    if (!items || items.length === 0) return [];
+    const db = storageService.getDatabase();
+    let currentRefs = [...db.characterReferences];
+    let currentVersions = [...db.characterVersions];
+    const created: CharacterReference[] = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const params = items[i];
+      let versionId = params.characterVersionId;
+      let targetVer = currentVersions.find((v) => v.id === versionId && v.characterId === params.characterId);
+      if (!targetVer) {
+        const char = db.characters.find((c) => c.id === params.characterId);
+        targetVer = currentVersions.find((v) => v.id === char?.activeVersionId && v.characterId === params.characterId)
+          || currentVersions.find((v) => v.characterId === params.characterId);
+        if (targetVer) {
+          versionId = targetVer.id;
+        }
+      }
+
+      const existingVersionRefs = currentRefs.filter(
+        (r) => r.characterId === params.characterId && r.characterVersionId === versionId,
+      );
+
+      const shortChar = params.characterId.replace('char_', '');
+      const shortVer = versionId.replace('ver_', '');
+      const cleanType = String(params.type || 'ref').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const timestamp = `${Date.now().toString(36)}_${i}_${Math.random().toString(36).substring(2, 6)}`;
+      const assetId = `ref_${shortChar}_${shortVer}_${cleanType}_${timestamp}`;
+
+      const filename = params.customFilename || `${assetId}.png`;
+      const storagePath = this.getCanonicalStoragePath(params.characterId, versionId, filename);
+
+      const willBePrimary = params.isPrimary === true || (existingVersionRefs.length === 0 && i === 0);
+
+      const newRef: CharacterReference = {
+        id: assetId,
+        characterId: params.characterId,
+        characterVersionId: versionId,
+        storagePath,
+        type: params.type,
+        image: params.image,
+        thumbnail: params.thumbnail || params.image,
+        description: params.description || `${params.type} reference asset`,
+        isPrimary: willBePrimary,
+        active: true,
+        createdAt: new Date().toISOString(),
+        fileSize: params.fileSize,
+        mimeType: params.mimeType,
+        width: params.width,
+        height: params.height,
+      };
+
+      if (willBePrimary) {
+        currentRefs = currentRefs.map((r) => {
+          if (r.characterVersionId === versionId) {
+            return { ...r, isPrimary: false };
+          }
+          return r;
+        });
+      }
+
+      currentRefs.unshift(newRef);
+      created.push(newRef);
+
+      currentVersions = currentVersions.map((v) => {
+        if (v.id === versionId) {
+          const existingIds = v.referenceAssetIds || [];
+          return {
+            ...v,
+            primaryReferenceAssetId: willBePrimary
+              ? newRef.id
+              : v.primaryReferenceAssetId || newRef.id,
+            referenceAssetIds: Array.from(new Set([...existingIds, newRef.id])),
+          };
+        }
+        return v;
+      });
+    }
+
+    storageService.saveDatabase({
+      characterReferences: currentRefs,
+      characterVersions: currentVersions,
+    });
+
+    return created;
   }
 
   /**

@@ -36,9 +36,26 @@ export class CharacterVersionService {
     }
 
     const current = db.characterVersions[index];
+
+    // Guarantee that referenceAssetIds always preserves all actual references belonging to this version
+    const actualRefs = (db.characterReferences || []).filter((r) => r.characterVersionId === versionId);
+    const actualRefIds = actualRefs.map((r) => r.id);
+    const mergedRefIds = Array.from(new Set([
+      ...actualRefIds,
+      ...(current.referenceAssetIds || []),
+      ...(updates.referenceAssetIds || []),
+    ]));
+
+    let primaryId = updates.primaryReferenceAssetId || current.primaryReferenceAssetId;
+    if (!primaryId || !mergedRefIds.includes(primaryId)) {
+      primaryId = actualRefs.find((r) => r.isPrimary)?.id || mergedRefIds[0];
+    }
+
     const updated: CharacterVersion = {
       ...current,
       ...updates,
+      referenceAssetIds: mergedRefIds,
+      primaryReferenceAssetId: primaryId,
     };
 
     const newVersions = [...db.characterVersions];

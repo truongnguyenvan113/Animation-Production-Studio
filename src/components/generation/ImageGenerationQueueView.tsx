@@ -411,7 +411,7 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
             <select
               value={selectedEpisodeId}
               onChange={(e) => setSelectedEpisodeId(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="all">{isVi ? 'Tất cả tập phim' : 'All Episodes'}</option>
               {db.episodes.map((ep) => (
@@ -425,7 +425,7 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
             <select
               value={selectedProvider}
               onChange={(e) => setSelectedProvider(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-900 font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
             >
               <option value="all">{isVi ? 'Tất cả Providers' : 'All Providers'}</option>
               {IMAGE_PROVIDER_SPECS.map((spec) => (
@@ -443,7 +443,7 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                 placeholder={isVi ? 'Tìm theo Shot ID, hành động...' : 'Search Shot ID, prompt...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 w-48 sm:w-56"
+                className="pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 w-48 sm:w-56"
               />
             </div>
           </div>

@@ -6,6 +6,8 @@ import {
 } from '../../types';
 import { CharacterReferenceService } from '../../services/characterReferenceService';
 import { CharacterService } from '../../services/characterService';
+import { storageService } from '../../services/storageService';
+import { processReferenceFile } from '../../services/imageAssetStorage';
 import { CharacterAvatar } from '../shared/CharacterAvatar';
 import { ReferenceCardPreview } from '../shared/ReferenceCardPreview';
 import {
@@ -90,7 +92,19 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
   const [uploadDescription, setUploadDescription] = useState<string>('');
   const [isPrimaryForVersion, setIsPrimaryForVersion] = useState<boolean>(false);
   const [selectedFileDataUrl, setSelectedFileDataUrl] = useState<string | null>(null);
+  const [selectedFileThumbnail, setSelectedFileThumbnail] = useState<string | null>(null);
   const [selectedFileName, setSelectedFileName] = useState<string>('');
+  const [pendingUploads, setPendingUploads] = useState<
+    Array<{
+      file: File;
+      name: string;
+      preview: string;
+      thumbnail?: string;
+      type: ReferenceType;
+      fileSize?: number;
+      mimeType?: string;
+    }>
+  >([]);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState<boolean>(false);
@@ -107,6 +121,9 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
 
   useEffect(() => {
     refreshReferences();
+    return storageService.subscribe(() => {
+      refreshReferences();
+    });
   }, [characterId, characterVersionId]);
 
   const showToast = (msg: string) => {
@@ -114,23 +131,60 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleFileSelect = (file: File) => {
-    if (!file.type.startsWith('image/')) {
+  const inferTypeFromFilename = (filename: string): ReferenceType => {
+    const lower = filename.toLowerCase();
+    if (lower.includes('three_quarter_left') || lower.includes('3_4_left') || lower.includes('34_left')) return '3/4';
+    if (lower.includes('three_quarter_right') || lower.includes('3_4_right') || lower.includes('34_right')) return '3/4';
+    if (lower.includes('hero_three_quarter') || lower.includes('hero_3_4') || lower.includes('hero')) return '3/4';
+    if (lower.includes('three_quarter') || lower.includes('3_4') || lower.includes('34') || lower.includes('beauty')) return '3/4';
+    if (lower.includes('left_side') || lower.includes('side_left')) return 'Side';
+    if (lower.includes('right_side') || lower.includes('side_right')) return 'Side';
+    if (lower.includes('front')) return 'Front';
+    if (lower.includes('side') || lower.includes('profile')) return 'Side';
+    if (lower.includes('expression')) return 'Expression';
+    if (lower.includes('full') || lower.includes('body') || lower.includes('stance')) return 'Full Body';
+    return 'Custom';
+  };
+
+  const handleFilesSelect = async (files: FileList | File[]) => {
+    const valid = Array.from(files).filter((f) => f.type.startsWith('image/'));
+    if (valid.length === 0) {
       alert(language === 'vi' ? 'Vui lòng chọn tệp hình ảnh hợp lệ (PNG, JPG, WEBP).' : 'Please choose a valid image file (PNG, JPG, WEBP).');
       return;
     }
-    setSelectedFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setSelectedFileDataUrl(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+
+    const items: typeof pendingUploads = [];
+    for (let i = 0; i < valid.length; i++) {
+      const file = valid[i];
+      try {
+        const processed = await processReferenceFile(file);
+        items.push({
+          file,
+          name: file.name,
+          preview: processed.dataUrl,
+          thumbnail: processed.thumbnailUrl,
+          type: inferTypeFromFilename(file.name),
+          fileSize: processed.fileSize,
+          mimeType: processed.mimeType,
+        });
+      } catch (err) {
+        console.error('Failed to process image:', file.name, err);
+      }
+    }
+
+    if (items.length > 0) {
+      setPendingUploads(items);
+      setSelectedFileDataUrl(items[0].preview);
+      setSelectedFileThumbnail(items[0].thumbnail || items[0].preview);
+      setSelectedFileName(items[0].name);
+      setUploadType(items[0].type);
+    }
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      handleFileSelect(files[0]);
+      handleFilesSelect(files);
     }
   };
 
@@ -138,7 +192,7 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
     e.preventDefault();
     setIsDragOver(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileSelect(e.dataTransfer.files[0]);
+      handleFilesSelect(e.dataTransfer.files);
     }
   };
 
@@ -154,7 +208,7 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
 
   const handleUploadSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedFileDataUrl) {
+    if (!selectedFileDataUrl && pendingUploads.length === 0) {
       alert(language === 'vi' ? 'Vui lòng tải lên tệp ảnh tham chiếu!' : 'Please upload a reference image file!');
       return;
     }
@@ -162,42 +216,79 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
     setIsUploading(true);
 
     try {
-      const cleanType = uploadType.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const assetFilename = selectedFileName
-        ? selectedFileName.replace(/\s+/g, '_')
-        : `ref_${characterId.replace('char_', '')}_${cleanType}_${Date.now().toString(36)}.png`;
-
-      const added = CharacterReferenceService.addReference({
-        characterId,
-        characterVersionId,
-        type: uploadType,
-        image: selectedFileDataUrl,
-        storagePath: CharacterReferenceService.getCanonicalStoragePath(
+      if (pendingUploads.length > 1) {
+        // Atomic batch upload
+        const batchItems = pendingUploads.map((item, idx) => ({
           characterId,
           characterVersionId,
-          assetFilename,
-        ),
-        description:
-          uploadDescription.trim() ||
-          `${uploadType} reference model sheet for ${character?.displayName || characterId} (${characterVersionId})`,
-        isPrimary: isPrimaryForVersion || references.length === 0,
-      });
+          type: item.type,
+          image: item.preview,
+          thumbnail: item.thumbnail || item.preview,
+          description: `${item.type} reference model sheet for ${character?.displayName || characterId} (${characterVersionId})`,
+          isPrimary: idx === 0 && (isPrimaryForVersion || references.length === 0),
+          customFilename: item.name,
+          fileSize: item.fileSize,
+          mimeType: item.mimeType,
+        }));
 
-      refreshReferences();
-      onAssetChanged?.();
+        CharacterReferenceService.addMultipleReferences(batchItems);
+        refreshReferences();
+        onAssetChanged?.();
 
-      // Reset form
-      setSelectedFileDataUrl(null);
-      setSelectedFileName('');
-      setUploadDescription('');
-      setIsPrimaryForVersion(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
+        setPendingUploads([]);
+        setSelectedFileDataUrl(null);
+        setSelectedFileThumbnail(null);
+        setSelectedFileName('');
+        setUploadDescription('');
+        setIsPrimaryForVersion(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
 
-      showToast(
-        language === 'vi'
-          ? `Đã lưu ảnh tham chiếu ${uploadType} vào kho ${added.storagePath}!`
-          : `Saved ${uploadType} reference asset to ${added.storagePath}!`,
-      );
+        showToast(
+          language === 'vi'
+            ? `Đã lưu thành công ${batchItems.length} ảnh tham chiếu vào kho!`
+            : `Successfully persisted ${batchItems.length} reference assets to storage!`,
+        );
+      } else {
+        const cleanType = uploadType.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const assetFilename = selectedFileName
+          ? selectedFileName.replace(/\s+/g, '_')
+          : `ref_${characterId.replace('char_', '')}_${cleanType}_${Date.now().toString(36)}.png`;
+
+        const added = CharacterReferenceService.addReference({
+          characterId,
+          characterVersionId,
+          type: uploadType,
+          image: selectedFileDataUrl!,
+          thumbnail: selectedFileThumbnail || selectedFileDataUrl!,
+          storagePath: CharacterReferenceService.getCanonicalStoragePath(
+            characterId,
+            characterVersionId,
+            assetFilename,
+          ),
+          description:
+            uploadDescription.trim() ||
+            `${uploadType} reference model sheet for ${character?.displayName || characterId} (${characterVersionId})`,
+          isPrimary: isPrimaryForVersion || references.length === 0,
+        });
+
+        refreshReferences();
+        onAssetChanged?.();
+
+        // Reset form
+        setPendingUploads([]);
+        setSelectedFileDataUrl(null);
+        setSelectedFileThumbnail(null);
+        setSelectedFileName('');
+        setUploadDescription('');
+        setIsPrimaryForVersion(false);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+
+        showToast(
+          language === 'vi'
+            ? `Đã lưu ảnh tham chiếu ${uploadType} vào kho ${added.storagePath}!`
+            : `Saved ${uploadType} reference asset to ${added.storagePath}!`,
+        );
+      }
     } catch (err: any) {
       alert(err?.message || 'Error saving reference asset.');
     } finally {
@@ -377,12 +468,33 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
             <input
               ref={fileInputRef}
               type="file"
+              multiple
               accept="image/*"
               className="hidden"
               onChange={handleFileInputChange}
             />
 
-            {selectedFileDataUrl ? (
+            {pendingUploads.length > 1 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs text-emerald-400 font-semibold">
+                  <span>
+                    ✓ {pendingUploads.length} {language === 'vi' ? 'ảnh tham chiếu sẵn sàng lưu trữ' : 'reference images ready to persist'}
+                  </span>
+                  <span className="text-[11px] text-slate-400 font-normal underline hover:text-white">
+                    {language === 'vi' ? 'Bấm để thêm ảnh' : 'Click to add more'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2">
+                  {pendingUploads.map((item, idx) => (
+                    <div key={idx} className="bg-slate-900 border border-slate-700 rounded-lg p-1.5 flex flex-col items-center">
+                      <img src={item.thumbnail || item.preview} alt={item.name} className="w-full h-14 object-contain rounded bg-slate-950" />
+                      <span className="text-[10px] text-amber-300 font-bold mt-1 uppercase truncate max-w-full font-mono">{item.type}</span>
+                      <span className="text-[9px] text-slate-400 truncate max-w-full font-mono">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : selectedFileDataUrl ? (
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <img
                   src={selectedFileDataUrl}
@@ -394,7 +506,7 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
                     {selectedFileName || 'image_reference.png'}
                   </span>
                   <span className="text-[11px] text-emerald-400 font-medium block mt-0.5">
-                    ✓ {language === 'vi' ? 'Đã tải tệp lên thành công' : 'Ready to save'}
+                    ✓ {language === 'vi' ? 'Đã sẵn sàng lưu' : 'Ready to save'}
                   </span>
                   <span className="text-[11px] text-slate-400 block mt-1">
                     {language === 'vi' ? 'Bấm để đổi tệp khác' : 'Click to choose another image'}
@@ -476,18 +588,21 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
                   ? 'Ví dụ: Tóc ngắn nâu, mắt to tròn, áo len vàng có hình phi thuyền...'
                   : 'E.g., Orthographic front turnaround, canonical proportions, yellow knit sweater...'
               }
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-amber-500 focus:outline-none"
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-400 focus:border-amber-500 focus:outline-none"
             />
           </div>
 
           {/* Submit Action */}
           <div className="flex items-center justify-end gap-3 pt-2">
-            {selectedFileDataUrl && (
+            {(selectedFileDataUrl || pendingUploads.length > 0) && (
               <button
                 type="button"
                 onClick={() => {
                   setSelectedFileDataUrl(null);
+                  setSelectedFileThumbnail(null);
                   setSelectedFileName('');
+                  setPendingUploads([]);
+                  if (fileInputRef.current) fileInputRef.current.value = '';
                 }}
                 className="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:text-white transition-colors"
               >
@@ -497,9 +612,9 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
 
             <button
               type="submit"
-              disabled={isUploading || !selectedFileDataUrl}
+              disabled={isUploading || (!selectedFileDataUrl && pendingUploads.length === 0)}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
-                selectedFileDataUrl
+                selectedFileDataUrl || pendingUploads.length > 0
                   ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed'
               }`}
@@ -508,6 +623,8 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
               <span>
                 {isUploading
                   ? language === 'vi' ? 'Đang lưu vào kho...' : 'Persisting to Storage...'
+                  : pendingUploads.length > 1
+                  ? language === 'vi' ? `Lưu & Khóa ${pendingUploads.length} Ảnh Vào Phiên Bản` : `Save & Persist ${pendingUploads.length} Images`
                   : language === 'vi' ? 'Lưu & Khóa Vào Phiên Bản' : 'Save & Persist to Version'}
               </span>
             </button>

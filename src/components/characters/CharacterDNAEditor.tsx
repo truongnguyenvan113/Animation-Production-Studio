@@ -7,6 +7,7 @@ import {
 } from '../../types';
 import { CharacterVersionService } from '../../services/characterVersionService';
 import { CharacterService } from '../../services/characterService';
+import { storageService } from '../../services/storageService';
 import { CharacterAvatar } from '../shared/CharacterAvatar';
 import { CharacterVersionReferenceLibrary } from './CharacterVersionReferenceLibrary';
 import {
@@ -61,12 +62,39 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
   const [setAsActive, setSetAsActive] = useState(true);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
 
+  // Sync selectedVersionId when character changes
+  useEffect(() => {
+    if (character) {
+      const targetVersionId = initialVersionId || character.activeVersionId || versions[0]?.id;
+      if (targetVersionId) {
+        setSelectedVersionId(targetVersionId);
+      }
+    }
+  }, [character?.id, character?.activeVersionId, initialVersionId]);
+
   // Sync formData when selectedVersionId changes
   useEffect(() => {
     const ver = CharacterVersionService.getVersionById(selectedVersionId);
     if (ver) {
       setFormData({ ...ver });
     }
+  }, [selectedVersionId]);
+
+  // Keep references in sync with database updates
+  useEffect(() => {
+    return storageService.subscribe(() => {
+      const ver = CharacterVersionService.getVersionById(selectedVersionId);
+      if (ver) {
+        setFormData((prev) => {
+          if (!prev || prev.id !== ver.id) return { ...ver };
+          return {
+            ...prev,
+            referenceAssetIds: ver.referenceAssetIds,
+            primaryReferenceAssetId: ver.primaryReferenceAssetId,
+          };
+        });
+      }
+    });
   }, [selectedVersionId]);
 
   if (!character || !formData) {

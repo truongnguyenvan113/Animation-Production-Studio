@@ -169,7 +169,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   max="60"
                   value={formData.durationSeconds}
                   onChange={(e) => handleChange('durationSeconds', parseInt(e.target.value) || 5)}
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -182,7 +182,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   value={formData.framing}
                   onChange={(e) => handleChange('framing', e.target.value)}
                   placeholder="Ví dụ: Trung cảnh hai nhân vật"
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -197,7 +197,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   value={formData.cameraMovement}
                   onChange={(e) => handleChange('cameraMovement', e.target.value)}
                   placeholder="Ví dụ: Tracking Pan theo bước chân nhân vật"
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -210,7 +210,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   value={formData.cameraAngle || ''}
                   onChange={(e) => handleChange('cameraAngle', e.target.value)}
                   placeholder="Ví dụ: Low-Angle 20° hoặc Eye-Level 0°"
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -223,7 +223,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                 rows={2}
                 value={formData.cameraDirection}
                 onChange={(e) => handleChange('cameraDirection', e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
           </div>
@@ -243,7 +243,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                 rows={3}
                 value={formData.action}
                 onChange={(e) => handleChange('action', e.target.value)}
-                className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
 
@@ -257,7 +257,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   value={formData.visualFocus || ''}
                   onChange={(e) => handleChange('visualFocus', e.target.value)}
                   placeholder="Ví dụ: Nụ cười rạng rỡ của Pi"
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -270,7 +270,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   value={formData.emotion}
                   onChange={(e) => handleChange('emotion', e.target.value)}
                   placeholder="Ví dụ: Hào hứng, ngây thơ"
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -319,7 +319,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   value={formData.dialogue || ''}
                   onChange={(e) => handleChange('dialogue', e.target.value)}
                   placeholder="Nhập câu thoại của nhân vật trong shot..."
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
             </div>
@@ -341,7 +341,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   type="text"
                   value={formData.continuityNotes?.characterPositions || ''}
                   onChange={(e) => handleContinuityChange('characterPositions', e.target.value)}
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -353,7 +353,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   type="text"
                   value={formData.continuityNotes?.propContinuity || ''}
                   onChange={(e) => handleContinuityChange('propContinuity', e.target.value)}
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -365,7 +365,7 @@ export const ShotEditorModal: React.FC<ShotEditorModalProps> = ({
                   type="text"
                   value={formData.continuityNotes?.previousShotRelationship || ''}
                   onChange={(e) => handleContinuityChange('previousShotRelationship', e.target.value)}
-                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  className="w-full text-xs rounded-lg border border-slate-300 px-3 py-2 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
             </div>

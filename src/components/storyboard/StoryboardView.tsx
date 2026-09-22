@@ -223,7 +223,7 @@ export const StoryboardView: React.FC<StoryboardViewProps> = ({
             id="storyboard-episode-selector"
             value={selectedEpisodeId}
             onChange={(e) => setSelectedEpisodeId(e.target.value)}
-            className="text-xs font-medium bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="text-xs font-medium bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
             {db.episodes.map((ep) => (
               <option key={ep.id} value={ep.id}>
