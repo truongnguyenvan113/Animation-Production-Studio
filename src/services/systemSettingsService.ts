@@ -103,6 +103,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
 
 export class SystemSettingsService {
   private static instance: SystemSettingsService;
+  private listeners: Set<(settings: SystemSettings) => void> = new Set();
 
   private constructor() {}
 
@@ -111,6 +112,55 @@ export class SystemSettingsService {
       SystemSettingsService.instance = new SystemSettingsService();
     }
     return SystemSettingsService.instance;
+  }
+
+  public subscribe(listener: (settings: SystemSettings) => void): () => void {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  }
+
+  private notify(settings: SystemSettings) {
+    this.listeners.forEach((fn) => {
+      try {
+        fn(settings);
+      } catch (err) {
+        console.error('Error notifying system settings listener:', err);
+      }
+    });
+  }
+
+  /**
+   * Resolves the active UI language mode from system settings.
+   * Priority:
+   * 1. settings.language.activeLanguage
+   * 2. settings.language.language
+   * 3. settings.language.primaryLocale ('vi-VN' -> 'vi', 'en-US' -> 'en')
+   * 4. settings.general.defaultLanguage ('vi-VN' -> 'vi', 'en-US' -> 'en')
+   * Default is 'vi'
+   */
+  public getActiveLanguageMode(): LanguageMode {
+    const settings = this.getSettings();
+    if (settings.language?.activeLanguage) {
+      return settings.language.activeLanguage;
+    }
+    if (settings.language?.language) {
+      return settings.language.language;
+    }
+    if (settings.language?.primaryLocale === 'vi-VN') {
+      return 'vi';
+    }
+    if (settings.language?.primaryLocale === 'en-US') {
+      return 'en';
+    }
+    if (settings.general?.defaultLanguage === 'vi-VN') {
+      return 'vi';
+    }
+    if (settings.general?.defaultLanguage === 'en-US') {
+      return 'en';
+    }
+    return 'vi';
   }
 
   /**
@@ -152,6 +202,7 @@ export class SystemSettingsService {
       ...updates,
     };
     storageService.saveDatabase({ systemSettings: newSettings });
+    this.notify(newSettings);
     return newSettings;
   }
 
@@ -160,6 +211,7 @@ export class SystemSettingsService {
    */
   public resetToDefaults(): SystemSettings {
     storageService.saveDatabase({ systemSettings: DEFAULT_SYSTEM_SETTINGS });
+    this.notify(DEFAULT_SYSTEM_SETTINGS);
     return DEFAULT_SYSTEM_SETTINGS;
   }
 

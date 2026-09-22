@@ -52,24 +52,13 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Language selector */}
         <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs font-medium">
           <button
-            onClick={() => onLanguageChange('bilingual')}
-            className={`px-2.5 py-1 rounded-md transition-colors ${
-              language === 'bilingual'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-            title="English + Tiếng Việt"
-          >
-            EN + VI
-          </button>
-          <button
             onClick={() => onLanguageChange('vi')}
             className={`px-2.5 py-1 rounded-md transition-colors ${
               language === 'vi'
                 ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
                 : 'text-slate-400 hover:text-slate-200'
             }`}
-            title="Tiếng Việt"
+            title="Tiếng Việt (Ngôn ngữ chính)"
           >
             Tiếng Việt
           </button>
@@ -83,6 +72,17 @@ export const Header: React.FC<HeaderProps> = ({
             title="English"
           >
             English
+          </button>
+          <button
+            onClick={() => onLanguageChange('bilingual')}
+            className={`px-2.5 py-1 rounded-md transition-colors ${
+              language === 'bilingual'
+                ? 'bg-amber-500 text-slate-950 font-bold shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="Song ngữ VI + EN (Bilingual Mode)"
+          >
+            VI + EN
           </button>
         </div>
 

@@ -10,6 +10,7 @@ import { CharacterService } from './services/characterService';
 import { EpisodeService } from './services/episodeService';
 import { StyleService } from './services/styleService';
 import { storageService } from './services/storageService';
+import { systemSettingsService } from './services/systemSettingsService';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { DashboardView } from './components/dashboard/DashboardView';
@@ -34,9 +35,27 @@ export default function App() {
   const [selectedCharacterId, setSelectedCharacterId] = useState<string>('char_pi');
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | undefined>(undefined);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('ep_009');
-  const [language, setLanguage] = useState<LanguageMode>('bilingual');
+  const [language, setLanguage] = useState<LanguageMode>(() => systemSettingsService.getActiveLanguageMode());
   const [backupModalMode, setBackupModalMode] = useState<'export' | 'import' | 'reset' | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = systemSettingsService.subscribe(() => {
+      setLanguage(systemSettingsService.getActiveLanguageMode());
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleLanguageChange = (newLang: LanguageMode) => {
+    setLanguage(newLang);
+    systemSettingsService.updateSettings({
+      language: {
+        ...systemSettingsService.getSettings().language,
+        language: newLang,
+        activeLanguage: newLang,
+      },
+    });
+  };
 
   const characters = CharacterService.getAllCharacters();
   const episodes = EpisodeService.getAllEpisodes();
@@ -95,7 +114,7 @@ export default function App() {
         <Header
           project={project}
           language={language}
-          onLanguageChange={setLanguage}
+          onLanguageChange={handleLanguageChange}
           onOpenExportModal={() => setBackupModalMode('export')}
           onOpenImportModal={() => setBackupModalMode('import')}
           onResetSeed={() => setBackupModalMode('reset')}

@@ -215,9 +215,9 @@ export interface SystemSettings {
     language?: 'vi' | 'en' | 'bilingual';
     activeLanguage?: 'vi' | 'en' | 'bilingual';
     locale?: string;
-    primaryLocale: 'vi-VN' | 'en-US' | string;
+    primaryLocale: 'vi-VN' | 'en-US';
     bilingualMode: boolean;
-    fallbackLocale: 'en-US' | 'vi-VN' | string;
+    fallbackLocale: 'en-US' | 'vi-VN';
   };
   aiModel: {
     defaultImageModel: string;

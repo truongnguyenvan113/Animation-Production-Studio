@@ -344,7 +344,29 @@ export const SystemSettingsView: React.FC = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">Ngôn ngữ giao diện chính:</label>
+                  <label className="font-bold text-slate-700">Ngôn ngữ hiển thị hoạt động (Active Language):</label>
+                  <select
+                    value={settings.language.language || (settings.language.primaryLocale === 'vi-VN' ? 'vi' : 'en')}
+                    onChange={(e) =>
+                      setSettings({
+                        ...settings,
+                        language: {
+                          ...settings.language,
+                          language: e.target.value as 'vi' | 'en' | 'bilingual',
+                          activeLanguage: e.target.value as 'vi' | 'en' | 'bilingual',
+                          locale: e.target.value === 'en' ? 'en-US' : 'vi-VN',
+                        },
+                      })
+                    }
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white font-medium text-slate-800"
+                  >
+                    <option value="vi">Tiếng Việt (vi) — Chuẩn Bắt Buộc (Mặc định)</option>
+                    <option value="en">English (en)</option>
+                    <option value="bilingual">Song ngữ VI + EN (Bilingual Mode)</option>
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700">Ngôn ngữ giao diện chuẩn (Primary Locale):</label>
                   <select
                     value={settings.language.primaryLocale}
                     disabled
@@ -366,6 +388,7 @@ export const SystemSettingsView: React.FC = () => {
                     className="w-full px-3 py-2 rounded-lg border border-slate-300"
                   >
                     <option value="en-US">English (en-US)</option>
+                    <option value="vi-VN">Tiếng Việt (vi-VN)</option>
                   </select>
                 </div>
               </div>
