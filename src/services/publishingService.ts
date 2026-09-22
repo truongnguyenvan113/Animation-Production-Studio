@@ -392,27 +392,99 @@ export class PublishingService {
   }
 
   /**
-   * Saves a custom or updated template
+   * Saves a custom or updated template and immediately syncs to disk
    */
-  public saveTemplate(template: PublishingTemplate): PublishingTemplate {
+  public async saveTemplate(template: PublishingTemplate): Promise<PublishingTemplate> {
     const db = storageService.getDatabase();
     const templates = Array.isArray(db.publishingTemplates)
       ? [...db.publishingTemplates]
       : [...DEFAULT_PUBLISHING_TEMPLATES];
 
-    const idx = templates.findIndex((t) => t.id === template.id);
+    const contentVal = template.content ?? template.contentStructure ?? '';
+    const normalized: PublishingTemplate = {
+      ...template,
+      platform: template.platform || template.type || 'youtube',
+      type: template.type || template.platform || 'youtube',
+      content: contentVal,
+      contentStructure: contentVal,
+      updatedAt: new Date().toISOString(),
+    };
+
+    const idx = templates.findIndex((t) => t.id === normalized.id);
     if (idx >= 0) {
-      templates[idx] = template;
+      templates[idx] = normalized;
     } else {
-      templates.push(template);
+      templates.push(normalized);
     }
     storageService.saveDatabase({ publishingTemplates: templates });
-    return template;
+    await storageService.saveToDisk();
+    return normalized;
+  }
+
+  /**
+   * Resets all publishing templates back to the default studio standards
+   */
+  public async resetTemplatesToDefault(): Promise<PublishingTemplate[]> {
+    const fresh = DEFAULT_PUBLISHING_TEMPLATES.map((t) => ({ ...t, updatedAt: new Date().toISOString() }));
+    storageService.saveDatabase({ publishingTemplates: fresh });
+    await storageService.saveToDisk();
+    return fresh;
+  }
+
+  /**
+   * Creates a new custom template
+   */
+  public async createTemplate(newTpl: Omit<PublishingTemplate, 'id'>): Promise<PublishingTemplate> {
+    const id = `tpl_${newTpl.platform || 'custom'}_${Date.now()}`;
+    const contentVal = newTpl.content ?? newTpl.contentStructure ?? '';
+    const template: PublishingTemplate = {
+      ...newTpl,
+      id,
+      platform: newTpl.platform || newTpl.type || 'youtube',
+      type: newTpl.type || newTpl.platform || 'youtube',
+      content: contentVal,
+      contentStructure: contentVal,
+      isDefault: false,
+      updatedAt: new Date().toISOString(),
+    };
+    return this.saveTemplate(template);
+  }
+
+  /**
+   * Deletes a template by ID
+   */
+  public async deleteTemplate(templateId: string): Promise<boolean> {
+    const db = storageService.getDatabase();
+    if (!Array.isArray(db.publishingTemplates)) return false;
+    const remaining = db.publishingTemplates.filter((t) => t.id !== templateId);
+    storageService.saveDatabase({ publishingTemplates: remaining });
+    await storageService.saveToDisk();
+    return true;
   }
 
   // =========================================================================
   // CONTENT GENERATION ALGORITHMS
   // =========================================================================
+
+  /**
+   * Interpolates template variables with actual episode brief data
+   */
+  public interpolateTemplate(templateString: string, brief: EpisodePublishingBrief): string {
+    const cleanTitle = brief.title.replace(/^Tập\s*\d+\s*[-–:]\s*/i, '').trim();
+    const summary = brief.storySummary?.trim() || cleanTitle;
+    const message =
+      brief.message?.trim() ||
+      'Một món đồ không cần hoàn hảo để trở nên đặc biệt. Tình yêu thương gia đình và tiếng cười biến mọi điều dang dở thành kỷ niệm ấm áp.';
+    const theme = brief.theme || 'Gia đình & Tuổi thơ';
+    const hashtags = this.generateHashtags(brief).join(' ');
+
+    return templateString
+      .replace(/\{episode_title\}/g, cleanTitle)
+      .replace(/\{story_summary\}/g, summary)
+      .replace(/\{educational_lesson\}/g, message)
+      .replace(/\{theme\}/g, theme)
+      .replace(/\{hashtags\}/g, hashtags);
+  }
 
   /**
    * YouTube Title Generator
@@ -446,9 +518,20 @@ export class PublishingService {
   }
 
   /**
-   * YouTube Description Generator
+   * YouTube Description Generator (Uses active template from library if available)
    */
-  public generateYouTubeDescription(brief: EpisodePublishingBrief): string {
+  public generateYouTubeDescription(brief: EpisodePublishingBrief, customTemplateContent?: string): string {
+    if (customTemplateContent) {
+      return this.interpolateTemplate(customTemplateContent, brief);
+    }
+
+    const templates = this.getTemplates();
+    const ytTemplate = templates.find((t) => t.platform === 'youtube' || t.type === 'youtube');
+    const tplText = ytTemplate?.content || ytTemplate?.contentStructure;
+    if (tplText && tplText.includes('{')) {
+      return this.interpolateTemplate(tplText, brief);
+    }
+
     const cleanTitle = brief.title.replace(/^Tập\s*\d+\s*[-–:]\s*/i, '').trim();
     const summary = brief.storySummary?.trim() || cleanTitle;
     const message =
@@ -493,9 +576,20 @@ ${hashtags}`;
   }
 
   /**
-   * Facebook Post Generator (Storytelling family narrative, natural Northern Vietnamese)
+   * Facebook Post Generator (Uses active template from library if available)
    */
-  public generateFacebookPost(brief: EpisodePublishingBrief): string {
+  public generateFacebookPost(brief: EpisodePublishingBrief, customTemplateContent?: string): string {
+    if (customTemplateContent) {
+      return this.interpolateTemplate(customTemplateContent, brief);
+    }
+
+    const templates = this.getTemplates();
+    const fbTemplate = templates.find((t) => t.platform === 'facebook' || t.type === 'facebook');
+    const tplText = fbTemplate?.content || fbTemplate?.contentStructure;
+    if (tplText && tplText.includes('{')) {
+      return this.interpolateTemplate(tplText, brief);
+    }
+
     const cleanTitle = brief.title.replace(/^Tập\s*\d+\s*[-–:]\s*/i, '').trim();
     const themeLower = (brief.theme || '').toLowerCase();
     const message =
@@ -544,10 +638,20 @@ Bố mẹ có câu chuyện đáng yêu nào của các bé nhà mình tuần n�
   }
 
   /**
-   * Hashtags Generator
+   * Hashtags Generator (Extracts from hashtag template if available)
    */
   public generateHashtags(brief: EpisodePublishingBrief): string[] {
-    const fixed = ['#Shorts', '#PiKem', '#KemTivi', '#GiaDinhPiKem', '#HoatHinhThieuNhi'];
+    const templates = this.getTemplates();
+    const hashTemplate = templates.find((t) => t.platform === 'hashtags' || t.type === 'hashtags');
+    let fixed = ['#Shorts', '#PiKem', '#KemTivi', '#GiaDinhPiKem', '#HoatHinhThieuNhi'];
+    if (Array.isArray(hashTemplate?.fixedHashtags) && hashTemplate.fixedHashtags.length > 0) {
+      fixed = hashTemplate.fixedHashtags;
+    } else if (hashTemplate?.content) {
+      const extracted = hashTemplate.content.match(/#[^\s#]+/g);
+      if (extracted && extracted.length > 0) {
+        fixed = extracted;
+      }
+    }
     const titleAndTheme = `${brief.title} ${brief.theme || ''}`.toLowerCase();
     const dynamicTags: string[] = [];
 
