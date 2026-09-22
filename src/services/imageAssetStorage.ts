@@ -83,9 +83,11 @@ export async function optimizeImageDataUrl(
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(img, 0, 0, width, height);
 
-    // Prefer image/webp or image/jpeg for substantial size savings
-    const mime = dataUrl.startsWith('data:image/png') ? 'image/png' : 'image/jpeg';
-    const optimized = canvas.toDataURL(mime, quality);
+    // Prefer image/webp or image/jpeg for quota-safe storage (~30KB-50KB)
+    let optimized = canvas.toDataURL('image/webp', quality);
+    if (!optimized.startsWith('data:image/webp')) {
+      optimized = canvas.toDataURL('image/jpeg', quality);
+    }
 
     // Return the smaller of the two if both are valid
     return optimized.length < dataUrl.length ? optimized : dataUrl;
@@ -156,8 +158,8 @@ export async function processReferenceFile(file: File): Promise<ProcessedReferen
 
       try {
         const [optimizedImage, thumbnail] = await Promise.all([
-          optimizeImageDataUrl(rawDataUrl, 1024, 0.88),
-          generateThumbnail(rawDataUrl, 200, 0.80),
+          optimizeImageDataUrl(rawDataUrl, 800, 0.82),
+          generateThumbnail(rawDataUrl, 160, 0.78),
         ]);
 
         let width = 1024;

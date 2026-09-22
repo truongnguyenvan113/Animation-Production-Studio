@@ -1,5 +1,11 @@
 import { CharacterReference, CharacterVersion, ReferenceType, Shot } from '../types';
 import { storageService } from './storageService';
+import {
+  resolveCanonicalCharacterId,
+  resolveCanonicalVersionId,
+  getAssociatedVersionIds,
+  getAssociatedCharacterIds,
+} from './characterAliasMap';
 
 export const CANONICAL_REFERENCE_TYPES: ReferenceType[] = [
   'front',
@@ -88,7 +94,8 @@ export class CharacterReferenceService {
    * ARCHITECTURAL RULE: Never mix assets between Character Versions.
    */
   public static getReferencesForVersion(versionId: string): CharacterReference[] {
-    return this.getAllReferences().filter((r) => r.characterVersionId === versionId);
+    const associated = getAssociatedVersionIds(versionId);
+    return this.getAllReferences().filter((r) => associated.includes(r.characterVersionId));
   }
 
   /**
@@ -99,8 +106,12 @@ export class CharacterReferenceService {
     characterId: string,
     versionId: string,
   ): CharacterReference[] {
+    const associatedVersions = getAssociatedVersionIds(versionId);
+    const associatedChars = getAssociatedCharacterIds(characterId);
     return this.getAllReferences().filter(
-      (r) => r.characterId === characterId && r.characterVersionId === versionId,
+      (r) =>
+        associatedChars.includes(r.characterId) &&
+        associatedVersions.includes(r.characterVersionId),
     );
   }
 
@@ -140,26 +151,26 @@ export class CharacterReferenceService {
   }): CharacterReference {
     const db = storageService.getDatabase();
     
-    // Ensure characterVersionId belongs to characterId
-    let versionId = params.characterVersionId;
-    let targetVer = db.characterVersions.find((v) => v.id === versionId && v.characterId === params.characterId);
+    const canonicalCharId = resolveCanonicalCharacterId(params.characterId) || params.characterId;
+    let versionId = resolveCanonicalVersionId(params.characterVersionId) || params.characterVersionId;
+    const associatedVersionIds = getAssociatedVersionIds(versionId);
+
+    let targetVer = db.characterVersions.find((v) => associatedVersionIds.includes(v.id));
     if (!targetVer) {
-      // Fall back to active version or first version of this character
-      const char = db.characters.find((c) => c.id === params.characterId);
-      targetVer = db.characterVersions.find((v) => v.id === char?.activeVersionId && v.characterId === params.characterId)
-        || db.characterVersions.find((v) => v.characterId === params.characterId);
+      const associatedChars = getAssociatedCharacterIds(canonicalCharId);
+      const char = db.characters.find((c) => associatedChars.includes(c.id));
+      targetVer =
+        db.characterVersions.find((v) => v.id === char?.activeVersionId) ||
+        db.characterVersions.find((v) => associatedChars.includes(v.characterId));
       if (targetVer) {
         versionId = targetVer.id;
       }
     }
 
-    const existingVersionRefs = this.getReferencesForCharacterAndVersion(
-      params.characterId,
-      versionId,
-    );
+    const existingVersionRefs = this.getReferencesForVersion(versionId);
 
     // Generate stable persistent asset ID with random suffix to prevent collisions on rapid uploads
-    const shortChar = params.characterId.replace('char_', '');
+    const shortChar = canonicalCharId.replace('char_', '');
     const shortVer = versionId.replace('ver_', '');
     const cleanType = String(params.type || 'ref').toLowerCase().replace(/[^a-z0-9]/g, '');
     const timestamp = `${Date.now().toString(36)}_${Math.random().toString(36).substring(2, 6)}`;
@@ -172,7 +183,7 @@ export class CharacterReferenceService {
     const storagePath =
       params.storagePath ||
       this.getCanonicalStoragePath(
-        params.characterId,
+        canonicalCharId,
         versionId,
         filename,
       );
@@ -183,7 +194,7 @@ export class CharacterReferenceService {
 
     const newRef: CharacterReference = {
       id: assetId,
-      characterId: params.characterId,
+      characterId: canonicalCharId,
       characterVersionId: versionId,
       storagePath,
       type: params.type,
@@ -203,7 +214,7 @@ export class CharacterReferenceService {
     let updatedRefs = [...db.characterReferences];
     if (willBePrimary) {
       updatedRefs = updatedRefs.map((r) => {
-        if (r.characterVersionId === versionId) {
+        if (associatedVersionIds.includes(r.characterVersionId)) {
           return { ...r, isPrimary: false };
         }
         return r;
@@ -212,16 +223,19 @@ export class CharacterReferenceService {
 
     updatedRefs = [newRef, ...updatedRefs];
 
-    // Synchronize Character DNA (CharacterVersion references)
+    // Synchronize Character DNA (CharacterVersion references) across associated version IDs
     const updatedVersions = db.characterVersions.map((v) => {
-      if (v.id === versionId) {
+      if (associatedVersionIds.includes(v.id)) {
         const existingIds = v.referenceAssetIds || [];
+        const newRefIds = Array.from(new Set([...existingIds, newRef.id]));
+        const verRefs = updatedRefs.filter((r) => associatedVersionIds.includes(r.characterVersionId));
         return {
           ...v,
+          references: verRefs,
           primaryReferenceAssetId: willBePrimary
             ? newRef.id
             : v.primaryReferenceAssetId || newRef.id,
-          referenceAssetIds: Array.from(new Set([...existingIds, newRef.id])),
+          referenceAssetIds: newRefIds,
         };
       }
       return v;
@@ -262,35 +276,41 @@ export class CharacterReferenceService {
 
     for (let i = 0; i < items.length; i++) {
       const params = items[i];
-      let versionId = params.characterVersionId;
-      let targetVer = currentVersions.find((v) => v.id === versionId && v.characterId === params.characterId);
+      const canonicalCharId = resolveCanonicalCharacterId(params.characterId) || params.characterId;
+      let versionId = resolveCanonicalVersionId(params.characterVersionId) || params.characterVersionId;
+      const associatedVersionIds = getAssociatedVersionIds(versionId);
+
+      let targetVer = currentVersions.find((v) => associatedVersionIds.includes(v.id));
       if (!targetVer) {
-        const char = db.characters.find((c) => c.id === params.characterId);
-        targetVer = currentVersions.find((v) => v.id === char?.activeVersionId && v.characterId === params.characterId)
-          || currentVersions.find((v) => v.characterId === params.characterId);
+        const associatedChars = getAssociatedCharacterIds(canonicalCharId);
+        const char = db.characters.find((c) => associatedChars.includes(c.id));
+        targetVer =
+          currentVersions.find((v) => v.id === char?.activeVersionId) ||
+          currentVersions.find((v) => associatedChars.includes(v.characterId));
         if (targetVer) {
           versionId = targetVer.id;
         }
       }
 
-      const existingVersionRefs = currentRefs.filter(
-        (r) => r.characterId === params.characterId && r.characterVersionId === versionId,
+      const existingVersionRefs = currentRefs.filter((r) =>
+        associatedVersionIds.includes(r.characterVersionId),
       );
 
-      const shortChar = params.characterId.replace('char_', '');
+      const shortChar = canonicalCharId.replace('char_', '');
       const shortVer = versionId.replace('ver_', '');
       const cleanType = String(params.type || 'ref').toLowerCase().replace(/[^a-z0-9]/g, '');
       const timestamp = `${Date.now().toString(36)}_${i}_${Math.random().toString(36).substring(2, 6)}`;
       const assetId = `ref_${shortChar}_${shortVer}_${cleanType}_${timestamp}`;
 
       const filename = params.customFilename || `${assetId}.png`;
-      const storagePath = this.getCanonicalStoragePath(params.characterId, versionId, filename);
+      const storagePath = this.getCanonicalStoragePath(canonicalCharId, versionId, filename);
 
-      const willBePrimary = params.isPrimary === true || (existingVersionRefs.length === 0 && i === 0);
+      const willBePrimary =
+        params.isPrimary === true || (existingVersionRefs.length === 0 && i === 0);
 
       const newRef: CharacterReference = {
         id: assetId,
-        characterId: params.characterId,
+        characterId: canonicalCharId,
         characterVersionId: versionId,
         storagePath,
         type: params.type,
@@ -308,7 +328,7 @@ export class CharacterReferenceService {
 
       if (willBePrimary) {
         currentRefs = currentRefs.map((r) => {
-          if (r.characterVersionId === versionId) {
+          if (associatedVersionIds.includes(r.characterVersionId)) {
             return { ...r, isPrimary: false };
           }
           return r;
@@ -319,14 +339,17 @@ export class CharacterReferenceService {
       created.push(newRef);
 
       currentVersions = currentVersions.map((v) => {
-        if (v.id === versionId) {
+        if (associatedVersionIds.includes(v.id)) {
           const existingIds = v.referenceAssetIds || [];
+          const newRefIds = Array.from(new Set([...existingIds, newRef.id]));
+          const verRefs = currentRefs.filter((r) => associatedVersionIds.includes(r.characterVersionId));
           return {
             ...v,
+            references: verRefs,
             primaryReferenceAssetId: willBePrimary
               ? newRef.id
               : v.primaryReferenceAssetId || newRef.id,
-            referenceAssetIds: Array.from(new Set([...existingIds, newRef.id])),
+            referenceAssetIds: newRefIds,
           };
         }
         return v;
@@ -350,8 +373,10 @@ export class CharacterReferenceService {
     const targetRef = db.characterReferences.find((r) => r.id === referenceId);
     if (!targetRef) return;
 
+    const associatedVersionIds = getAssociatedVersionIds(targetRef.characterVersionId);
+
     const updatedRefs = db.characterReferences.map((r) => {
-      if (r.characterVersionId === targetRef.characterVersionId) {
+      if (associatedVersionIds.includes(r.characterVersionId)) {
         return {
           ...r,
           isPrimary: r.id === referenceId,
@@ -361,9 +386,11 @@ export class CharacterReferenceService {
     });
 
     const updatedVersions = db.characterVersions.map((v) => {
-      if (v.id === targetRef.characterVersionId) {
+      if (associatedVersionIds.includes(v.id)) {
+        const verRefs = updatedRefs.filter((r) => associatedVersionIds.includes(r.characterVersionId));
         return {
           ...v,
+          references: verRefs,
           primaryReferenceAssetId: referenceId,
         };
       }
@@ -384,13 +411,14 @@ export class CharacterReferenceService {
     const targetRef = db.characterReferences.find((r) => r.id === referenceId);
     if (!targetRef) return;
 
+    const associatedVersionIds = getAssociatedVersionIds(targetRef.characterVersionId);
     const remainingRefs = db.characterReferences.filter((r) => r.id !== referenceId);
 
     // If target was primary, pick another reference in the same version as primary
     let newPrimaryId: string | undefined = undefined;
     if (targetRef.isPrimary) {
-      const versionSiblings = remainingRefs.filter(
-        (r) => r.characterVersionId === targetRef.characterVersionId,
+      const versionSiblings = remainingRefs.filter((r) =>
+        associatedVersionIds.includes(r.characterVersionId),
       );
       if (versionSiblings.length > 0) {
         versionSiblings[0].isPrimary = true;
@@ -399,15 +427,45 @@ export class CharacterReferenceService {
     }
 
     const updatedVersions = db.characterVersions.map((v) => {
-      if (v.id === targetRef.characterVersionId) {
+      if (associatedVersionIds.includes(v.id)) {
         const existingIds = (v.referenceAssetIds || []).filter((id) => id !== referenceId);
+        const verRefs = remainingRefs.filter((r) => associatedVersionIds.includes(r.characterVersionId));
         return {
           ...v,
+          references: verRefs,
           primaryReferenceAssetId:
             v.primaryReferenceAssetId === referenceId
               ? newPrimaryId
               : v.primaryReferenceAssetId,
           referenceAssetIds: existingIds,
+        };
+      }
+      return v;
+    });
+
+    storageService.saveDatabase({
+      characterReferences: remainingRefs,
+      characterVersions: updatedVersions,
+    });
+  }
+
+  /**
+   * Clears all reference assets for a specific Character Version.
+   */
+  public static clearReferencesForVersion(versionId: string): void {
+    const db = storageService.getDatabase();
+    const associatedVersionIds = getAssociatedVersionIds(versionId);
+    const remainingRefs = db.characterReferences.filter(
+      (r) => !associatedVersionIds.includes(r.characterVersionId),
+    );
+
+    const updatedVersions = db.characterVersions.map((v) => {
+      if (associatedVersionIds.includes(v.id)) {
+        return {
+          ...v,
+          references: [],
+          primaryReferenceAssetId: undefined,
+          referenceAssetIds: [],
         };
       }
       return v;

@@ -108,6 +108,7 @@ export interface CharacterVersion {
   status: CharacterStatus;
   primaryReferenceAssetId?: string; // Canonical primary reference asset ID
   referenceAssetIds?: string[]; // IDs of reference assets attached to this version
+  references?: CharacterReference[]; // Hydrated reference image assets attached to this version
   createdAt: string;
 }
 

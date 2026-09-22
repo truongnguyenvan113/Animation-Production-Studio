@@ -27,6 +27,13 @@ import {
   SEED_STORYBOARDS,
 } from './seedData';
 import { SEED_PROJECT_REFERENCES } from './projectReferenceService';
+import {
+  resolveCanonicalCharacterId,
+  resolveCanonicalVersionId,
+  getAssociatedVersionIds,
+  getAssociatedCharacterIds,
+} from './characterAliasMap';
+import { isVisualImage } from './characterImageResolver';
 
 const STORAGE_KEY = 'pikem_animation_studio_v2';
 const ALT_STORAGE_KEY = 'pi_kem_animation_studio_db';
@@ -175,68 +182,92 @@ export class StorageService {
             }
           }
 
-          // Audit and heal character references and versions
+          // Ensure characterReferences is initialized without overwriting user-authored empty states or uploads
           if (!Array.isArray(parsed.characterReferences)) {
             parsed.characterReferences = [...SEED_CHARACTER_REFERENCES];
-          } else {
-            // Merge any canonical seed references that are missing
-            const currentRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
-            for (const seedRef of SEED_CHARACTER_REFERENCES) {
-              if (!currentRefIds.has(seedRef.id)) {
-                parsed.characterReferences.push(seedRef);
+          }
+
+          // Ensure canonical versions exist (including alias versions ver_nancy_v1 and ver_leo_v1)
+          if (Array.isArray(parsed.characterVersions)) {
+            const currentVerIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
+            for (const seedVer of SEED_CHARACTER_VERSIONS) {
+              if (!currentVerIds.has(seedVer.id)) {
+                parsed.characterVersions.push({ ...seedVer });
               }
             }
+          } else {
+            parsed.characterVersions = [...SEED_CHARACTER_VERSIONS];
           }
 
           const validVersionIds = new Set(parsed.characterVersions.map((v: CharacterVersion) => v.id));
-          const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
+          validVersionIds.add('ver_nancy_v1');
+          validVersionIds.add('ver_leo_v1');
+          validVersionIds.add('ver_pi_v1');
+          validVersionIds.add('ver_kem_v1');
 
-          // Filter out truly invalid references (missing ID or pointing to non-existent characters/versions)
-          parsed.characterReferences = parsed.characterReferences.filter(
-            (ref: CharacterReference) =>
-              ref &&
-              ref.id &&
-              validCharIds.has(ref.characterId) &&
-              validVersionIds.has(ref.characterVersionId)
-          ).map((ref: CharacterReference) => {
-            if (ref.id === 'ref_pi_front' && (!ref.image || ref.image === 'pi_front')) {
+          const validCharIds = new Set(parsed.characters.map((c: Character) => c.id));
+          validCharIds.add('char_nancy');
+          validCharIds.add('char_leo');
+          validCharIds.add('char_pi');
+          validCharIds.add('char_kem');
+
+          // Normalize and retain all valid character references without silent loss
+          parsed.characterReferences = parsed.characterReferences
+            .filter((ref: CharacterReference) => ref && ref.id)
+            .map((ref: CharacterReference) => {
+              const canonChar = resolveCanonicalCharacterId(ref.characterId);
+              let img = ref.image;
+              let thumb = ref.thumbnail;
+              if (ref.id === 'ref_pi_front' && (!img || img === 'pi_front')) {
+                img = '/assets/aistudio/references/images/char_pi_turnaround.jpg';
+                thumb = '/assets/aistudio/references/images/char_pi_turnaround.jpg';
+              }
               return {
                 ...ref,
-                image: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
-                thumbnail: '/assets/aistudio/references/images/char_pi_turnaround.jpg',
+                characterId: canonChar || ref.characterId,
+                image: img,
+                thumbnail: thumb || img,
               };
-            }
-            return ref;
-          });
+            });
 
           const existingRefIds = new Set(parsed.characterReferences.map((r: CharacterReference) => r.id));
 
-          // Clean and synchronize reference IDs from versions, ensuring no valid uploaded reference is lost
+          // Clean, synchronize, and strictly populate references array and referenceAssetIds on versions
           parsed.characterVersions = parsed.characterVersions.map((ver: CharacterVersion) => {
-            // Find all actual references in database belonging to this version
-            const verRefs = parsed.characterReferences.filter(
-              (r: CharacterReference) => r.characterVersionId === ver.id
+            const associatedVersionIds = getAssociatedVersionIds(ver.id);
+            // Find all actual references belonging to this version or its alias
+            const verRefs = parsed.characterReferences.filter((r: CharacterReference) =>
+              associatedVersionIds.includes(r.characterVersionId),
             );
             const verRefIds = verRefs.map((r: CharacterReference) => r.id);
 
-            // Merge existing IDs with all actual refs for this version
-            const validRefIds = Array.from(
-              new Set([
-                ...verRefIds,
-                ...(ver.referenceAssetIds || []).filter((id: string) => existingRefIds.has(id)),
-              ])
-            );
+            let primaryId: string | undefined = undefined;
 
-            let primaryId = ver.primaryReferenceAssetId;
-            if (!primaryId || !existingRefIds.has(primaryId)) {
-              const explicitPrimary = verRefs.find((r: CharacterReference) => r.isPrimary)?.id;
-              primaryId = explicitPrimary || validRefIds[0];
+            if (verRefs.length > 0) {
+              // 1. Check existing primary ID if still valid
+              if (ver.primaryReferenceAssetId && existingRefIds.has(ver.primaryReferenceAssetId)) {
+                primaryId = ver.primaryReferenceAssetId;
+              }
+              // 2. Check explicit isPrimary flag
+              if (!primaryId) {
+                primaryId = verRefs.find((r: CharacterReference) => r.isPrimary)?.id;
+              }
+              // 3. Prefer real visual images over placeholder token strings
+              const visualRef = verRefs.find((r: CharacterReference) => isVisualImage(r.image));
+              const currentRefObj = primaryId ? verRefs.find((r: CharacterReference) => r.id === primaryId) : undefined;
+              if (visualRef && (!currentRefObj || !isVisualImage(currentRefObj.image))) {
+                primaryId = visualRef.id;
+              }
+              // 4. Default to first reference
+              if (!primaryId) {
+                primaryId = verRefIds[0];
+              }
+
+              // Synchronize isPrimary flags strictly on references for this version
+              verRefs.forEach((r: CharacterReference) => {
+                r.isPrimary = r.id === primaryId;
+              });
             }
-
-            // Sync isPrimary flags on references for this version
-            verRefs.forEach((r: CharacterReference) => {
-              r.isPrimary = r.id === primaryId;
-            });
 
             // Authoritative Master DNA Outfit Synchronization for Canonical v1.0 Locks
             let clothing = ver.clothing;
@@ -249,7 +280,8 @@ export class StorageService {
             return {
               ...ver,
               clothing,
-              referenceAssetIds: validRefIds,
+              references: verRefs,
+              referenceAssetIds: verRefIds,
               primaryReferenceAssetId: primaryId,
             };
           });
@@ -305,7 +337,28 @@ export class StorageService {
     };
   }
 
+  public syncVersionsAndReferences(): void {
+    if (!this.db || !Array.isArray(this.db.characterVersions)) return;
+    const refs = this.db.characterReferences || [];
+    this.db.characterVersions = this.db.characterVersions.map((ver) => {
+      const associated = getAssociatedVersionIds(ver.id);
+      const verRefs = refs.filter((r) => associated.includes(r.characterVersionId));
+      const verRefIds = verRefs.map((r) => r.id);
+      let primaryId = ver.primaryReferenceAssetId;
+      if (!primaryId || !verRefIds.includes(primaryId)) {
+        primaryId = verRefs.find((r) => r.isPrimary)?.id || verRefIds[0] || undefined;
+      }
+      return {
+        ...ver,
+        references: verRefs,
+        referenceAssetIds: verRefIds,
+        primaryReferenceAssetId: primaryId,
+      };
+    });
+  }
+
   public getDatabase(): StudioDatabase {
+    this.syncVersionsAndReferences();
     return this.db;
   }
 
@@ -315,6 +368,8 @@ export class StorageService {
       ...db,
       updatedAt: new Date().toISOString(),
     };
+
+    this.syncVersionsAndReferences();
 
     if (typeof localStorage !== 'undefined') {
       try {
