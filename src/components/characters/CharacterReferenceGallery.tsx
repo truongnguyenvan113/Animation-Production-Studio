@@ -171,20 +171,22 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
     });
   }, [versionReferences, selectedTypeFilter, searchQuery]);
 
-  const inferTypeFromFilename = (filename: string): ReferenceType => {
+  const inferTypeFromFilename = (filename: string): ReferenceType | null => {
     const lower = filename.toLowerCase();
     if (lower.includes('three_quarter_left') || lower.includes('3_4_left') || lower.includes('34_left')) return 'three_quarter_left';
     if (lower.includes('three_quarter_right') || lower.includes('3_4_right') || lower.includes('34_right')) return 'three_quarter_right';
     if (lower.includes('hero_three_quarter') || lower.includes('hero_3_4') || lower.includes('hero')) return 'hero_three_quarter';
-    if (lower.includes('three_quarter') || lower.includes('3_4') || lower.includes('34') || lower.includes('beauty')) return '3/4';
-    if (lower.includes('left_side') || lower.includes('side_left')) return 'left_side';
-    if (lower.includes('right_side') || lower.includes('side_right')) return 'right_side';
-    if (lower.includes('front')) return 'front';
-    if (lower.includes('side') || lower.includes('profile')) return 'side';
-    if (lower.includes('back') || lower.includes('rear')) return 'back';
-    if (lower.includes('expression')) return 'expression';
-    if (lower.includes('full') || lower.includes('body') || lower.includes('stance')) return 'full-body';
-    return 'custom';
+    if (lower.includes('three_quarter') || lower.includes('3_4') || lower.includes('34') || lower.includes('beauty') || lower.includes('3-4')) return '3/4';
+    if (lower.includes('left_side') || lower.includes('side_left') || lower.includes('ben_trai')) return 'left_side';
+    if (lower.includes('right_side') || lower.includes('side_right') || lower.includes('ben_phai')) return 'right_side';
+    if (lower.includes('front') || lower.includes('chinh_dien') || lower.includes('truoc') || lower.includes('mat_truoc')) return 'front';
+    if (lower.includes('side') || lower.includes('profile') || lower.includes('nghieng')) return 'side';
+    if (lower.includes('back') || lower.includes('rear') || lower.includes('sau')) return 'back';
+    if (lower.includes('expression') || lower.includes('bieu_cam') || lower.includes('cam_xuc')) return 'expression';
+    if (lower.includes('full') || lower.includes('body') || lower.includes('stance') || lower.includes('toan_than')) return 'full-body';
+    if (lower.includes('custom') || lower.includes('prop') || lower.includes('dao_cu') || lower.includes('phu_kien')) return 'custom';
+    // If filename does not contain specific keywords, return null to preserve the user's selected type (front by default)
+    return null;
   };
 
   // Handle open upload modal
@@ -234,12 +236,13 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
       const file = validFiles[i];
       try {
         const processed = await processReferenceFile(file);
+        const inferred = inferTypeFromFilename(file.name);
         newItems.push({
           file,
           name: file.name,
           preview: processed.dataUrl,
           thumbnail: processed.thumbnailUrl,
-          type: inferTypeFromFilename(file.name),
+          type: inferred || uploadType || 'front',
           fileSize: processed.fileSize,
           mimeType: processed.mimeType,
           isPrimary: (i === 0 && versionReferences.length === 0),
@@ -253,7 +256,10 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
       setPendingUploads(newItems);
       setUploadImageFile(newItems[0].file || null);
       setUploadImagePreview(newItems[0].preview);
-      setUploadType(newItems[0].type);
+      const firstInferred = inferTypeFromFilename(newItems[0].name);
+      if (firstInferred) {
+        setUploadType(firstInferred);
+      }
     }
   };
 

@@ -131,19 +131,21 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const inferTypeFromFilename = (filename: string): ReferenceType => {
+  const inferTypeFromFilename = (filename: string): ReferenceType | null => {
     const lower = filename.toLowerCase();
     if (lower.includes('three_quarter_left') || lower.includes('3_4_left') || lower.includes('34_left')) return '3/4';
     if (lower.includes('three_quarter_right') || lower.includes('3_4_right') || lower.includes('34_right')) return '3/4';
     if (lower.includes('hero_three_quarter') || lower.includes('hero_3_4') || lower.includes('hero')) return '3/4';
-    if (lower.includes('three_quarter') || lower.includes('3_4') || lower.includes('34') || lower.includes('beauty')) return '3/4';
-    if (lower.includes('left_side') || lower.includes('side_left')) return 'Side';
-    if (lower.includes('right_side') || lower.includes('side_right')) return 'Side';
-    if (lower.includes('front')) return 'Front';
-    if (lower.includes('side') || lower.includes('profile')) return 'Side';
-    if (lower.includes('expression')) return 'Expression';
-    if (lower.includes('full') || lower.includes('body') || lower.includes('stance')) return 'Full Body';
-    return 'Custom';
+    if (lower.includes('three_quarter') || lower.includes('3_4') || lower.includes('34') || lower.includes('beauty') || lower.includes('3-4')) return '3/4';
+    if (lower.includes('left_side') || lower.includes('side_left') || lower.includes('ben_trai')) return 'Side';
+    if (lower.includes('right_side') || lower.includes('side_right') || lower.includes('ben_phai')) return 'Side';
+    if (lower.includes('front') || lower.includes('chinh_dien') || lower.includes('truoc') || lower.includes('mat_truoc')) return 'Front';
+    if (lower.includes('side') || lower.includes('profile') || lower.includes('nghieng')) return 'Side';
+    if (lower.includes('expression') || lower.includes('bieu_cam') || lower.includes('cam_xuc')) return 'Expression';
+    if (lower.includes('full') || lower.includes('body') || lower.includes('stance') || lower.includes('toan_than')) return 'Full Body';
+    if (lower.includes('custom') || lower.includes('prop') || lower.includes('dao_cu') || lower.includes('phu_kien')) return 'Custom';
+    // If filename has no specific keyword, return null to keep the user's selected type (Front by default)
+    return null;
   };
 
   const handleFilesSelect = async (files: FileList | File[]) => {
@@ -158,12 +160,13 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
       const file = valid[i];
       try {
         const processed = await processReferenceFile(file);
+        const inferred = inferTypeFromFilename(file.name);
         items.push({
           file,
           name: file.name,
           preview: processed.dataUrl,
           thumbnail: processed.thumbnailUrl,
-          type: inferTypeFromFilename(file.name),
+          type: inferred || uploadType || 'Front',
           fileSize: processed.fileSize,
           mimeType: processed.mimeType,
         });
@@ -177,7 +180,10 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
       setSelectedFileDataUrl(items[0].preview);
       setSelectedFileThumbnail(items[0].thumbnail || items[0].preview);
       setSelectedFileName(items[0].name);
-      setUploadType(items[0].type);
+      const firstInferred = inferTypeFromFilename(items[0].name);
+      if (firstInferred) {
+        setUploadType(firstInferred);
+      }
     }
   };
 
