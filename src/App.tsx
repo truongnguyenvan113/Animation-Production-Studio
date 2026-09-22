@@ -36,12 +36,16 @@ export default function App() {
   const [selectedSeasonId, setSelectedSeasonId] = useState<string | undefined>(undefined);
   const [selectedEpisodeId, setSelectedEpisodeId] = useState<string>('ep_009');
   const [language, setLanguage] = useState<LanguageMode>(() => systemSettingsService.getActiveLanguageMode());
+  const [showLanguageSwitcher, setShowLanguageSwitcher] = useState<boolean>(() => {
+    return !!systemSettingsService.getSettings().language?.showLanguageSwitcher;
+  });
   const [backupModalMode, setBackupModalMode] = useState<'export' | 'import' | 'reset' | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = systemSettingsService.subscribe(() => {
+    const unsubscribe = systemSettingsService.subscribe((updatedSettings) => {
       setLanguage(systemSettingsService.getActiveLanguageMode());
+      setShowLanguageSwitcher(!!updatedSettings.language?.showLanguageSwitcher);
     });
     return () => unsubscribe();
   }, []);
@@ -115,9 +119,7 @@ export default function App() {
           project={project}
           language={language}
           onLanguageChange={handleLanguageChange}
-          onOpenExportModal={() => setBackupModalMode('export')}
-          onOpenImportModal={() => setBackupModalMode('import')}
-          onResetSeed={() => setBackupModalMode('reset')}
+          showLanguageSwitcher={showLanguageSwitcher}
         />
 
         {/* Scrollable Workspace Stage */}
@@ -244,7 +246,13 @@ export default function App() {
           )}
 
           {currentView === 'system-settings' && (
-            <SystemSettingsView language={language} />
+            <SystemSettingsView
+              language={language}
+              onOpenExportModal={() => setBackupModalMode('export')}
+              onOpenImportModal={() => setBackupModalMode('import')}
+              onResetSeed={() => setBackupModalMode('reset')}
+              onRefreshAll={handleRefreshAll}
+            />
           )}
         </main>
       </div>

@@ -218,6 +218,7 @@ export interface SystemSettings {
     primaryLocale: 'vi-VN' | 'en-US';
     bilingualMode: boolean;
     fallbackLocale: 'en-US' | 'vi-VN';
+    showLanguageSwitcher?: boolean;
   };
   aiModel: {
     defaultImageModel: string;

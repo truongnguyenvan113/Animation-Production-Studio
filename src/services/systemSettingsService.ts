@@ -27,6 +27,7 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     primaryLocale: 'vi-VN',
     bilingualMode: true,
     fallbackLocale: 'en-US',
+    showLanguageSwitcher: false,
   },
   aiModel: {
     defaultImageModel: 'imagen-3.0-generate-002',
