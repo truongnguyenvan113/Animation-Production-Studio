@@ -1,5 +1,71 @@
 @import "tailwindcss";
 
+/* =============================================================================
+   DESIGN TOKENS: FORM CONTROLS & INPUT READABILITY
+   Compliant with WCAG AA/AAA contrast guidelines.
+   Dark Studio Theme is default; Contextual Light Theme activates in light panels.
+   ============================================================================= */
+
+:root {
+  /* DARK STUDIO THEME (Default) */
+  --input-background: #020617;          /* slate-950 */
+  --input-background-elevated: #0f172a; /* slate-900 */
+  --input-foreground: #f8fafc;          /* slate-50: 19.7:1 contrast on #020617 */
+  --input-placeholder: #94a3b8;         /* slate-400: 8.0:1 contrast on #020617, distinctly secondary */
+  --input-border: #334155;              /* slate-700: clear visual boundary */
+  --input-border-hover: #475569;        /* slate-600 */
+  --input-focus-border: #f59e0b;        /* amber-500: signature production gold (9.1:1 contrast) */
+  --input-focus-ring: rgba(245, 158, 11, 0.3);
+  --input-disabled-foreground: #64748b; /* slate-500 */
+  --input-disabled-background: #1e293b; /* slate-800 */
+  --input-disabled-border: #334155;     /* slate-700 */
+  --input-readonly-foreground: #cbd5e1; /* slate-300 */
+  --input-readonly-background: #090e1a;
+  --input-select-option-bg: #0f172a;    /* slate-900 */
+  --input-select-option-text: #f8fafc;  /* slate-50 */
+}
+
+/* CONTEXTUAL LIGHT THEME
+   Automatically scoped to any light card, container, or modal across the studio
+   (System Settings, Google Flow Director import, Storyboard modals, Queue toolbar) */
+:is(.bg-white, .bg-slate-50, .bg-slate-100, .bg-slate-200, [data-theme="light"], .light-context, .light-panel) {
+  --input-background: #ffffff;          /* Pure White */
+  --input-background-elevated: #f8fafc; /* slate-50 */
+  --input-foreground: #0f172a;          /* slate-900: 18.1:1 contrast on white */
+  --input-placeholder: #64748b;         /* slate-500: 4.8:1 contrast on white (WCAG AA compliant) */
+  --input-border: #cbd5e1;              /* slate-300: clean defined border */
+  --input-border-hover: #94a3b8;        /* slate-400 */
+  --input-focus-border: #6366f1;        /* indigo-500: crisp focus indicator */
+  --input-focus-ring: rgba(99, 102, 241, 0.25);
+  --input-disabled-foreground: #64748b; /* slate-500 */
+  --input-disabled-background: #f1f5f9; /* slate-100 */
+  --input-disabled-border: #e2e8f0;     /* slate-200 */
+  --input-readonly-foreground: #334155; /* slate-700 */
+  --input-readonly-background: #f8fafc; /* slate-50 */
+  --input-select-option-bg: #ffffff;
+  --input-select-option-text: #0f172a;
+}
+
+/* CONTEXTUAL DARK STUDIO RE-ASSERTION
+   Ensures any dark modals or containers nested within light wrappers retain dark tokens */
+:is(.bg-slate-900, .bg-slate-950, .bg-[#0b1120], [data-theme="dark"], .dark-context, .dark-panel) {
+  --input-background: #020617;
+  --input-background-elevated: #0f172a;
+  --input-foreground: #f8fafc;
+  --input-placeholder: #94a3b8;
+  --input-border: #334155;
+  --input-border-hover: #475569;
+  --input-focus-border: #f59e0b;
+  --input-focus-ring: rgba(245, 158, 11, 0.3);
+  --input-disabled-foreground: #64748b;
+  --input-disabled-background: #1e293b;
+  --input-disabled-border: #334155;
+  --input-readonly-foreground: #cbd5e1;
+  --input-readonly-background: #090e1a;
+  --input-select-option-bg: #0f172a;
+  --input-select-option-text: #f8fafc;
+}
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -8,6 +74,81 @@
     margin: 0;
     padding: 0;
   }
+
+  /* Universal text-bearing input elements: guaranteed high-contrast foreground & background */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="color"]):not([type="file"]):not([type="hidden"]),
+  textarea,
+  select {
+    color: var(--input-foreground);
+    background-color: var(--input-background);
+  }
+
+  /* Placeholder typography: clearly secondary, but guaranteed WCAG AA contrast (>= 4.5:1) */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--input-placeholder) !important;
+    opacity: 1 !important;
+  }
+
+  /* Interactive hover border feedback */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="color"]):not([type="file"]):not([type="hidden"]):not(:disabled):not(:read-only):hover,
+  textarea:not(:disabled):not(:read-only):hover,
+  select:not(:disabled):hover {
+    border-color: var(--input-border-hover);
+  }
+
+  /* Keyboard & mouse focus: high-contrast border and visible ring */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="color"]):not([type="file"]):not([type="hidden"]):focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--input-focus-border) !important;
+    box-shadow: 0 0 0 2px var(--input-focus-ring) !important;
+    outline: none !important;
+  }
+
+  /* Disabled form fields: visually differentiated, muted, but still comfortably legible */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="file"]):disabled,
+  textarea:disabled,
+  select:disabled {
+    color: var(--input-disabled-foreground) !important;
+    background-color: var(--input-disabled-background) !important;
+    border-color: var(--input-disabled-border) !important;
+    cursor: not-allowed;
+    opacity: 0.9;
+  }
+
+  /* Read-only form fields */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="file"]):read-only:not(:disabled),
+  textarea:read-only:not(:disabled) {
+    color: var(--input-readonly-foreground);
+    background-color: var(--input-readonly-background);
+  }
+
+  /* Dropdown option items in native select controls */
+  select option {
+    background-color: var(--input-select-option-bg);
+    color: var(--input-select-option-text);
+  }
+
+  /* Accessible checkbox & radio accent indicators */
+  input[type="checkbox"],
+  input[type="radio"] {
+    accent-color: var(--input-focus-border);
+    cursor: pointer;
+  }
+
+  /* Combobox / searchable select triggers */
+  [role="combobox"] {
+    color: var(--input-foreground);
+    background-color: var(--input-background);
+  }
+}
+
+/* Elevate low-contrast borders on dark theme inputs to clear structural visibility */
+input.border-slate-800,
+textarea.border-slate-800,
+select.border-slate-800 {
+  border-color: var(--input-border);
 }
 
 /* Custom scrollbar for production studio UI */
