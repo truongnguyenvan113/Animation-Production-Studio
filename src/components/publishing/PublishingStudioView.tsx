@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PublishingLibraryView } from './PublishingLibraryView';
 import { PublishingStudioWorkspace } from './PublishingStudioWorkspace';
 
@@ -13,10 +13,17 @@ export const PublishingStudioView: React.FC<PublishingStudioViewProps> = ({
     initialEpisodeId || null
   );
 
+  useEffect(() => {
+    if (initialEpisodeId) {
+      setCurrentEpisodeId(initialEpisodeId);
+    }
+  }, [initialEpisodeId]);
+
   return (
     <div className="w-full">
       {currentEpisodeId ? (
         <PublishingStudioWorkspace
+          key={currentEpisodeId}
           initialEpisodeId={currentEpisodeId}
           onBackToLibrary={() => setCurrentEpisodeId(null)}
         />

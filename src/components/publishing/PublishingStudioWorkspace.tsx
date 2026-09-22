@@ -47,11 +47,20 @@ export const PublishingStudioWorkspace: React.FC<PublishingStudioWorkspaceProps>
   const episodes = db.episodes || [];
   const currentEpisode = episodes.find((e) => e.id === selectedEpisodeId);
 
-  // Sync pack whenever episodeId changes
+  // Sync pack whenever episodeId changes or initialEpisodeId updates
   useEffect(() => {
-    const currentPack = publishingService.getOrCreatePublishingPack(selectedEpisodeId);
-    setPack(currentPack);
-  }, [selectedEpisodeId]);
+    if (initialEpisodeId && initialEpisodeId !== selectedEpisodeId) {
+      setSelectedEpisodeId(initialEpisodeId);
+      const currentPack = publishingService.getOrCreatePublishingPack(initialEpisodeId);
+      setPack(currentPack);
+    }
+  }, [initialEpisodeId]);
+
+  const handleSelectEpisode = (newEpisodeId: string) => {
+    setSelectedEpisodeId(newEpisodeId);
+    const updatedPack = publishingService.getOrCreatePublishingPack(newEpisodeId);
+    setPack(updatedPack);
+  };
 
   const handlePackUpdated = (updatedPack: PublishingPack) => {
     setPack(updatedPack);
@@ -103,7 +112,7 @@ ${pack.facebook.post}`;
               <div className="relative inline-block">
                 <select
                   value={selectedEpisodeId}
-                  onChange={(e) => setSelectedEpisodeId(e.target.value)}
+                  onChange={(e) => handleSelectEpisode(e.target.value)}
                   className="appearance-none pl-3 pr-8 py-1 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 font-bold text-sm focus:outline-hidden focus:border-amber-500 cursor-pointer"
                 >
                   {episodes.map((ep) => (
@@ -268,6 +277,7 @@ ${pack.facebook.post}`;
       <div className="bg-slate-950 rounded-2xl">
         {activeTab === 'brief' && (
           <EpisodeBriefTab
+            key={pack.episodeId}
             pack={pack}
             episode={currentEpisode}
             onPackUpdated={handlePackUpdated}
@@ -276,22 +286,23 @@ ${pack.facebook.post}`;
         )}
 
         {activeTab === 'youtube' && (
-          <YouTubeTab pack={pack} onPackUpdated={handlePackUpdated} />
+          <YouTubeTab key={pack.episodeId} pack={pack} onPackUpdated={handlePackUpdated} />
         )}
 
         {activeTab === 'facebook' && (
-          <FacebookTab pack={pack} onPackUpdated={handlePackUpdated} />
+          <FacebookTab key={pack.episodeId} pack={pack} onPackUpdated={handlePackUpdated} />
         )}
 
         {activeTab === 'export' && (
           <ExportPackageTab
+            key={pack.episodeId}
             pack={pack}
             onNavigateToTab={(tab) => setActiveTab(tab as any)}
           />
         )}
 
         {activeTab === 'history' && (
-          <RevisionHistoryTab pack={pack} onPackUpdated={handlePackUpdated} />
+          <RevisionHistoryTab key={pack.episodeId} pack={pack} onPackUpdated={handlePackUpdated} />
         )}
 
         {activeTab === 'templates' && <TemplateSettingsTab />}

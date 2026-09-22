@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Youtube,
   Copy,
@@ -33,6 +33,11 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
   const [showAssetModal, setShowAssetModal] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
   const [previewDescription, setPreviewDescription] = useState(false);
+
+  // Synchronize local data whenever pack changes
+  useEffect(() => {
+    setData({ ...pack.youtube });
+  }, [pack.episodeId, pack.youtube]);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);

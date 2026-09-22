@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Facebook,
   Copy,
@@ -29,6 +29,11 @@ export const FacebookTab: React.FC<FacebookTabProps> = ({ pack, onPackUpdated })
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [showAssetModal, setShowAssetModal] = useState(false);
+
+  // Synchronize local data whenever pack changes
+  useEffect(() => {
+    setData({ ...pack.facebook });
+  }, [pack.episodeId, pack.facebook]);
 
   const copyToClipboard = (text: string, key: string) => {
     navigator.clipboard.writeText(text);

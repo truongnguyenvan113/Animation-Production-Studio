@@ -27,12 +27,25 @@ export class PublishingService {
   /**
    * Returns all publishing packs stored in the studio database
    */
+  /**
+   * Returns all publishing packs
+   */
   public getPublishingPacks(): PublishingPack[] {
     const db = storageService.getDatabase();
-    if (!Array.isArray(db.publishingPacks)) {
-      return [...SEED_PUBLISHING_PACKS];
+    const stored = Array.isArray(db.publishingPacks) ? db.publishingPacks : [];
+    // Ensure seed packs are present
+    let hasNewSeed = false;
+    const merged = [...stored];
+    for (const seed of SEED_PUBLISHING_PACKS) {
+      if (!merged.some((p) => p.episodeId === seed.episodeId)) {
+        merged.push(seed);
+        hasNewSeed = true;
+      }
     }
-    return db.publishingPacks;
+    if (hasNewSeed || !Array.isArray(db.publishingPacks)) {
+      storageService.saveDatabase({ publishingPacks: merged });
+    }
+    return merged;
   }
 
   /**
@@ -48,31 +61,90 @@ export class PublishingService {
    * if none exists, auto-prefilling from the episode's canonical data.
    */
   public getOrCreatePublishingPack(episodeId: string): PublishingPack {
-    const existing = this.getPublishingPackByEpisodeId(episodeId);
+    let existing = this.getPublishingPackByEpisodeId(episodeId);
+    const db = storageService.getDatabase();
+    const episode = db.episodes?.find((e) => e.id === episodeId);
+
+    // If existing exists, verify it has rich brief data; if brief is empty or generic, enrich it from episode
     if (existing) {
+      let changed = false;
+      const brief = { ...existing.episodeBrief };
+
+      if (
+        (!brief.storySummary || brief.storySummary === 'Câu chuyện dễ thương của gia đình Pi & Kem.') &&
+        (episode?.storyDraft?.premise || episode?.storyIdea)
+      ) {
+        brief.storySummary = episode.storyDraft?.premise || episode.storyIdea || brief.storySummary;
+        changed = true;
+      }
+      if (
+        (!brief.message || brief.message === 'Tình yêu thương gia đình và sự sẻ chia là bài học quý giá nhất.') &&
+        (episode?.educationalMessage || episode?.storyDraft?.educationalLesson)
+      ) {
+        brief.message = episode.educationalMessage || episode.storyDraft?.educationalLesson || brief.message;
+        changed = true;
+      }
+      if ((!brief.theme || brief.theme === 'Gia đình & Tình bạn') && episode?.theme) {
+        brief.theme = episode.theme;
+        changed = true;
+      }
+      if (!brief.title && episode?.title) {
+        brief.title = episode.title;
+        changed = true;
+      }
+
+      // If YouTube or Facebook content was empty, populate from templates
+      const ytTitle = existing.youtube?.title || this.generateYouTubeTitle(brief);
+      const ytDesc = existing.youtube?.description || this.generateYouTubeDescription(brief);
+      const ytTags = existing.youtube?.hashtags?.length ? existing.youtube.hashtags : this.generateHashtags(brief);
+      const fbPost = existing.facebook?.post || this.generateFacebookPost(brief);
+
+      if (changed || !existing.youtube?.title || !existing.youtube?.description || !existing.facebook?.post) {
+        existing = {
+          ...existing,
+          episodeBrief: brief,
+          youtube: {
+            ...existing.youtube,
+            title: ytTitle,
+            description: ytDesc,
+            hashtags: ytTags,
+          },
+          facebook: {
+            ...existing.facebook,
+            post: fbPost,
+          },
+        };
+        this.savePublishingPack(existing);
+      }
       return existing;
     }
 
-    const db = storageService.getDatabase();
-    const episode = db.episodes.find((e) => e.id === episodeId);
-
-    const title = episode?.title || `Tập ${episodeId}`;
-    const theme = episode?.theme || 'Gia đình & Tình bạn';
+    const rawTitle = episode?.title || `Tập ${episodeId}`;
+    const cleanTitle = rawTitle.replace(/^Tập\s*\d+\s*[-–:]\s*/i, '').trim() || rawTitle;
+    const theme = episode?.theme || 'Gia đình & Tuổi thơ';
     const storySummary =
-      episode?.storyDraft?.premise || episode?.storyIdea || 'Câu chuyện dễ thương của gia đình Pi & Kem.';
+      episode?.storyDraft?.premise ||
+      episode?.storyIdea ||
+      (episode?.storyDraft?.beginning ? `${episode.storyDraft.beginning} ${episode.storyDraft.middle || ''}` : '') ||
+      'Câu chuyện gia đình ấm áp, vui tươi của Pi & Kem.';
     const message =
       episode?.educationalMessage ||
       episode?.storyDraft?.educationalLesson ||
       'Tình yêu thương gia đình và sự sẻ chia là bài học quý giá nhất.';
-    const episodeType = 'Tập chuẩn (Standard)';
+    const episodeType = episode?.durationLimit?.includes('15s') || episode?.duration?.includes('15s')
+      ? 'Shorts / Điểm tin ngắn'
+      : 'Tập chuẩn (Standard)';
 
     const brief: EpisodePublishingBrief = {
-      title,
+      title: cleanTitle,
       theme,
       storySummary,
       message,
       episodeType,
     };
+
+    const defaultThumbUrl = '/assets/aistudio/references/images/char_pi_turnaround.jpg';
+    const defaultAssetId = 'ref_project_banner_hero';
 
     const newPack: PublishingPack = {
       id: `pub_${episodeId}`,
@@ -82,18 +154,25 @@ export class PublishingService {
         title: this.generateYouTubeTitle(brief),
         description: this.generateYouTubeDescription(brief),
         hashtags: this.generateHashtags(brief),
+        thumbnailAssetId: defaultAssetId,
+        thumbnailUrl: defaultThumbUrl,
         publishStatus: 'draft',
         timezone: 'Asia/Ho_Chi_Minh',
       },
       facebook: {
         post: this.generateFacebookPost(brief),
+        imageAssetId: defaultAssetId,
+        imageUrl: defaultThumbUrl,
         includeYoutubeLink: true,
         status: 'draft',
       },
-      assets: {},
+      assets: {
+        thumbnailAssetId: defaultAssetId,
+        thumbnailUrl: defaultThumbUrl,
+      },
       status: {
         videoReady: false,
-        thumbnailReady: false,
+        thumbnailReady: true,
         youtubeReady: true,
         facebookReady: true,
       },
@@ -114,15 +193,22 @@ export class PublishingService {
               title: this.generateYouTubeTitle(brief),
               description: this.generateYouTubeDescription(brief),
               hashtags: this.generateHashtags(brief),
+              thumbnailAssetId: defaultAssetId,
+              thumbnailUrl: defaultThumbUrl,
               publishStatus: 'draft',
               timezone: 'Asia/Ho_Chi_Minh',
             },
             facebook: {
               post: this.generateFacebookPost(brief),
+              imageAssetId: defaultAssetId,
+              imageUrl: defaultThumbUrl,
               includeYoutubeLink: true,
               status: 'draft',
             },
-            assets: {},
+            assets: {
+              thumbnailAssetId: defaultAssetId,
+              thumbnailUrl: defaultThumbUrl,
+            },
           },
         },
       ],

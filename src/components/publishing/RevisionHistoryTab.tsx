@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   History,
   RotateCcw,
@@ -27,6 +27,10 @@ export const RevisionHistoryTab: React.FC<RevisionHistoryTabProps> = ({
     pack.history && pack.history.length > 0 ? pack.history[0] : null
   );
   const [restoredSuccess, setRestoredSuccess] = useState(false);
+
+  useEffect(() => {
+    setSelectedRev(pack.history && pack.history.length > 0 ? pack.history[0] : null);
+  }, [pack.episodeId, pack.history]);
 
   const historyList = pack.history || [];
 

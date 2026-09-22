@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileText,
   Sparkles,
@@ -29,6 +29,11 @@ export const EpisodeBriefTab: React.FC<EpisodeBriefTabProps> = ({
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [showOverwriteModal, setShowOverwriteModal] = useState(false);
   const [generateMode, setGenerateMode] = useState<'all' | 'youtube' | 'facebook'>('all');
+
+  // Synchronize local brief whenever pack changes
+  useEffect(() => {
+    setBrief({ ...pack.episodeBrief });
+  }, [pack.episodeId, pack.episodeBrief]);
 
   const hasExistingContent =
     !!(pack.youtube?.title && pack.youtube?.title.trim()) ||
