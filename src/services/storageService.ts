@@ -628,6 +628,72 @@ export class StorageService {
     return false;
   }
 
+  public hasLocalStorageData(): boolean {
+    if (typeof localStorage === 'undefined') return false;
+    return !!(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(ALT_STORAGE_KEY));
+  }
+
+  public getLocalStorageRawData(): any | null {
+    if (typeof localStorage === 'undefined') return null;
+    try {
+      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(ALT_STORAGE_KEY);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.warn('Failed to parse localStorage data:', e);
+    }
+    return null;
+  }
+
+  public async migrateLegacyData(legacyData?: any): Promise<{ success: boolean; message: string; stats?: any }> {
+    try {
+      const dataToMigrate = legacyData || this.getLocalStorageRawData() || this.db;
+      const res = await fetch('/api/storage/migrate-legacy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: dataToMigrate }),
+      });
+      const json = await res.json();
+      if (res.ok && json.status === 'ok') {
+        if (json.data) {
+          this.db = this.normalizeLoadedDatabase(json.data);
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+            }
+          } catch {}
+          this.notify();
+        }
+        return {
+          success: true,
+          message: json.message || 'Đã chuyển đổi và ánh xạ dữ liệu sang cấu trúc thư mục mới thành công!',
+          stats: json.stats,
+        };
+      }
+      return {
+        success: false,
+        message: json.message || 'Lỗi khi gọi API chuyển đổi dữ liệu.',
+      };
+    } catch (err: any) {
+      console.error('Error invoking migrateLegacyData:', err);
+      return {
+        success: false,
+        message: `Lỗi kết nối máy chủ: ${err.message}`,
+      };
+    }
+  }
+
+  public async getStorageStructure(): Promise<any> {
+    try {
+      const res = await fetch('/api/storage/structure');
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.warn('Failed to fetch storage structure:', e);
+    }
+    return null;
+  }
+
   public subscribe(listener: () => void): () => void {
     this.listeners.push(listener);
     return () => {

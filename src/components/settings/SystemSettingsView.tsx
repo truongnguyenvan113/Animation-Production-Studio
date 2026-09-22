@@ -29,6 +29,9 @@ import {
   CheckCircle,
   HardDrive,
   RefreshCw,
+  FolderCheck,
+  ArrowRight,
+  FolderTree,
 } from 'lucide-react';
 
 interface SystemSettingsViewProps {
@@ -58,13 +61,66 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
   const [isSavingDisk, setIsSavingDisk] = useState(false);
   const [isReloadingDisk, setIsReloadingDisk] = useState(false);
 
+  // Legacy migration states
+  const [hasLocalStorage, setHasLocalStorage] = useState(() => storageService.hasLocalStorageData());
+  const [isMigrating, setIsMigrating] = useState(false);
+  const [migrationReport, setMigrationReport] = useState<any | null>(null);
+
   useEffect(() => {
     setSettings(systemSettingsService.getSettings());
     const unsub = storageService.subscribe(() => {
       setDiskStatus(storageService.getDiskSyncStatus());
+      setHasLocalStorage(storageService.hasLocalStorageData());
     });
     return unsub;
   }, []);
+
+  const handleMigrateFromLocalStorage = async () => {
+    if (!window.confirm('Chuyển đổi toàn bộ dữ liệu từ trình duyệt (LocalStorage) vào tệp data/database.json và ánh xạ ảnh sang thư mục mới?')) {
+      return;
+    }
+    setIsMigrating(true);
+    setMigrationReport(null);
+    try {
+      const raw = storageService.getLocalStorageRawData();
+      const res = await storageService.migrateLegacyData(raw);
+      if (res.success) {
+        setMigrationReport(res.stats);
+        setStorageStatusMessage({ type: 'success', text: res.message });
+        if (onRefreshAll) onRefreshAll();
+      } else {
+        setStorageStatusMessage({ type: 'error', text: res.message });
+      }
+    } catch (err: any) {
+      setStorageStatusMessage({ type: 'error', text: `Lỗi: ${err.message}` });
+    } finally {
+      setIsMigrating(false);
+    }
+  };
+
+  const handleMigrateFromUploadedFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsMigrating(true);
+    setMigrationReport(null);
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const res = await storageService.migrateLegacyData(parsed);
+      if (res.success) {
+        setMigrationReport(res.stats);
+        setStorageStatusMessage({ type: 'success', text: `Đã nạp file "${file.name}" và chuyển đổi vào cấu trúc thư mục mới thành công!` });
+        if (onRefreshAll) onRefreshAll();
+      } else {
+        setStorageStatusMessage({ type: 'error', text: res.message });
+      }
+    } catch (err: any) {
+      setStorageStatusMessage({ type: 'error', text: `Lỗi đọc file: ${err.message}` });
+    } finally {
+      setIsMigrating(false);
+      e.target.value = '';
+    }
+  };
 
   const handleForceSyncDisk = async () => {
     setIsSavingDisk(true);
@@ -1052,6 +1108,148 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
                     {isReloadingDisk ? 'Đang nạp lại...' : 'Tải lại dữ liệu từ tệp dự án'}
                   </button>
                 </div>
+              </div>
+
+              {/* SECTION 0.5: LEGACY DATA TO NEW FOLDER FORMAT MAPPER */}
+              <div className="p-5 bg-slate-950 rounded-xl border border-sky-500/30 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-sky-500/20 text-sky-400">
+                        <FolderTree className="w-4 h-4" />
+                      </div>
+                      <h4 className="font-bold text-sm text-white">
+                        Ánh Xạ Dữ Liệu Cũ Vào Định Dạng Thư Mục Mới (Legacy Data & Folder Mapper)
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-sky-500/10 text-sky-400 border border-sky-500/30">
+                        Tự Động Chuẩn Hóa
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      Bạn có thể tiếp tục sử dụng toàn bộ dữ liệu xưởng phim đã làm trước đây (từ LocalStorage hoặc tệp JSON cũ). Hệ thống sẽ tự động:
+                      <br />• <strong>Chuẩn hóa ID nhân vật:</strong> Ánh xạ bí danh cũ (Nancy ➔ Pi, Leo ➔ Kem, v.v.)
+                      <br />• <strong>Tổ chức thư mục chuẩn:</strong> Trích xuất toàn bộ ảnh Base64 thành các tệp ảnh thực tế trong thư mục <code className="text-sky-300 font-mono bg-slate-900 px-1 py-0.5 rounded">public/storage/characters/&#123;characterId&#125;/&#123;versionId&#125;/</code>
+                      <br />• <strong>Tối ưu hóa Database:</strong> Ghi cấu trúc sạch sẽ, gọn nhẹ vào <code className="text-amber-300 font-mono bg-slate-900 px-1 py-0.5 rounded">data/database.json</code>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Visual Architecture Mapping Schema */}
+                <div className="bg-slate-900/90 rounded-lg p-3.5 border border-slate-800 text-xs font-mono">
+                  <div className="text-[11px] text-slate-400 font-sans font-semibold mb-2">
+                    Sơ đồ luồng ánh xạ dữ liệu:
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
+                    <div className="bg-slate-950 p-2.5 rounded border border-slate-800 text-slate-400">
+                      <span className="text-rose-400 font-bold block mb-1">Dữ Liệu Cũ (Legacy)</span>
+                      • LocalStorage cũ<br />
+                      • Tệp JSON xuất trước đây<br />
+                      • Ảnh Base64 nặng chục MB<br />
+                      • ID cũ: char_nancy, char_leo
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded border border-sky-500/30 flex flex-col justify-center items-center text-center text-sky-300">
+                      <span className="text-sky-400 font-bold block mb-1">Bộ Ánh Xạ (Folder Mapper)</span>
+                      <ArrowRight className="w-5 h-5 my-1 text-sky-400" />
+                      Tự động trích xuất file & chuẩn hóa schema
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded border border-emerald-500/30 text-emerald-300">
+                      <span className="text-emerald-400 font-bold block mb-1">Định Dạng Thư Mục Mới</span>
+                      📁 data/database.json<br />
+                      📁 data/backups/...<br />
+                      📁 public/storage/characters/<br />
+                      &nbsp;&nbsp;└── char_kem/ver_kem_v1/
+                    </div>
+                  </div>
+                </div>
+
+                {/* Migration Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                  {/* Action 1: Migrate from LocalStorage */}
+                  <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <FolderCheck className="w-4 h-4 text-emerald-400" />
+                        Cách 1: Lấy từ trình duyệt (LocalStorage)
+                      </span>
+                      {hasLocalStorage ? (
+                        <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                          Phát hiện có dữ liệu
+                        </span>
+                      ) : (
+                        <span className="text-[10px] text-slate-500">Trống</span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Chuyển dữ liệu đã lưu trong bộ nhớ trình duyệt của bạn vào tệp data/database.json và tạo các thư mục ảnh thật.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={handleMigrateFromLocalStorage}
+                      disabled={isMigrating || !hasLocalStorage}
+                      className="w-full mt-1 px-3.5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-40 text-white font-bold text-xs inline-flex items-center justify-center gap-2 transition-colors shadow-sm"
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      {isMigrating ? 'Đang xử lý ánh xạ...' : 'Ánh xạ dữ liệu LocalStorage vào Folder mới'}
+                    </button>
+                  </div>
+
+                  {/* Action 2: Migrate from Old JSON File */}
+                  <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Upload className="w-4 h-4 text-sky-400" />
+                        Cách 2: Tải lên tệp JSON cũ từ máy tính
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Chọn tệp sao lưu JSON cũ từ máy tính. Hệ thống sẽ giải mã và phân bổ ngay vào các thư mục theo chuẩn mới.
+                    </p>
+                    <label className="w-full mt-1 px-3.5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 cursor-pointer text-white font-bold text-xs inline-flex items-center justify-center gap-2 transition-colors shadow-sm text-center">
+                      <Upload className="w-4 h-4" />
+                      <span>{isMigrating ? 'Đang chuyển đổi...' : 'Chọn tệp JSON cũ để chuyển đổi (.json)'}</span>
+                      <input
+                        type="file"
+                        accept=".json,application/json"
+                        disabled={isMigrating}
+                        onChange={handleMigrateFromUploadedFile}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Migration Report if completed */}
+                {migrationReport && (
+                  <div className="p-4 rounded-xl bg-emerald-950/40 border border-emerald-500/40 space-y-2.5 animate-fadeIn">
+                    <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span>Kết Quả Ánh Xạ Dữ Liệu Thành Công:</span>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-slate-300">
+                      <div className="bg-slate-950/80 p-2 rounded border border-emerald-500/20">
+                        <span className="text-slate-400 block text-[10px]">Nhân vật đã map:</span>
+                        <span className="font-bold text-white">{migrationReport.charactersCount}</span>
+                      </div>
+                      <div className="bg-slate-950/80 p-2 rounded border border-emerald-500/20">
+                        <span className="text-slate-400 block text-[10px]">Phiên bản DNA:</span>
+                        <span className="font-bold text-amber-400">{migrationReport.versionsCount}</span>
+                      </div>
+                      <div className="bg-slate-950/80 p-2 rounded border border-emerald-500/20">
+                        <span className="text-slate-400 block text-[10px]">Tài nguyên tham chiếu:</span>
+                        <span className="font-bold text-sky-400">{migrationReport.referencesCount}</span>
+                      </div>
+                      <div className="bg-slate-950/80 p-2 rounded border border-emerald-500/20">
+                        <span className="text-slate-400 block text-[10px]">Ảnh trích xuất thành file:</span>
+                        <span className="font-bold text-emerald-400">{migrationReport.extractedImagesCount} tệp</span>
+                      </div>
+                    </div>
+                    <div className="text-[11px] text-slate-400 font-mono">
+                      📁 Cấu trúc thư mục: <span className="text-amber-300">{migrationReport.folderStructure}</span> | File DB: <span className="text-amber-300">{migrationReport.databasePath}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* SECTION 1: EXPORT */}
