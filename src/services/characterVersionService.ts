@@ -2,6 +2,7 @@ import { CharacterVersion } from '../types';
 import { storageService } from './storageService';
 import { CharacterService } from './characterService';
 import { CharacterReferenceService } from './characterReferenceService';
+import { getAssociatedVersionIds } from './characterAliasMap';
 
 export class CharacterVersionService {
   public static getAllVersions(): CharacterVersion[] {
@@ -36,9 +37,12 @@ export class CharacterVersionService {
     }
 
     const current = db.characterVersions[index];
+    const associatedVersionIds = getAssociatedVersionIds(versionId);
 
-    // Guarantee that referenceAssetIds always preserves all actual references belonging to this version
-    const actualRefs = (db.characterReferences || []).filter((r) => r.characterVersionId === versionId);
+    // Guarantee that references always preserves all actual references belonging to this version or aliases
+    const actualRefs = (db.characterReferences || []).filter((r) =>
+      associatedVersionIds.includes(r.characterVersionId),
+    );
     const actualRefIds = actualRefs.map((r) => r.id);
     const mergedRefIds = Array.from(new Set([
       ...actualRefIds,
@@ -51,15 +55,30 @@ export class CharacterVersionService {
       primaryId = actualRefs.find((r) => r.isPrimary)?.id || mergedRefIds[0];
     }
 
+    // Explicitly enforce references: actualRefs so that DNA updates never overwrite or drop reference images
     const updated: CharacterVersion = {
       ...current,
       ...updates,
+      references: actualRefs,
       referenceAssetIds: mergedRefIds,
       primaryReferenceAssetId: primaryId,
     };
 
-    const newVersions = [...db.characterVersions];
-    newVersions[index] = updated;
+    const newVersions = db.characterVersions.map((v) => {
+      if (v.id === versionId) {
+        return updated;
+      }
+      if (associatedVersionIds.includes(v.id)) {
+        return {
+          ...v,
+          references: actualRefs,
+          referenceAssetIds: mergedRefIds,
+          primaryReferenceAssetId: primaryId,
+        };
+      }
+      return v;
+    });
+
     storageService.saveDatabase({ characterVersions: newVersions });
     return updated;
   }

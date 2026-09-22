@@ -89,7 +89,8 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
           if (!prev || prev.id !== ver.id) return { ...ver };
           return {
             ...prev,
-            referenceAssetIds: ver.referenceAssetIds,
+            references: ver.references || [],
+            referenceAssetIds: ver.referenceAssetIds || [],
             primaryReferenceAssetId: ver.primaryReferenceAssetId,
           };
         });
@@ -121,7 +122,15 @@ export const CharacterDNAEditor: React.FC<CharacterDNAEditorProps> = ({
 
   const handleSaveCurrent = () => {
     if (!formData) return;
-    CharacterVersionService.updateVersion(formData.id, formData);
+    // Always fetch latest reference state to guarantee DNA save never overwrites or drops references
+    const latest = CharacterVersionService.getVersionById(formData.id);
+    const payloadToSave: CharacterVersion = {
+      ...formData,
+      references: latest?.references || formData.references || [],
+      referenceAssetIds: latest?.referenceAssetIds || formData.referenceAssetIds || [],
+      primaryReferenceAssetId: latest?.primaryReferenceAssetId || formData.primaryReferenceAssetId,
+    };
+    CharacterVersionService.updateVersion(formData.id, payloadToSave);
     setSaveSuccessMessage(
       language === 'vi'
         ? `Đã lưu thành công phiên bản DNA ${formData.version}!`

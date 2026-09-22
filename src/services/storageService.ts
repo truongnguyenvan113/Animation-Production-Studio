@@ -35,8 +35,8 @@ import {
 } from './characterAliasMap';
 import { isVisualImage } from './characterImageResolver';
 
-const STORAGE_KEY = 'pikem_animation_studio_v2';
-const ALT_STORAGE_KEY = 'pi_kem_animation_studio_db';
+const STORAGE_KEY = 'pi_kem_animation_studio_db';
+const ALT_STORAGE_KEY = 'pikem_animation_studio_v2';
 
 function sanitizeImageUri(uri?: string): string | undefined {
   if (!uri) return uri;
@@ -376,27 +376,28 @@ export class StorageService {
         const payload = JSON.stringify(this.db);
         localStorage.setItem(STORAGE_KEY, payload);
         try {
-          localStorage.setItem(ALT_STORAGE_KEY, payload);
+          // Remove duplicate legacy key to free up 50% storage quota
+          localStorage.removeItem(ALT_STORAGE_KEY);
         } catch {}
       } catch (e: any) {
         console.warn('First attempt to save database threw an error (likely quota exceeded). Pruning transient jobs cache...', e);
         try {
+          try {
+            localStorage.removeItem(ALT_STORAGE_KEY);
+          } catch {}
           // Prune transient large outputs from imageGenerationJobs and flowGenerationJobs without losing references
-          if (Array.isArray(this.db.imageGenerationJobs) && this.db.imageGenerationJobs.length > 5) {
-            this.db.imageGenerationJobs = this.db.imageGenerationJobs.slice(0, 5).map((job) => ({
+          if (Array.isArray(this.db.imageGenerationJobs) && this.db.imageGenerationJobs.length > 3) {
+            this.db.imageGenerationJobs = this.db.imageGenerationJobs.slice(0, 3).map((job) => ({
               ...job,
-              outputAssets: (job.outputAssets || []).slice(0, 2),
+              outputAssets: (job.outputAssets || []).slice(0, 1),
             }));
           }
-          if (Array.isArray(this.db.flowGenerationJobs) && this.db.flowGenerationJobs.length > 5) {
-            this.db.flowGenerationJobs = this.db.flowGenerationJobs.slice(0, 5);
+          if (Array.isArray(this.db.flowGenerationJobs) && this.db.flowGenerationJobs.length > 3) {
+            this.db.flowGenerationJobs = this.db.flowGenerationJobs.slice(0, 3);
           }
 
           const prunedPayload = JSON.stringify(this.db);
           localStorage.setItem(STORAGE_KEY, prunedPayload);
-          try {
-            localStorage.setItem(ALT_STORAGE_KEY, prunedPayload);
-          } catch {}
           console.info('Database successfully persisted after pruning transient render history.');
         } catch (retryErr) {
           console.error('Critical: Failed to save database to localStorage even after pruning:', retryErr);

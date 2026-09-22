@@ -49,19 +49,19 @@ export function resolveCanonicalCharacterId(characterId: string): string {
 export function resolveCanonicalVersionId(versionId: string): string {
   if (!versionId) return versionId;
   const lower = versionId.toLowerCase().trim();
-  if (lower === 'ver_nancy_v1' || lower === 'ver_pi_v1') {
+  if (lower === 'ver_nancy_v1' || lower === 'ver_pi_v1' || lower === 'ver_pi' || lower === 'ver_nancy') {
     return 'ver_pi_v1';
   }
-  if (lower === 'ver_leo_v1' || lower === 'ver_kem_v1') {
+  if (lower === 'ver_leo_v1' || lower === 'ver_kem_v1' || lower === 'ver_kem' || lower === 'ver_leo') {
     return 'ver_kem_v1';
   }
-  if (lower === 'ver_ethan_v1') {
+  if (lower === 'ver_ethan_v1' || lower === 'ver_ethan') {
     return 'ver_ethan_v1';
   }
-  if (lower === 'ver_emma_v1') {
+  if (lower === 'ver_emma_v1' || lower === 'ver_emma') {
     return 'ver_emma_v1';
   }
-  if (lower === 'ver_mochi_v1') {
+  if (lower === 'ver_mochi_v1' || lower === 'ver_mochi') {
     return 'ver_mochi_v1';
   }
   return versionId;
@@ -73,11 +73,20 @@ export function resolveCanonicalVersionId(versionId: string): string {
 export function getAssociatedVersionIds(versionId: string): string[] {
   if (!versionId) return [];
   const lower = versionId.toLowerCase().trim();
-  if (lower === 'ver_nancy_v1' || lower === 'ver_pi_v1') {
+  if (lower === 'ver_nancy_v1' || lower === 'ver_pi_v1' || lower === 'ver_pi' || lower === 'ver_nancy') {
     return ['ver_pi_v1', 'ver_nancy_v1'];
   }
-  if (lower === 'ver_leo_v1' || lower === 'ver_kem_v1') {
+  if (lower === 'ver_leo_v1' || lower === 'ver_kem_v1' || lower === 'ver_kem' || lower === 'ver_leo') {
     return ['ver_kem_v1', 'ver_leo_v1'];
+  }
+  if (lower === 'ver_ethan_v1' || lower === 'ver_ethan') {
+    return ['ver_ethan_v1'];
+  }
+  if (lower === 'ver_emma_v1' || lower === 'ver_emma') {
+    return ['ver_emma_v1'];
+  }
+  if (lower === 'ver_mochi_v1' || lower === 'ver_mochi') {
+    return ['ver_mochi_v1'];
   }
   return [versionId];
 }
