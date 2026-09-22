@@ -1148,7 +1148,7 @@ export class ImageGenerationService {
   <g transform="translate(900, 85)">
     <rect x="0" y="0" width="320" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
     <text x="306" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="${accentColor}" text-anchor="end">
-      PROVIDER: ${job.provider.toUpperCase()}
+      PROVIDER: ${String(job.provider || 'STUDIO').toUpperCase()}
     </text>
     <text x="306" y="40" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="end">
       SEED: #${seed} • STEPS: ${job.params.steps || 30} • QA VALIDATED

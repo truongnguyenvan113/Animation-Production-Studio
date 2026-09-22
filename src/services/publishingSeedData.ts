@@ -4,6 +4,7 @@ export const DEFAULT_PUBLISHING_TEMPLATES: PublishingTemplate[] = [
   {
     id: 'tpl_youtube_standard_v1',
     type: 'youtube',
+    platform: 'youtube',
     name: 'Pi & Kem — YouTube Standard v1',
     description: 'Mẫu chuẩn xuất bản YouTube cho kênh Kem Tivi, tối ưu SEO, đầy đủ giới thiệu nhân vật và thông điệp.',
     isDefault: true,
@@ -15,11 +16,31 @@ export const DEFAULT_PUBLISHING_TEMPLATES: PublishingTemplate[] = [
 5. Thông điệp giáo dục ý nghĩa
 6. Thông tin tập phim & Kêu gọi hành động (CTA Subscribe)
 7. Bộ thẻ Hashtag chính thức`,
+    content: `🎬 {episode_title} | Phim Hoạt Hình 3D Pi & Kem Gia Đình | Kem Tivi
+
+✨ TÓM TẮT NỘI DUNG:
+{story_summary}
+
+💡 BÀI HỌC GIÁO DỤC Ý NGHĨA:
+{educational_lesson}
+
+👨‍👩‍👧‍👦 CHÀO MỪNG ĐẾN VỚI THẾ GIỚI HOẠT HÌNH PI & KEM:
+Kênh Kem Tivi mang đến những thước phim hoạt hình 3D Việt Nam vui nhộn, ấm áp và giàu tính giáo dục dành cho thiếu nhi và cả gia đình.
+- Pi: Cậu bé 6 tuổi hiếu động, thông minh và giàu lòng nhân ái.
+- Kem: Cô em gái 3.5 tuổi tinh nghịch, thích bắt chước anh trai.
+- Ba Trường & Mẹ Vân: Luôn đồng hành, thấu hiểu và lắng nghe các con.
+- Chú cún Mochi: Thành viên 4 chân đáng yêu luôn tạo nên những tràng cười sảng khoái!
+
+🔔 Đừng quên bấm ĐĂNG KÝ KÊNH (Subscribe) và nhấn Chuông thông báo để không bỏ lỡ tập phim mới mỗi tuần nhé!
+👉 Theo dõi Fanpage chính thức: fb.com/giadinhpikem
+
+{hashtags}`,
     fixedHashtags: ['#Shorts', '#PiKem', '#KemTivi', '#GiaDinhPiKem', '#HoatHinhThieuNhi'],
   },
   {
     id: 'tpl_facebook_storytelling_v1',
     type: 'facebook',
+    platform: 'facebook',
     name: 'Pi & Kem Storytelling v1 (Gia đình & Tâm sự cha mẹ)',
     description: 'Mẫu bài viết Facebook phong cách tâm sự gia đình ấm áp, giọng kể tự nhiên miền Bắc, kết nối cảm xúc cha mẹ.',
     isDefault: true,
@@ -31,14 +52,28 @@ export const DEFAULT_PUBLISHING_TEMPLATES: PublishingTemplate[] = [
 5. Lời nhắn nhủ nhẹ nhàng dành cho các gia đình
 6. Liên kết xem trọn vẹn tập phim trên YouTube (tùy chọn)
 7. Bộ thẻ Hashtag Facebook`,
+    content: `🏮 {episode_title} — "Hóa ra niềm vui của con trẻ đôi khi giản dị đến bất ngờ..."
+
+{story_summary}
+
+Có nuôi con mới thấu, những khoảnh khắc đời thường tưởng chừng nhỏ bé lại chính là những viên gạch xây đắp nên ký ức tuổi thơ tươi đẹp nhất của con.
+
+{educational_lesson}
+
+👨‍👩‍👧‍👦 Bố mẹ đã xem trọn vẹn tập phim này cùng các bé chưa? Hãy cùng cả nhà đón xem câu chuyện của Pi & Kem trên kênh Kem Tivi nhé!
+
+{hashtags}`,
     fixedHashtags: ['#PiKem', '#KemTivi', '#GiaDinhPiKem', '#NuoiDayCon', '#LamChaMe', '#HoatHinhViet'],
   },
   {
     id: 'tpl_hashtags_standard_v1',
     type: 'hashtags',
+    platform: 'hashtags',
     name: 'Kem Tivi Standard Hashtag v1',
     description: 'Bộ thẻ phân loại nền tảng và nội dung cho kênh hoạt hình thiếu nhi Kem Tivi.',
     isDefault: true,
+    contentStructure: `#Shorts #PiKem #KemTivi #GiaDinhPiKem #HoatHinhThieuNhi #AnimationVietNam #HoatHinh3D #PhimHoatHinh`,
+    content: `#Shorts #PiKem #KemTivi #GiaDinhPiKem #HoatHinhThieuNhi #AnimationVietNam #HoatHinh3D #PhimHoatHinh`,
     fixedHashtags: [
       '#Shorts',
       '#PiKem',

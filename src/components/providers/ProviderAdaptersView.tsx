@@ -358,7 +358,7 @@ export const ProviderAdaptersView: React.FC<ProviderAdaptersViewProps> = ({
                               ) : (
                                 <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
                               )}
-                              {testResult.status.toUpperCase()} ({testResult.executionDurationMs}ms)
+                              {String(testResult.status || 'STATUS').toUpperCase()} ({testResult.executionDurationMs}ms)
                             </span>
                             <span className="text-slate-400">
                               Req: {testResult.requestId}

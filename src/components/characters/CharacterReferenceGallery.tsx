@@ -352,7 +352,7 @@ export const CharacterReferenceGallery: React.FC<CharacterReferenceGalleryProps>
         <circle cx="335" cy="210" r="16" fill="#f59e0b"/>
         <path d="M 270 270 Q 300 300 330 270" stroke="#f59e0b" stroke-width="6" fill="none" stroke-linecap="round"/>
         <rect x="230" y="340" width="140" height="180" rx="20" fill="#1e293b" stroke="#38bdf8" stroke-width="3"/>
-        <text x="300" y="555" font-family="sans-serif" font-size="20" font-weight="bold" fill="#f8fafc" text-anchor="middle">${uploadCharId.toUpperCase()} • ${uploadType.toUpperCase()} VIEW</text>
+        <text x="300" y="555" font-family="sans-serif" font-size="20" font-weight="bold" fill="#f8fafc" text-anchor="middle">${String(uploadCharId || '').toUpperCase()} • ${String(uploadType || '').toUpperCase()} VIEW</text>
         <text x="300" y="580" font-family="monospace" font-size="12" fill="#94a3b8" text-anchor="middle">${previewStoragePath}</text>
       </svg>`;
       finalImageUrl = `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

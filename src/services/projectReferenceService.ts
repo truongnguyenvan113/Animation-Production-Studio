@@ -113,7 +113,7 @@ export function createReferenceSvg(options: {
 
       <!-- Source pill -->
       <text x="302" y="36" fill="#94a3b8" font-family="sans-serif" font-size="9" font-weight="600" text-anchor="end">
-        ${source.toUpperCase().replace('_', ' ')}
+        ${String(source || '').toUpperCase().replace('_', ' ')}
       </text>
 
       <!-- Title & Type -->
@@ -121,7 +121,7 @@ export function createReferenceSvg(options: {
         ${title}
       </text>
       <text x="160" y="182" fill="#94a3b8" font-family="sans-serif" font-size="9.5" text-anchor="middle">
-        ${meta} • ${type.toUpperCase()}
+        ${meta} • ${String(type || 'REF').toUpperCase()}
       </text>
     </svg>
   `.trim();

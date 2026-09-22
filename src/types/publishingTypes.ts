@@ -88,11 +88,14 @@ export interface PublishingPack {
 export interface PublishingTemplate {
   id: string;
   type: 'youtube' | 'facebook' | 'hashtags';
+  platform?: 'youtube' | 'facebook' | 'hashtags';
   name: string;
   description?: string;
   isDefault?: boolean;
   contentStructure?: string;
+  content?: string;
   fixedHashtags?: string[];
   tone?: string;
   customRules?: string;
+  updatedAt?: string;
 }

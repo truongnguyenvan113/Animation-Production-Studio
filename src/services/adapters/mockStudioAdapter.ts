@@ -235,7 +235,7 @@ export class MockStudioAdapter extends BaseImageProviderAdapter {
   <g transform="translate(880, 85)">
     <rect x="0" y="0" width="340" height="52" rx="8" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255, 255, 255, 0.15)" />
     <text x="326" y="22" font-family="monospace" font-size="12" font-weight="bold" fill="${accentColor}" text-anchor="end">
-      MOCK STUDIO • ${model.toUpperCase()}
+      MOCK STUDIO • ${String(model || 'STUDIO').toUpperCase()}
     </text>
     <text x="326" y="40" font-family="monospace" font-size="10" fill="#94a3b8" text-anchor="end">
       REQ: ${requestId.slice(-10)} • SEED: #${seed} • OFFLINE QA

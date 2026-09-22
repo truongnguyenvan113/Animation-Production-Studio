@@ -195,7 +195,7 @@ export const ShotCard: React.FC<ShotCardProps> = ({
                 <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm" title="Khung hình phát triển cục bộ / Local Development Asset">
                   Local Dev Asset
                 </span>
-                {shot.outputMimeType && (
+                {typeof shot.outputMimeType === 'string' && shot.outputMimeType && (
                   <span className="bg-slate-900/80 text-emerald-300 text-[9px] font-mono px-1.5 py-0.5 rounded border border-emerald-500/30">
                     {shot.outputMimeType.replace('image/', '').toUpperCase()}
                   </span>

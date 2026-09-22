@@ -79,8 +79,9 @@ export const TemplateSettingsTab: React.FC = () => {
           <div className="space-y-2">
             {templates.map((tpl) => {
               const isSelected = activeTemplate?.id === tpl.id;
-              const isYT = tpl.platform === 'youtube';
-              const isFB = tpl.platform === 'facebook';
+              const platformType = tpl.platform || tpl.type || 'youtube';
+              const isYT = platformType === 'youtube';
+              const isFB = platformType === 'facebook';
               return (
                 <div
                   key={tpl.id}
@@ -140,7 +141,7 @@ export const TemplateSettingsTab: React.FC = () => {
                   <p className="text-xs text-slate-400">{activeTemplate.description}</p>
                 </div>
                 <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-[11px] font-mono text-amber-300 border border-slate-700">
-                  {activeTemplate.platform.toUpperCase()}
+                  {String(activeTemplate.platform || activeTemplate.type || 'TEMPLATE').toUpperCase()}
                 </span>
               </div>
 
@@ -150,7 +151,7 @@ export const TemplateSettingsTab: React.FC = () => {
                 </label>
                 <textarea
                   rows={16}
-                  value={activeTemplate.content}
+                  value={activeTemplate.content || activeTemplate.contentStructure || ''}
                   onChange={(e) => handleTemplateContentChange(e.target.value)}
                   className="w-full p-3.5 rounded-xl bg-slate-950 border border-slate-700 text-slate-100 text-xs font-mono leading-relaxed focus:outline-hidden focus:border-amber-500"
                 />

@@ -638,7 +638,7 @@ export const ImageGenerationQueueView: React.FC<ImageGenerationQueueViewProps> =
                           {job.status === 'completed' && <CheckCircle2 className="w-3.5 h-3.5" />}
                           {job.status === 'processing' && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                           {job.status === 'failed' && <AlertTriangle className="w-3.5 h-3.5" />}
-                          {job.status.toUpperCase()}
+                          {String(job.status || 'PENDING').toUpperCase()}
                         </span>
                       </div>
                     </div>

@@ -704,7 +704,7 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
                   {/* Top Bar: Type & Primary status */}
                   <div className="flex items-center justify-between gap-2 mb-2.5">
                     <span className="px-2.5 py-0.5 rounded-md text-[11px] font-mono font-bold bg-sky-500/10 text-sky-400 border border-sky-500/30">
-                      #{ref.type.toUpperCase()}
+                      #{String(ref.type || 'ref').toUpperCase()}
                     </span>
 
                     {ref.isPrimary ? (
@@ -785,7 +785,7 @@ export const CharacterVersionReferenceLibrary: React.FC<CharacterVersionReferenc
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="px-2.5 py-0.5 rounded text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                  #{activePreviewRef.type.toUpperCase()}
+                  #{String(activePreviewRef.type || 'ref').toUpperCase()}
                 </span>
                 <h4 className="text-base font-bold text-white">
                   {character?.displayName || characterId} ({characterVersionId})

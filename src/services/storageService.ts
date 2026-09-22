@@ -492,9 +492,15 @@ export class StorageService {
             }
           }
 
-          // Ensure publishingTemplates array exists
+          // Ensure publishingTemplates array exists and is hydrated
           if (!Array.isArray(parsed.publishingTemplates) || parsed.publishingTemplates.length === 0) {
             parsed.publishingTemplates = [...DEFAULT_PUBLISHING_TEMPLATES];
+          } else {
+            parsed.publishingTemplates = parsed.publishingTemplates.map((t) => ({
+              ...t,
+              platform: t.platform || t.type || 'youtube',
+              content: t.content || t.contentStructure || '',
+            }));
           }
 
       return parsed;

@@ -48,12 +48,16 @@ export const PublishingLibraryView: React.FC<PublishingLibraryViewProps> = ({
   });
 
   // Filter episodes
+  const q = (searchQuery || '').toLowerCase().trim();
   const filtered = episodesWithPacks.filter(({ episode, pack }) => {
+    const epTitle = (episode?.title || '').toLowerCase();
+    const epTheme = (episode?.theme || '').toLowerCase();
     const matchesSearch =
-      episode.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (episode.theme && episode.theme.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      `tập ${episode.episodeNumber}`.includes(searchQuery.toLowerCase()) ||
-      `ep${episode.episodeNumber}`.includes(searchQuery.toLowerCase());
+      !q ||
+      epTitle.includes(q) ||
+      epTheme.includes(q) ||
+      `tập ${episode?.episodeNumber}`.includes(q) ||
+      `ep${episode?.episodeNumber}`.includes(q);
 
     if (!matchesSearch) return false;
 
