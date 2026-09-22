@@ -23,6 +23,7 @@ import {
   Film,
   FolderArchive,
   Settings,
+  Share2,
 } from 'lucide-react';
 import { Character, LanguageMode } from '../../types';
 
@@ -304,6 +305,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="truncate">{formatLabel('Google Flow Director', 'Điều Phối Google Flow')}</span>
                   <span className="ml-auto text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-1.5 py-0.5 rounded font-bold">
                     Phase 4.7
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => onNavigate('publishing-studio')}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-left transition-colors ${
+                    isActive('publishing-studio')
+                      ? 'bg-amber-500 text-slate-950 font-bold shadow-md'
+                      : 'text-slate-300 hover:bg-slate-900 hover:text-white'
+                  }`}
+                >
+                  <Share2 className={`w-4 h-4 shrink-0 ${isActive('publishing-studio') ? 'text-slate-950' : 'text-amber-400'}`} />
+                  <span className="truncate">{formatLabel('Publishing Studio', 'Trung Tâm Xuất Bản')}</span>
+                  <span className={`ml-auto text-[10px] px-1.5 py-0.5 rounded font-bold ${isActive('publishing-studio') ? 'bg-slate-950/20 text-slate-950' : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'}`}>
+                    YouTube/FB
                   </span>
                 </button>
               </div>

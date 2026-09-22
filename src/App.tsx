@@ -26,6 +26,7 @@ import { ImageGenerationQueueView } from './components/generation/ImageGeneratio
 import { ProjectReferenceLibraryView } from './components/references/ProjectReferenceLibraryView';
 import { ProviderAdaptersView } from './components/providers/ProviderAdaptersView';
 import { GoogleFlowDirectorView } from './components/flow/GoogleFlowDirectorView';
+import { PublishingStudioView } from './components/publishing/PublishingStudioView';
 import { SystemSettingsView } from './components/settings/SystemSettingsView';
 import { BackupModal } from './components/shared/BackupModal';
 
@@ -82,6 +83,8 @@ export default function App() {
     } else if (view === 'storyboard' && id) {
       setSelectedEpisodeId(id);
     } else if (view === 'google-flow-director' && id) {
+      setSelectedEpisodeId(id);
+    } else if (view === 'publishing-studio' && id) {
       setSelectedEpisodeId(id);
     }
   };
@@ -183,6 +186,10 @@ export default function App() {
                 setSelectedEpisodeId(epId);
                 setCurrentView('storyboard');
               }}
+              onOpenPublishing={(epId) => {
+                setSelectedEpisodeId(epId);
+                setCurrentView('publishing-studio');
+              }}
               language={language}
             />
           )}
@@ -242,6 +249,12 @@ export default function App() {
                 if (epId) setSelectedEpisodeId(epId);
                 setCurrentView('storyboard');
               }}
+            />
+          )}
+
+          {currentView === 'publishing-studio' && (
+            <PublishingStudioView
+              initialEpisodeId={selectedEpisodeId}
             />
           )}
 

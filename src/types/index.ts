@@ -823,4 +823,5 @@ export type StyleVersion = GlobalStyleVersion;
 export type { StudioDatabase } from '../services/storageService';
 
 export * from './flowTypes';
+export * from './publishingTypes';
 

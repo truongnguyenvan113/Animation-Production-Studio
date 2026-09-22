@@ -17,12 +17,14 @@ import {
 interface EpisodeListViewProps {
   initialSeasonId?: string;
   onOpenStoryboard?: (episodeId: string) => void;
+  onOpenPublishing?: (episodeId: string) => void;
   language: LanguageMode;
 }
 
 export const EpisodeListView: React.FC<EpisodeListViewProps> = ({
   initialSeasonId,
   onOpenStoryboard,
+  onOpenPublishing,
   language,
 }) => {
   const seasons = SeasonService.getAllSeasons();
@@ -142,6 +144,7 @@ export const EpisodeListView: React.FC<EpisodeListViewProps> = ({
               onDelete={handleDelete}
               onInspectSnapshot={(id) => setInspectingEpisodeId(id)}
               onOpenStoryboard={onOpenStoryboard}
+              onOpenPublishing={onOpenPublishing}
               language={language}
             />
           ))}

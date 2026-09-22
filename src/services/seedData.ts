@@ -1668,6 +1668,96 @@ export const SEED_EPISODES: Episode[] = [
     createdAt: '2026-02-10T09:00:00.000Z',
     updatedAt: '2026-02-15T15:30:00.000Z',
   },
+  {
+    id: 'ep_010',
+    seasonId: 'season_001',
+    episodeNumber: 10,
+    title: 'Tập 10 – Chiếc Đèn Lồng Đặc Biệt',
+    storyIdea:
+      'Hai chị em Pi và Kem cùng làm đèn lồng giấy bóng kính hình ngôi sao đón Tết Trung Thu và học được bài học về sự gắn kết gia đình.',
+    theme: 'Tết Trung Thu & Tình Yêu Thương Gia Đình (Mid-Autumn Festival & Family Bond)',
+    educationalMessage:
+      'Một món đồ không cần hoàn hảo để trở nên đặc biệt. Tình yêu thương gia đình và tiếng cười biến mọi điều dang dở thành kỷ niệm ấm áp.',
+    characterIds: ['char_pi', 'char_kem', 'char_emma', 'char_ethan'],
+    supportingCharacterIds: ['char_mochi'],
+    allowedCharacters: ['char_pi', 'char_kem', 'char_emma', 'char_ethan', 'char_mochi'],
+    excludedCharacters: [],
+    props: [
+      'Nan tre vót nhẵn',
+      'Giấy bóng kính đỏ và vàng',
+      'Hồ dán thủ công',
+      'Nến nhỏ an toàn',
+      'Đèn lồng ngôi sao',
+    ],
+    language: 'Tiếng Việt (Vietnamese)',
+    durationLimit: '15s',
+    continuityRules: [
+      'Đèn lồng hình ngôi sao năm cánh có dán mặt trăng khuyết màu vàng che vết rách.',
+      'Kem mặc tạp dề xanh có vệt hồ dán nhỏ bên má.',
+      'Pi thắt tóc hai bên, đeo nơ đỏ đồng điệu sắc màu lễ hội Trung Thu.',
+      'Ánh trăng rằm chiếu sáng hiên nhà kết hợp cùng ánh nến lung linh 3200K ấm cúng.',
+    ],
+    location: 'Sân hiên gia đình ấm cúng (Cozy Family Veranda & Living Room)',
+    duration: '06:45 (Minutes)',
+    targetDuration: '06:45 (Minutes)',
+    targetAudience: 'Preschool & Early Elementary (3–8 years)',
+    additionalNotes:
+      'Tập phim đặc biệt mùa Tết Trung Thu. Tôn vinh nét đẹp văn hóa truyền thống và tình cảm gia đình.',
+    targetPlatform: 'YouTube Kids & OTT Streaming',
+    status: 'Completed',
+    storyboardId: 'sb_ep010',
+    characterVersionSnapshots: {
+      char_pi: 'ver_pi_v1',
+      char_kem: 'ver_kem_v1',
+      char_emma: 'ver_emma_v1',
+      char_ethan: 'ver_ethan_v1',
+      char_mochi: 'ver_mochi_v1',
+    },
+    styleVersionSnapshotId: 'style_ver_1_0',
+    storyDraft: {
+      id: 'draft_ep010_canonical',
+      episodeId: 'ep_010',
+      title: 'Tập 10 – Chiếc Đèn Lồng Đặc Biệt',
+      premise:
+        'Pi làm đèn lồng giấy bóng kính hình ngôi sao rất cẩn thận, Kem nghịch ngợm dán lệch và làm rách giấy một chút, nhưng Ba Trường và Mẹ Vân đã giúp hai chị em biến chỗ rách thành một mặt trăng cười độc đáo. Tối đó hai chị em cùng Mochi rước đèn quanh sân nhà rộn rã tiếng cười.',
+      educationalLesson:
+        'Một món đồ không cần hoàn hảo để trở nên đặc biệt. Tình yêu thương gia đình và tiếng cười biến mọi điều dang dở thành kỷ niệm ấm áp.',
+      targetAudience: 'Preschool & Early Elementary (3–8 years)',
+      targetDuration: '06:45 (Minutes)',
+      additionalNotes: 'Tập phim Trung Thu đặc biệt.',
+      beginning:
+        'Chiều rằm tháng Tám, gió thu nhè nhẹ thổi qua hiên nhà. Mẹ Vân mang ra một bó nan tre và những cuộn giấy kính màu đỏ vàng rực rỡ.',
+      middle:
+        'Pi cẩn thận phết hồ dán từng cánh sao. Kem vụng về muốn phụ chị dán giấy bóng kính nhưng lỡ tay làm rách toạc một góc. Ba Trường mỉm cười gợi ý cắt một vầng trăng khuyết dán đè lên, biến chỗ rách thành một ông Trăng cười lấp lánh.',
+      ending:
+        'Dưới ánh trăng rằm tháng Tám vằng vặc, cả nhà cùng rước đèn quanh sân. Chiếc đèn lồng với nụ cười ông trăng tỏa ánh sáng lung linh rộn vang tiếng cười giòn tan.',
+      emotionalArc:
+        'Háo hức chuẩn bị → Tiếc nuối òa khóc → Bất ngờ sáng tạo → Vỡ òa hạnh phúc & Tự hào',
+      location: 'Sân nhà và phòng khách gia đình',
+      characterParticipation: [
+        {
+          characterId: 'char_pi',
+          characterName: 'Pi (Nancy)',
+          characterRole: 'Older Sister',
+          versionSnapshotId: 'ver_pi_v1',
+          participationRole: 'Chị gái khéo léo làm đèn lồng',
+        },
+        {
+          characterId: 'char_kem',
+          characterName: 'Kem (Leo)',
+          characterRole: 'Younger Brother',
+          versionSnapshotId: 'ver_kem_v1',
+          participationRole: 'Cậu em tinh nghịch phụ giúp chị',
+        },
+      ],
+      styleVersionSnapshotId: 'style_ver_1_0',
+      scenes: [],
+      createdAt: '2026-09-20T08:00:00.000Z',
+      updatedAt: '2026-09-22T09:00:00.000Z',
+    },
+    createdAt: '2026-09-20T08:00:00.000Z',
+    updatedAt: '2026-09-22T09:00:00.000Z',
+  },
 ];
 
 export const SEED_PROVIDER_ADAPTERS: ProviderAdapterSpec[] = [

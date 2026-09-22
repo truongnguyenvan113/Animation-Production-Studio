@@ -14,6 +14,8 @@ import {
   ProductionPack,
   FlowGenerationJob,
   ProductionAsset,
+  PublishingPack,
+  PublishingTemplate,
 } from '../types';
 import {
   SEED_PROJECT,
@@ -27,6 +29,7 @@ import {
   SEED_STORYBOARDS,
 } from './seedData';
 import { SEED_PROJECT_REFERENCES } from './projectReferenceService';
+import { DEFAULT_PUBLISHING_TEMPLATES, SEED_PUBLISHING_PACKS } from './publishingSeedData';
 import {
   resolveCanonicalCharacterId,
   resolveCanonicalVersionId,
@@ -63,6 +66,8 @@ export interface StudioDatabase {
   productionPacks?: ProductionPack[];
   flowGenerationJobs?: FlowGenerationJob[];
   productionAssets?: ProductionAsset[];
+  publishingPacks?: PublishingPack[];
+  publishingTemplates?: PublishingTemplate[];
   updatedAt: string;
 }
 
@@ -279,6 +284,16 @@ export class StorageService {
             }
           }
 
+          // Ensure Episode 10 exists if missing
+          const ep10 = parsed.episodes?.find((e: Episode) => e.id === 'ep_010');
+          if (!ep10) {
+            const seedEp10 = SEED_EPISODES.find((e) => e.id === 'ep_010');
+            if (seedEp10) {
+              parsed.episodes = parsed.episodes || [];
+              parsed.episodes.push(seedEp10);
+            }
+          }
+
           // Ensure storyboards array exists and contains seed storyboards if empty
           if (!Array.isArray(parsed.storyboards) || parsed.storyboards.length === 0) {
             parsed.storyboards = SEED_STORYBOARDS;
@@ -465,6 +480,23 @@ export class StorageService {
             });
           }
 
+          // Ensure publishingPacks array exists and contains seed data if empty
+          if (!Array.isArray(parsed.publishingPacks) || parsed.publishingPacks.length === 0) {
+            parsed.publishingPacks = [...SEED_PUBLISHING_PACKS];
+          } else {
+            // Ensure ep_010 seed pack is present if missing
+            const hasEp10Pack = parsed.publishingPacks.some((p: PublishingPack) => p.episodeId === 'ep_010');
+            if (!hasEp10Pack) {
+              const seedEp10Pack = SEED_PUBLISHING_PACKS.find((p) => p.episodeId === 'ep_010');
+              if (seedEp10Pack) parsed.publishingPacks.push(seedEp10Pack);
+            }
+          }
+
+          // Ensure publishingTemplates array exists
+          if (!Array.isArray(parsed.publishingTemplates) || parsed.publishingTemplates.length === 0) {
+            parsed.publishingTemplates = [...DEFAULT_PUBLISHING_TEMPLATES];
+          }
+
       return parsed;
     }
     return this.getInitialSeedDatabase();
@@ -502,6 +534,8 @@ export class StorageService {
       productionPacks: [],
       flowGenerationJobs: [],
       productionAssets: [],
+      publishingPacks: SEED_PUBLISHING_PACKS,
+      publishingTemplates: DEFAULT_PUBLISHING_TEMPLATES,
       updatedAt: new Date().toISOString(),
     };
   }

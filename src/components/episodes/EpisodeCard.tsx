@@ -16,6 +16,7 @@ import {
   Sparkles,
   BookOpen,
   Film,
+  Share2,
 } from 'lucide-react';
 
 interface EpisodeCardProps {
@@ -24,6 +25,7 @@ interface EpisodeCardProps {
   onDelete: (episodeId: string) => void;
   onInspectSnapshot: (episodeId: string) => void;
   onOpenStoryboard?: (episodeId: string) => void;
+  onOpenPublishing?: (episodeId: string) => void;
   language: LanguageMode;
 }
 
@@ -33,6 +35,7 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
   onDelete,
   onInspectSnapshot,
   onOpenStoryboard,
+  onOpenPublishing,
   language,
 }) => {
   const allCharacters = [
@@ -86,6 +89,17 @@ export const EpisodeCard: React.FC<EpisodeCardProps> = ({
             >
               <Film className="w-3.5 h-3.5 text-amber-400" />
               <span>{formatLabel('Storyboard & Shots', 'Storyboard')}</span>
+            </button>
+          )}
+
+          {onOpenPublishing && (
+            <button
+              onClick={() => onOpenPublishing(episode.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 transition-colors shadow-xs"
+              title="Mở Trung Tâm Xuất Bản (Publishing Studio)"
+            >
+              <Share2 className="w-3.5 h-3.5 text-rose-400" />
+              <span>{formatLabel('Publishing', 'Xuất bản')}</span>
             </button>
           )}
 
