@@ -1,6 +1,7 @@
-import React from 'react';
-import { Film } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Film, HardDrive } from 'lucide-react';
 import { Project, LanguageMode } from '../../types';
+import { storageService } from '../../services/storageService';
 
 interface HeaderProps {
   project: Project;
@@ -15,6 +16,15 @@ export const Header: React.FC<HeaderProps> = ({
   onLanguageChange,
   showLanguageSwitcher = false,
 }) => {
+  const [syncStatus, setSyncStatus] = useState(() => storageService.getDiskSyncStatus());
+
+  useEffect(() => {
+    const unsub = storageService.subscribe(() => {
+      setSyncStatus(storageService.getDiskSyncStatus());
+    });
+    return unsub;
+  }, []);
+
   return (
     <header className="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 flex items-center justify-between z-20 shrink-0 select-none">
       {/* Project Identity Display */}
@@ -42,8 +52,34 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Control Actions: Only display Language Switcher if activated in System Settings */}
+      {/* Control Actions & Storage Indicator */}
       <div className="flex items-center gap-3">
+        {/* Project Folder Storage Badge */}
+        <div
+          className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-[11px] transition-colors"
+          title={
+            syncStatus.connected
+              ? 'Dữ liệu được lưu tự động vào tệp data/database.json trong thư mục dự án'
+              : 'Đang kết nối lưu trữ tệp dự án (offline cache active)'
+          }
+        >
+          <HardDrive className="w-3.5 h-3.5 text-slate-400" />
+          <span
+            className={`w-2 h-2 rounded-full ${
+              syncStatus.syncing
+                ? 'bg-amber-400 animate-ping'
+                : syncStatus.connected
+                ? 'bg-emerald-400'
+                : 'bg-slate-500'
+            }`}
+          />
+          <span className="font-mono text-slate-300">data/database.json</span>
+          {syncStatus.syncing && (
+            <span className="text-amber-400 text-[10px] font-medium">Đang lưu...</span>
+          )}
+        </div>
+
+        {/* Control Actions: Only display Language Switcher if activated in System Settings */}
         {showLanguageSwitcher && (
           <div className="flex items-center bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs font-medium animate-fadeIn">
             <button

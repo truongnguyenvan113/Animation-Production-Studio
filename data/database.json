@@ -1,0 +1,3076 @@
+{
+  "project": {
+    "id": "proj_pikem_001",
+    "name": "Pi & Kem Family Animation",
+    "vietnameseName": "Hoạt Hình Gia Đình Pi & Kem",
+    "description": "A warm, hilarious, and educational recurring 3D CGI animation universe following the daily joyful adventures of Pi, Kem, their parents Ba Trường & Mẹ Vân, and puppy Mochi.",
+    "universe": "Pi & Kem Animation Universe (3D CGI)",
+    "targetAudience": "Preschool & Early Elementary (3–8 years) & Family Co-viewing",
+    "aspectRatio": "16:9 Cinematic",
+    "defaultLanguage": "Vietnamese (Primary) / English (Global Dub)",
+    "createdAt": "2026-01-10T08:00:00.000Z",
+    "updatedAt": "2026-09-01T10:30:00.000Z"
+  },
+  "characters": [
+    {
+      "id": "char_ethan",
+      "projectId": "proj_pikem_001",
+      "displayName": "Ethan (Ba Trường)",
+      "englishName": "Ethan",
+      "vietnameseName": "Ba Trường",
+      "role": "Father",
+      "isSupporting": false,
+      "activeVersionId": "ver_ethan_v1",
+      "colorScheme": {
+        "primary": "#2563eb",
+        "secondary": "#38bdf8",
+        "accent": "#f59e0b",
+        "bgGradients": "from-blue-600 to-indigo-800"
+      },
+      "createdAt": "2026-01-10T08:30:00.000Z",
+      "updatedAt": "2026-01-10T08:30:00.000Z"
+    },
+    {
+      "id": "char_emma",
+      "projectId": "proj_pikem_001",
+      "displayName": "Emma (Mẹ Vân)",
+      "englishName": "Emma",
+      "vietnameseName": "Mẹ Vân",
+      "role": "Mother",
+      "isSupporting": false,
+      "activeVersionId": "ver_emma_v1",
+      "colorScheme": {
+        "primary": "#ec4899",
+        "secondary": "#f472b6",
+        "accent": "#8b5cf6",
+        "bgGradients": "from-rose-500 to-purple-700"
+      },
+      "createdAt": "2026-01-10T08:35:00.000Z",
+      "updatedAt": "2026-01-10T08:35:00.000Z"
+    },
+    {
+      "id": "char_pi",
+      "projectId": "proj_pikem_001",
+      "displayName": "Pi (Nancy)",
+      "englishName": "Nancy",
+      "vietnameseName": "Pi",
+      "role": "Older Sister",
+      "isSupporting": false,
+      "activeVersionId": "ver_pi_v1",
+      "colorScheme": {
+        "primary": "#f97316",
+        "secondary": "#fb923c",
+        "accent": "#ec4899",
+        "bgGradients": "from-amber-500 to-pink-600"
+      },
+      "createdAt": "2026-01-10T08:40:00.000Z",
+      "updatedAt": "2026-01-10T08:40:00.000Z"
+    },
+    {
+      "id": "char_kem",
+      "projectId": "proj_pikem_001",
+      "displayName": "Kem (Leo)",
+      "englishName": "Leo",
+      "vietnameseName": "Kem",
+      "role": "Younger Brother",
+      "isSupporting": false,
+      "activeVersionId": "ver_kem_v1",
+      "colorScheme": {
+        "primary": "#10b981",
+        "secondary": "#34d399",
+        "accent": "#facc15",
+        "bgGradients": "from-emerald-500 to-teal-700"
+      },
+      "createdAt": "2026-01-10T08:45:00.000Z",
+      "updatedAt": "2026-01-10T08:45:00.000Z"
+    },
+    {
+      "id": "char_mochi",
+      "projectId": "proj_pikem_001",
+      "displayName": "Mochi",
+      "englishName": "Mochi",
+      "vietnameseName": "Mochi (Cún Mochi)",
+      "role": "Permanent Supporting Character",
+      "isSupporting": true,
+      "activeVersionId": "ver_mochi_v1",
+      "colorScheme": {
+        "primary": "#eab308",
+        "secondary": "#fef08a",
+        "accent": "#d97706",
+        "bgGradients": "from-amber-400 to-yellow-600"
+      },
+      "createdAt": "2026-01-10T08:50:00.000Z",
+      "updatedAt": "2026-01-10T08:50:00.000Z"
+    }
+  ],
+  "characterVersions": [
+    {
+      "id": "ver_ethan_v1",
+      "characterId": "char_ethan",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Ethan (Ba Trường) - Programmer / Software Developer.",
+      "occupation": "Programmer / Software Developer",
+      "likes": "Sports, especially football",
+      "visualIdentity": "Must be represented as a father in a warm family-oriented 3D children's animation universe.",
+      "age": "33 years old",
+      "gender": "Male",
+      "height": "178 cm (tall, protective dad build)",
+      "bodyProportions": "Athletic yet comfortable dad silhouette, slightly broad shoulders, approachable posture",
+      "faceShape": "Gently rounded square jaw with warm smiling cheeks, clean-shaven, light laugh lines around eyes",
+      "skinTone": "Healthy light golden Vietnamese skin tone, warm undertone",
+      "hair": "Short dark side-part hair, slight stylish side taper, clean and well-kept",
+      "eyes": "Warm almond-shaped dark hazel eyes, rectangular glasses, expressive and patient expression",
+      "nose": "Straight friendly nose with soft rounded tip",
+      "mouth": "Comfortable natural smile, clean teeth, friendly laughing mouth shape",
+      "facialExpression": "Good-humored, attentive, affectionate fatherly gaze with a slight playful twinkle",
+      "clothing": "Light blue polo shirt and grey shorts",
+      "shoes": "Clean white minimalist leather sneakers with navy heel accents",
+      "accessories": "Rectangular glasses, smart digital fitness wristband on left wrist",
+      "personality": "Funny, caring, responsible, playful with his children",
+      "behavior": "Loves inventing playful bedtime games, plays football and sports with the kids, mimics funny sound effects when playing with Pi & Kem, checks on everyone thoughtfully",
+      "voiceDescription": "Warm, reassuring baritone voice with a friendly melodic cadence, gentle comedic pauses",
+      "typicalEmotions": "Fond amusement, proud paternal joy, calm encouragement, mock surrender when kids gang up on him in games",
+      "typicalGestures": "Playfully tapping kids on their nose, lifting Kem onto his shoulders, kicking a football, clapping enthusiastically",
+      "relationships": "Father of Pi and Kem, husband of Emma",
+      "visualKeywords": [
+        "3D stylized animated father",
+        "programmer software developer dad",
+        "light blue polo shirt",
+        "grey shorts",
+        "rectangular glasses",
+        "short dark side-part hair",
+        "warm hazel eyes",
+        "friendly smile",
+        "warm family-oriented 3D animation"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Ethan (Ba Trường), father in a warm family-oriented 3D children's animation universe. Programmer/Software Developer, athletic comfortable build, short stylish dark side-part hair, rectangular glasses, clean-shaven, light blue polo shirt, grey shorts, clean white sneakers, warm lighting, Pixar-quality animation aesthetic.",
+      "negativePrompt": "architect, handyman, distorted proportions, exaggerated muscles, wrinkled elder face, frown, scowl, formal suit, tie, blurry render, photographic realistic skin, extra limbs, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_ethan_front",
+      "referenceAssetIds": [
+        "ref_ethan_front",
+        "ref_ethan_34",
+        "ref_ethan_side",
+        "ref_ethan_expression",
+        "ref_ethan_clothing",
+        "ref_ethan_pose",
+        "ref_ethan_action"
+      ],
+      "createdAt": "2026-01-10T08:30:00.000Z"
+    },
+    {
+      "id": "ver_emma_v1",
+      "characterId": "char_emma",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Emma (Mẹ Vân) - Career Consultant.",
+      "occupation": "Career Consultant",
+      "likes": "Travelling and shopping",
+      "visualIdentity": "Warm, elegant, approachable mother character suitable for a family-oriented children's animation.",
+      "age": "31 years old",
+      "gender": "Female",
+      "height": "164 cm (graceful, energetic mother silhouette)",
+      "bodyProportions": "Slender, balanced feminine posture, warm and welcoming body language",
+      "faceShape": "Friendly round face with gentle cheekbones, bright youthful complexion",
+      "skinTone": "Fair rosy-warm Asian skin tone, natural soft glow",
+      "hair": "Short dark wavy hair, styled with natural bounce and soft feminine elegance",
+      "eyes": "Large expressive dark brown almond eyes, soft feminine lashes, sparkling with intelligence and love",
+      "nose": "Delicate straight nose with subtle contour",
+      "mouth": "Sweet petal lips with light coral tint, radiant warm smile",
+      "facialExpression": "Encouraging, empathetic, joyful, lovingly observant, warm and confident presence",
+      "clothing": "PURPLE FLORAL COLLARED SHIRT and blue jeans",
+      "shoes": "Beige slip-on canvas espadrilles with tiny pastel embroidery",
+      "accessories": "Delicate gold teardrop pendant necklace, small pearl stud earrings, pastel scrunchie on wrist",
+      "personality": "Warm, intelligent, caring, patient, confident",
+      "behavior": "Plans family travel trips, prepares creative activities, gently mediates sibling squabbles with humor, loves discovering new places and shopping for cute family essentials",
+      "voiceDescription": "Clear, musical, gentle soprano with soothing maternal clarity and cheerful upbeat notes",
+      "typicalEmotions": "Tender affection, delight in children creativity, empathetic listening, joyful laughter",
+      "typicalGestures": "Gently tucking hair behind her ear, spreading out travel maps or craft mats, kneeling down to child eye level",
+      "relationships": "Mother of Pi and Kem, wife of Ethan",
+      "visualKeywords": [
+        "3D stylized animated mother",
+        "career consultant mom",
+        "PURPLE FLORAL COLLARED SHIRT",
+        "blue jeans",
+        "short dark wavy hair",
+        "friendly round face",
+        "pearl earrings",
+        "warm bright eyes",
+        "warm elegant approachable smile",
+        "family-oriented children animation"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Emma (Mẹ Vân), warm, elegant, approachable mother character suitable for family-oriented children's animation. Career consultant, fit and energetic adult female proportions, friendly round face, short dark wavy hair, large expressive dark eyes, PURPLE FLORAL COLLARED SHIRT, blue jeans, gentle warm smile, confident presence.",
+      "negativePrompt": "children book author, illustrator, harsh makeup, angular severe face, sad expression, messy clothing, unrealistic body shape, elderly wrinkles, gothic, dark gloomy lighting, extra fingers, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_emma_front",
+      "referenceAssetIds": [
+        "ref_emma_front",
+        "ref_emma_34",
+        "ref_emma_side",
+        "ref_emma_expression",
+        "ref_emma_clothing",
+        "ref_emma_pose",
+        "ref_emma_action"
+      ],
+      "createdAt": "2026-01-10T08:35:00.000Z"
+    },
+    {
+      "id": "ver_pi_v1",
+      "characterId": "char_pi",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Pi (Nancy) - Energetic Older Sister.",
+      "likes": "Playing, exploring and especially dancing",
+      "visualIdentity": "Vibrant, joyful older sister leading family activities in 3D animation.",
+      "age": "5–7 years old",
+      "gender": "Female",
+      "height": "112 cm (energetic kindergarten proportions)",
+      "bodyProportions": "Cute 3.5 heads tall stylized child proportions, bouncy posture, light and quick movements",
+      "faceShape": "Chubby round cheeks, button chin, cute expressive face that lights up instantly",
+      "skinTone": "Warm peachy sun-kissed child skin tone, soft rosy cheeks",
+      "hair": "Playful jet-black hair styled into two bouncing high pigtails fastened with cheerful yellow star clips, wispy bangs",
+      "eyes": "Very large sparkling black eyes with star-like reflections, wide open with wonder, expressive curved eyebrows",
+      "nose": "Tiny cute button nose",
+      "mouth": "Expressive wide smile showing small baby teeth, adorable giggle shape",
+      "facialExpression": "Bursting with curiosity, adventurous determination, infectious joy",
+      "clothing": "Bright sunny-yellow sleeveless cotton dress with a cute embroidered dancing rainbow patch, over a striped peach tee",
+      "shoes": "Lightweight cherry-red sneaker-boots with flexible white rubber soles, colorful mismatched socks",
+      "accessories": "Pair of yellow star hairpins, small teal canvas crossbody pouch containing crayons and tiny treasures",
+      "personality": "Energetic, curious, playful, adventurous",
+      "behavior": "Often initiates activities and adventures. Breaks into spontaneous happy dance steps when excited, leads explorations around the house, teaches Kem new discoveries",
+      "voiceDescription": "Bright, bouncy, high-pitched melodic child voice with animated pitch jumps when inspired",
+      "typicalEmotions": "Awe-struck wonder, boundless enthusiasm, competitive eagerness, sudden tender concern for Kem",
+      "typicalGestures": "Dancing playfully, spinning on one foot, pointing enthusiastically at discoveries, grabbing Kem hand to run",
+      "relationships": "Older sister of Kem, daughter of Ethan and Emma.",
+      "visualKeywords": [
+        "3D animated girl",
+        "5 to 7 year old child older sister",
+        "twin pigtails with star clips",
+        "yellow summer dress",
+        "cherry red sneakers",
+        "sparkling big eyes",
+        "dancing child explorer",
+        "3D children series"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Pi (Nancy), 5–7 years old girl, older sister. Energetic, curious, playful, adventurous, cute 3.5 heads child proportion, twin bouncy pigtails with yellow star hair clips, large sparkling black eyes, bright sunny yellow dress with rainbow patch, cherry red sneakers, joyful dancing pose, initiating an adventure.",
+      "negativePrompt": "adult proportions, teenager appearance, sad face, distorted hands, creepy eyes, realism uncanny valley, dull colors, dark lighting, extra limbs, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_pi_front",
+      "referenceAssetIds": [
+        "ref_pi_front",
+        "ref_pi_34",
+        "ref_pi_side",
+        "ref_pi_expression",
+        "ref_pi_clothing",
+        "ref_pi_pose",
+        "ref_pi_action"
+      ],
+      "createdAt": "2026-01-10T08:40:00.000Z"
+    },
+    {
+      "id": "ver_nancy_v1",
+      "characterId": "char_pi",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Nancy (Pi) - Energetic Older Sister.",
+      "likes": "Playing, exploring and especially dancing",
+      "visualIdentity": "Vibrant, joyful older sister leading family activities in 3D animation.",
+      "age": "5–7 years old",
+      "gender": "Female",
+      "height": "112 cm (energetic kindergarten proportions)",
+      "bodyProportions": "Cute 3.5 heads tall stylized child proportions, bouncy posture, light and quick movements",
+      "faceShape": "Chubby round cheeks, button chin, cute expressive face that lights up instantly",
+      "skinTone": "Warm peachy sun-kissed child skin tone, soft rosy cheeks",
+      "hair": "Playful jet-black hair styled into two bouncing high pigtails fastened with cheerful yellow star clips, wispy bangs",
+      "eyes": "Very large sparkling black eyes with star-like reflections, wide open with wonder, expressive curved eyebrows",
+      "nose": "Tiny cute button nose",
+      "mouth": "Expressive wide smile showing small baby teeth, adorable giggle shape",
+      "facialExpression": "Bursting with curiosity, adventurous determination, infectious joy",
+      "clothing": "Bright sunny-yellow sleeveless cotton dress with a cute embroidered dancing rainbow patch, over a striped peach tee",
+      "shoes": "Lightweight cherry-red sneaker-boots with flexible white rubber soles, colorful mismatched socks",
+      "accessories": "Pair of yellow star hairpins, small teal canvas crossbody pouch containing crayons and tiny treasures",
+      "personality": "Energetic, curious, playful, adventurous",
+      "behavior": "Often initiates activities and adventures. Breaks into spontaneous happy dance steps when excited, leads explorations around the house, teaches Kem new discoveries",
+      "voiceDescription": "Bright, bouncy, high-pitched melodic child voice with animated pitch jumps when inspired",
+      "typicalEmotions": "Awe-struck wonder, boundless enthusiasm, competitive eagerness, sudden tender concern for Kem",
+      "typicalGestures": "Dancing playfully, spinning on one foot, pointing enthusiastically at discoveries, grabbing Kem hand to run",
+      "relationships": "Older sister of Kem, daughter of Ethan and Emma.",
+      "visualKeywords": [
+        "3D animated girl",
+        "5 to 7 year old child older sister",
+        "twin pigtails with star clips",
+        "yellow summer dress",
+        "cherry red sneakers",
+        "sparkling big eyes",
+        "dancing child explorer",
+        "3D children series"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Nancy (Pi), 5–7 years old girl, older sister. Energetic, curious, playful, adventurous, cute 3.5 heads child proportion, twin bouncy pigtails with yellow star hair clips, large sparkling black eyes, bright sunny yellow dress with rainbow patch, cherry red sneakers, joyful dancing pose, initiating an adventure.",
+      "negativePrompt": "adult proportions, teenager appearance, sad face, distorted hands, creepy eyes, realism uncanny valley, dull colors, dark lighting, extra limbs, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_pi_front",
+      "referenceAssetIds": [
+        "ref_pi_front",
+        "ref_pi_34",
+        "ref_pi_side",
+        "ref_pi_expression",
+        "ref_pi_clothing",
+        "ref_pi_pose",
+        "ref_pi_action"
+      ],
+      "createdAt": "2026-01-10T08:40:00.000Z"
+    },
+    {
+      "id": "ver_kem_v1",
+      "characterId": "char_kem",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Kem (Leo) - Cute Mischievous Younger Brother.",
+      "likes": "Following Pi, copying dance moves, funny games with Mochi",
+      "visualIdentity": "Irresistibly cute toddler brother in 3D stylized children's animation.",
+      "age": "Approximately 2–3 years old",
+      "gender": "Male",
+      "height": "92 cm (toddler silhouette, adorable waddling gait)",
+      "bodyProportions": "Cute 2.8 heads tall stylized toddler proportions, chubby round tummy, cute baby wrist rolls",
+      "faceShape": "Super chubby baby cheeks like freshly steamed dumplings, button chin, dimple on right cheek",
+      "skinTone": "Creamy soft toddler skin tone with natural healthy blush on cheeks and nose tip",
+      "hair": "Fluffy soft dark hair with a cute mischievous cowlick tuft standing proudly at the crown",
+      "eyes": "Huge round dewy puppy eyes, long cute lashes, wide with innocent curiosity that hides funny mischief",
+      "nose": "Adorable tiny button nose",
+      "mouth": "Cupid bow baby lips, tiny toothy grin, funny pout when pretending to concentrate",
+      "facialExpression": "Sweet innocence with a cheeky mischievous twinkle, hilarious amazed gasps",
+      "clothing": "Soft mint-green denim dungaree overalls over a pale-lemon short-sleeved bodysuit with a friendly baby dinosaur print",
+      "shoes": "Chubby baby trainers in vibrant turquoise blue with squeaky soles and velcro straps",
+      "accessories": "Cute dinosaur tail patch on back of overalls, soft silicone dinosaur wrist teether toy",
+      "personality": "Cute, curious, playful, mischievous",
+      "behavior": "Often follows Pi and creates funny situations. Copies her dancing with clumsy toddler hops, creates funny accidental chaos",
+      "voiceDescription": "Charming toddler voice with adorable half-words, enthusiastic giggles, funny squeaks when surprised",
+      "typicalEmotions": "Pure wide-eyed fascination, silly pride after copying Pi, funny drama-pout when denied a snack, instant giggles",
+      "typicalGestures": "Clumsy two-footed jumps, clapping his chubby hands, hiding behind Pi legs, hugging puppy Mochi",
+      "relationships": "Younger brother of Pi, son of Ethan and Emma.",
+      "visualKeywords": [
+        "3D animated toddler boy",
+        "2 to 3 year old younger brother",
+        "mint green overalls dungarees",
+        "fluffy hair with cowlick",
+        "huge curious eyes",
+        "chubby dumpling cheeks",
+        "mischievous toddler",
+        "3D children series"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Kem (Leo), approximately 2–3 years old toddler boy, younger brother. Cute, curious, playful, mischievous, 2.8 heads proportion, chubby dumpling cheeks, fluffy dark hair with cute cowlick tuft, mint green dungaree overalls over pale yellow tee, following Pi, cute innocent mischievous expression.",
+      "negativePrompt": "older child, adult proportions, skinny face, aggressive look, sad tears, complex adult clothing, realistic skin pores, low poly, extra limbs, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_kem_front",
+      "referenceAssetIds": [
+        "ref_kem_front",
+        "ref_kem_34",
+        "ref_kem_side",
+        "ref_kem_expression",
+        "ref_kem_clothing",
+        "ref_kem_pose",
+        "ref_kem_action"
+      ],
+      "createdAt": "2026-01-10T08:45:00.000Z"
+    },
+    {
+      "id": "ver_leo_v1",
+      "characterId": "char_kem",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Leo (Kem) - Cute Mischievous Younger Brother.",
+      "likes": "Following Pi, copying dance moves, funny games with Mochi",
+      "visualIdentity": "Irresistibly cute toddler brother in 3D stylized children's animation.",
+      "age": "Approximately 2–3 years old",
+      "gender": "Male",
+      "height": "92 cm (toddler silhouette, adorable waddling gait)",
+      "bodyProportions": "Cute 2.8 heads tall stylized toddler proportions, chubby round tummy, cute baby wrist rolls",
+      "faceShape": "Super chubby baby cheeks like freshly steamed dumplings, button chin, dimple on right cheek",
+      "skinTone": "Creamy soft toddler skin tone with natural healthy blush on cheeks and nose tip",
+      "hair": "Fluffy soft dark hair with a cute mischievous cowlick tuft standing proudly at the crown",
+      "eyes": "Huge round dewy puppy eyes, long cute lashes, wide with innocent curiosity that hides funny mischief",
+      "nose": "Adorable tiny button nose",
+      "mouth": "Cupid bow baby lips, tiny toothy grin, funny pout when pretending to concentrate",
+      "facialExpression": "Sweet innocence with a cheeky mischievous twinkle, hilarious amazed gasps",
+      "clothing": "Soft mint-green denim dungaree overalls over a pale-lemon short-sleeved bodysuit with a friendly baby dinosaur print",
+      "shoes": "Chubby baby trainers in vibrant turquoise blue with squeaky soles and velcro straps",
+      "accessories": "Cute dinosaur tail patch on back of overalls, soft silicone dinosaur wrist teether toy",
+      "personality": "Cute, curious, playful, mischievous",
+      "behavior": "Loves imitating Pi, running wobbly sprints, playing hide-and-seek with Mochi, giving sudden enthusiastic hugs",
+      "voiceDescription": "Adorable baby-talk gurgles, cheerful bubbling laughter, enthusiastic high squeals",
+      "typicalEmotions": "Pure giddy delight, innocent fascination, mock indignation when teased, instant giggles",
+      "typicalGestures": "Waddling quickly with arms outstretched, tumbling softly onto plush rugs, clapping with whole hands",
+      "relationships": "Younger brother of Pi (Nancy), son of Ethan and Emma.",
+      "visualKeywords": [
+        "3D animated toddler boy",
+        "2 to 3 years old younger brother",
+        "mint green denim dungarees",
+        "fluffy hair with cowlick",
+        "huge curious eyes",
+        "chubby dumpling cheeks",
+        "mischievous toddler",
+        "3D children series"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Leo (Kem), approximately 2–3 years old toddler boy, younger brother. Cute, curious, playful, mischievous, 2.8 heads proportion, chubby dumpling cheeks, fluffy dark hair with cute cowlick tuft, mint green dungaree overalls over pale yellow tee, following Pi, cute innocent mischievous expression.",
+      "negativePrompt": "older child, adult proportions, skinny face, aggressive look, sad tears, complex adult clothing, realistic skin pores, low poly, extra limbs, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_kem_front",
+      "referenceAssetIds": [
+        "ref_kem_front",
+        "ref_kem_34",
+        "ref_kem_side",
+        "ref_kem_expression",
+        "ref_kem_clothing",
+        "ref_kem_pose",
+        "ref_kem_action"
+      ],
+      "createdAt": "2026-01-10T08:45:00.000Z"
+    },
+    {
+      "id": "ver_mochi_v1",
+      "characterId": "char_mochi",
+      "version": "v1.0",
+      "changeNotes": "Canonical Bible v1.0: Mochi - Permanent Supporting Character (Small fluffy cream-colored PUPPY dog).",
+      "species": "Small fluffy cream-colored puppy (Dog, NOT A CAT)",
+      "likes": "Running with Pi & Kem, treats from Ba Trường, belly rubs, squeaky toys",
+      "visualIdentity": "Small fluffy cream-colored puppy, floppy ears, expressive eyes, cute proportions.",
+      "age": "8 months old (puppy stage)",
+      "gender": "Male",
+      "height": "28 cm shoulder height (small lap puppy)",
+      "bodyProportions": "Fluffy cloud-like rounded puppy silhouette, short stumpy legs, delightfully wiggly tail",
+      "faceShape": "Round fluffy teddy bear puppy face with soft plush muzzle",
+      "skinTone": "Creamy ivory and biscuit-tinted puppy coat",
+      "hair": "Ultra-soft fluffy cream-colored puppy fur, floppy ears, warm marshmallow hues, velvety soft texture",
+      "eyes": "Large glossy obsidian-black expressive puppy eyes with warm liquid highlights",
+      "nose": "Shiny wet black button nose, constantly twitching with curiosity",
+      "mouth": "Gentle happy dog grin, soft pink tongue lolling out when panting joyfully",
+      "facialExpression": "Extremely sweet, eager, playful, puppy joy",
+      "clothing": "No clothing; wears a custom comfortable cherry-red woven puppy collar with a shiny golden bell and bone tag",
+      "shoes": "Four tiny cream-colored paws with soft pink toe-beans",
+      "accessories": "Shiny gold bone-shaped name tag engraved with \"Mochi\"",
+      "personality": "Cute, energetic, playful, friendly.",
+      "behavior": "Often follows Pi and Kem and participates in funny family situations. Tilts head inquisitively at strange noises, runs happily around the children",
+      "voiceDescription": "Cute squeaky puppy yips, joyful tail-thump rhythm, soft sleepy sighs",
+      "typicalEmotions": "Unconditional puppy devotion, boundless excitement, comically playful reactions",
+      "typicalGestures": "Tilting head 45 degrees, vigorous tail wagging that shakes his whole backside, pawing gently for cuddles",
+      "relationships": "Beloved family puppy; often follows Pi and Kem and participates in funny family situations; loved by Ethan and Emma.",
+      "visualKeywords": [
+        "3D animated puppy dog",
+        "small fluffy cream puppy",
+        "floppy ears",
+        "shiny black eyes",
+        "red collar with gold bell",
+        "cute puppy proportions",
+        "not a cat",
+        "friendly playful dog",
+        "3D children animation"
+      ],
+      "characterPrompt": "3D CGI stylized animation of Mochi, small fluffy cream-colored puppy dog (CANONICAL PUPPY DOG, NOT A CAT), floppy ears, expressive black eyes, wet black button nose, cute rounded puppy proportions, cherry-red collar with gold bell, cute energetic playful friendly pose, participating in funny family moments, Pixar-quality aesthetic.",
+      "negativePrompt": "cat, feline, kitten, scottish fold, meow, ferocious dog, realistic wolf, flat 2D cartoon, distorted paws, extra tail, robotic, watermark",
+      "status": "Active",
+      "primaryReferenceAssetId": "ref_mochi_front",
+      "referenceAssetIds": [
+        "ref_mochi_front",
+        "ref_mochi_34",
+        "ref_mochi_side",
+        "ref_mochi_expression",
+        "ref_mochi_clothing",
+        "ref_mochi_pose",
+        "ref_mochi_action"
+      ],
+      "createdAt": "2026-01-10T08:50:00.000Z"
+    }
+  ],
+  "characterReferences": [
+    {
+      "id": "ref_pi_front",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_front.png",
+      "type": "front",
+      "image": "/assets/aistudio/references/images/char_pi_turnaround.jpg",
+      "thumbnail": "/assets/aistudio/references/images/char_pi_turnaround.jpg",
+      "description": "Orthographic front turn: Full body neutral stance with yellow dress and star clips.",
+      "isPrimary": true,
+      "active": true,
+      "createdAt": "2026-01-10T09:00:00.000Z"
+    },
+    {
+      "id": "ref_pi_34",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_34.png",
+      "type": "3/4",
+      "image": "pi_34",
+      "thumbnail": "pi_34_thumb",
+      "description": "3/4 beauty shot: Showing facial volume, ponytail silhouette, and smiling eyes.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:05:00.000Z"
+    },
+    {
+      "id": "ref_pi_side",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_side.png",
+      "type": "side",
+      "image": "pi_side",
+      "thumbnail": "pi_side_thumb",
+      "description": "Side profile turn: Demonstrates nose angle, pigtail attachment point, and shoe curvature.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:10:00.000Z"
+    },
+    {
+      "id": "ref_pi_expression",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_expression.png",
+      "type": "expressions",
+      "image": "pi_expression",
+      "thumbnail": "pi_expression_thumb",
+      "description": "Key emotional sheet: Laughing, curious wonder, determined explorer, and sweet sibling hug.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:15:00.000Z"
+    },
+    {
+      "id": "ref_pi_clothing",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_clothing.png",
+      "type": "custom",
+      "image": "pi_clothing",
+      "thumbnail": "pi_clothing_thumb",
+      "description": "Costume turnaround: Stitching details on rainbow patch, pocket seam, and cherry sneakers.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:20:00.000Z"
+    },
+    {
+      "id": "ref_pi_pose",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_pose.png",
+      "type": "full-body",
+      "image": "pi_pose",
+      "thumbnail": "pi_pose_thumb",
+      "description": "Action dynamic poses: Spontaneous twist dance, holding paintbrush, running forward.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:25:00.000Z"
+    },
+    {
+      "id": "ref_pi_action",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "storagePath": "characters/char_pi/ver_pi_v1/ref_pi_action.png",
+      "type": "action",
+      "image": "pi_action",
+      "thumbnail": "pi_action_thumb",
+      "description": "Adventure sheet: Leading the way with Kem, pointing with excitement, leaping joyfully.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:28:00.000Z"
+    },
+    {
+      "id": "ref_kem_front",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_front.png",
+      "type": "front",
+      "image": "kem_front",
+      "thumbnail": "kem_front_thumb",
+      "description": "Orthographic front turn: Mint dungarees, cowlick tuft, and chubby cheeks.",
+      "isPrimary": true,
+      "active": true,
+      "createdAt": "2026-01-10T09:30:00.000Z"
+    },
+    {
+      "id": "ref_kem_34",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_34.png",
+      "type": "3/4",
+      "image": "kem_34",
+      "thumbnail": "kem_34_thumb",
+      "description": "3/4 beauty view: Cheeky toddler grin, dinosaur patch on dungaree bib.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:35:00.000Z"
+    },
+    {
+      "id": "ref_kem_side",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_side.png",
+      "type": "side",
+      "image": "kem_side",
+      "thumbnail": "kem_side_thumb",
+      "description": "Side profile turn: Round toddler belly contour, dinosaur tail patch behind.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:40:00.000Z"
+    },
+    {
+      "id": "ref_kem_expression",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_expression.png",
+      "type": "expressions",
+      "image": "kem_expression",
+      "thumbnail": "kem_expression_thumb",
+      "description": "Expression sheet: Toddler giggles, funny innocent pout, wide-eyed awe.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:45:00.000Z"
+    },
+    {
+      "id": "ref_kem_clothing",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_clothing.png",
+      "type": "custom",
+      "image": "kem_clothing",
+      "thumbnail": "kem_clothing_thumb",
+      "description": "Overalls turnaround: Mint green denim texture, dinosaur bib embroidery, squeaky baby trainers.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:46:00.000Z"
+    },
+    {
+      "id": "ref_kem_pose",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_pose.png",
+      "type": "full-body",
+      "image": "kem_pose",
+      "thumbnail": "kem_pose_thumb",
+      "description": "Toddler stance: Wobbly waddling balance, outstretched arms ready for a hug.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:47:00.000Z"
+    },
+    {
+      "id": "ref_kem_action",
+      "characterId": "char_kem",
+      "characterVersionId": "ver_kem_v1",
+      "storagePath": "characters/char_kem/ver_kem_v1/ref_kem_action.png",
+      "type": "action",
+      "image": "kem_action",
+      "thumbnail": "kem_action_thumb",
+      "description": "Playful mischief: Copying Pi dance steps with funny toddler hops, giggling with puppy Mochi.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:48:00.000Z"
+    },
+    {
+      "id": "ref_ethan_front",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_front.png",
+      "type": "front",
+      "image": "ethan_front",
+      "thumbnail": "ethan_front_thumb",
+      "description": "Orthographic front turn: Ba Trường in navy polo shirt and chinos.",
+      "isPrimary": true,
+      "active": true,
+      "createdAt": "2026-01-10T09:50:00.000Z"
+    },
+    {
+      "id": "ref_ethan_34",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_34.png",
+      "type": "3/4",
+      "image": "ethan_34",
+      "thumbnail": "ethan_34_thumb",
+      "description": "3/4 view: Warm smiling programmer father, approachable posture.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:55:00.000Z"
+    },
+    {
+      "id": "ref_ethan_side",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_side.png",
+      "type": "side",
+      "image": "ethan_side",
+      "thumbnail": "ethan_side_thumb",
+      "description": "Side profile turn: Athletic comfortable posture, rectangular frames silhouette.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:56:00.000Z"
+    },
+    {
+      "id": "ref_ethan_expression",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_expression.png",
+      "type": "expressions",
+      "image": "ethan_expression",
+      "thumbnail": "ethan_expression_thumb",
+      "description": "Expression sheet: Gentle fatherly smile, curious tech problem solver, laughing with kids.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:57:00.000Z"
+    },
+    {
+      "id": "ref_ethan_clothing",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_clothing.png",
+      "type": "custom",
+      "image": "ethan_clothing",
+      "thumbnail": "ethan_clothing_thumb",
+      "description": "Costume turnaround: Light blue polo shirt weave, tailored grey shorts, white sneakers.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:58:00.000Z"
+    },
+    {
+      "id": "ref_ethan_pose",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_pose.png",
+      "type": "full-body",
+      "image": "ethan_pose",
+      "thumbnail": "ethan_pose_thumb",
+      "description": "Full body stance: Relaxed upright father posture, hands comfortably in pockets.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:59:00.000Z"
+    },
+    {
+      "id": "ref_ethan_action",
+      "characterId": "char_ethan",
+      "characterVersionId": "ver_ethan_v1",
+      "storagePath": "characters/char_ethan/ver_ethan_v1/ref_ethan_action.png",
+      "type": "action",
+      "image": "ethan_action",
+      "thumbnail": "ethan_action_thumb",
+      "description": "Fatherly engagement: Kneeling down to talk with Pi & Kem, carrying Kem on shoulders.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T09:59:30.000Z"
+    },
+    {
+      "id": "ref_emma_front",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_front.png",
+      "type": "front",
+      "image": "emma_front",
+      "thumbnail": "emma_front_thumb",
+      "description": "Orthographic front turn: Mẹ Vân in PURPLE FLORAL COLLARED SHIRT and blue jeans.",
+      "isPrimary": true,
+      "active": true,
+      "createdAt": "2026-01-10T10:00:00.000Z"
+    },
+    {
+      "id": "ref_emma_34",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_34.png",
+      "type": "3/4",
+      "image": "emma_34",
+      "thumbnail": "emma_34_thumb",
+      "description": "3/4 beauty view: Gentle loving mother smile, wavy chestnut hair.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:05:00.000Z"
+    },
+    {
+      "id": "ref_emma_side",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_side.png",
+      "type": "side",
+      "image": "emma_side",
+      "thumbnail": "emma_side_thumb",
+      "description": "Side profile turn: Graceful mother silhouette, soft jawline, hair wave contour.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:06:00.000Z"
+    },
+    {
+      "id": "ref_emma_expression",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_expression.png",
+      "type": "expressions",
+      "image": "emma_expression",
+      "thumbnail": "emma_expression_thumb",
+      "description": "Expression sheet: Encouraging maternal warmth, delighted chuckle, comforting reassurance.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:07:00.000Z"
+    },
+    {
+      "id": "ref_emma_clothing",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_clothing.png",
+      "type": "custom",
+      "image": "emma_clothing",
+      "thumbnail": "emma_clothing_thumb",
+      "description": "Costume turnaround: Detailed purple floral collared pattern, denim jeans stitch, pearl accessories.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:08:00.000Z"
+    },
+    {
+      "id": "ref_emma_pose",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_pose.png",
+      "type": "full-body",
+      "image": "emma_pose",
+      "thumbnail": "emma_pose_thumb",
+      "description": "Full body poise: Elegant, grounded mother posture with welcoming open body language.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:09:00.000Z"
+    },
+    {
+      "id": "ref_emma_action",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "storagePath": "characters/char_emma/ver_emma_v1/ref_emma_action.png",
+      "type": "action",
+      "image": "emma_action",
+      "thumbnail": "emma_action_thumb",
+      "description": "Family activities: Guiding craft sessions, holding hands with children, joyful travel planning.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:09:30.000Z"
+    },
+    {
+      "id": "ref_mochi_front",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_front.png",
+      "type": "full-body",
+      "image": "mochi_front",
+      "thumbnail": "mochi_front_thumb",
+      "description": "Full body puppy: Fluffy cream fur, red collar with gold bell, shiny eyes.",
+      "isPrimary": true,
+      "active": true,
+      "createdAt": "2026-01-10T10:10:00.000Z"
+    },
+    {
+      "id": "ref_mochi_34",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_34.png",
+      "type": "3/4",
+      "image": "mochi_34",
+      "thumbnail": "mochi_34_thumb",
+      "description": "3/4 puppy view: Adorable round teddy-bear puppy face, floppy ears, curious gaze.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:11:00.000Z"
+    },
+    {
+      "id": "ref_mochi_side",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_side.png",
+      "type": "side",
+      "image": "mochi_side",
+      "thumbnail": "mochi_side_thumb",
+      "description": "Side profile turn: Short stumpy puppy legs, soft rounded back, wagging fluffy tail.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:12:00.000Z"
+    },
+    {
+      "id": "ref_mochi_expression",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_expression.png",
+      "type": "expressions",
+      "image": "mochi_expression",
+      "thumbnail": "mochi_expression_thumb",
+      "description": "Expression sheet: Head tilt, happy panting dog smile, playful pounce.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:15:00.000Z"
+    },
+    {
+      "id": "ref_mochi_clothing",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_clothing.png",
+      "type": "custom",
+      "image": "mochi_clothing",
+      "thumbnail": "mochi_clothing_thumb",
+      "description": "Collar turnaround: Cherry-red woven collar, shiny golden bell, engraved Mochi bone tag.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:16:00.000Z"
+    },
+    {
+      "id": "ref_mochi_pose",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_pose.png",
+      "type": "full-body",
+      "image": "mochi_pose",
+      "thumbnail": "mochi_pose_thumb",
+      "description": "Playful stance: Front paws stretched forward in playful bow, wagging tail high.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:17:00.000Z"
+    },
+    {
+      "id": "ref_mochi_action",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/ref_mochi_action.png",
+      "type": "action",
+      "image": "mochi_action",
+      "thumbnail": "mochi_action_thumb",
+      "description": "Puppy adventure: Trotting energetically beside Kem, sniffing curiously at fallen leaves.",
+      "isPrimary": false,
+      "active": true,
+      "createdAt": "2026-01-10T10:18:00.000Z"
+    }
+  ],
+  "globalStyle": {
+    "id": "style_pikem_001",
+    "projectId": "proj_pikem_001",
+    "name": "Pi & Kem Signature 3D Cinematic Style",
+    "activeVersionId": "style_ver_1_0",
+    "createdAt": "2026-01-10T08:00:00.000Z",
+    "updatedAt": "2026-01-15T09:00:00.000Z"
+  },
+  "globalStyleVersions": [
+    {
+      "id": "style_ver_1_0",
+      "styleId": "style_pikem_001",
+      "version": "v1.0",
+      "changeNotes": "Initial production baseline style for Season 1 episodes.",
+      "animationStyle": "High-quality cinematic 3D animated movie style, Pixar/Illumination inspired aesthetic",
+      "lighting": "Warm cinematic soft studio lighting, golden hour ambient rim light, gentle indoor fill",
+      "colorPalette": "Vibrant pastel colors, warm peach, sky blue, playful lemon yellow, cozy teal",
+      "cameraStyle": "Eye-level child perspective, gentle slow dolly movements, cinematic focal depth",
+      "environmentStyle": "Modern bright family home, child-friendly rounded furniture, soft tactile textures",
+      "characterRendering": "Polished 3D stylized cartoon rendering, expressive big eyes, soft skin subsurface scattering",
+      "texture": "Detailed but soft fabric weave, stylized hair strands, clean vinyl & wooden materials",
+      "cinematography": "Cinematic composition, soft depth of field, balanced rule of thirds, child-safe framing",
+      "aspectRatio": "16:9",
+      "resolution": "4K UHD (3840x2160) / 1080p Master",
+      "fps": 24,
+      "targetPlatform": "YouTube Kids, OTT Streaming, Broadcast Television",
+      "globalPrompt": "High-quality cinematic 3D animated movie style, polished 3D rendering, warm cinematic lighting, vibrant pastel colors, expressive child-friendly characters, detailed but soft environments, modern family home, cinematic composition, soft depth of field, colorful children animation.",
+      "negativePrompt": "wrong character identity, inconsistent face, inconsistent hairstyle, inconsistent clothing, incorrect age, adult proportions, distorted anatomy, extra fingers, missing fingers, extra limbs, duplicated characters, deformed face, unnatural eyes, incorrect number of characters, duplicate person, cropped character, broken hands, malformed body, text, watermark, logo, blurry, low quality",
+      "status": "Active",
+      "createdAt": "2026-01-10T08:00:00.000Z"
+    },
+    {
+      "id": "style_ver_1_1",
+      "styleId": "style_pikem_001",
+      "version": "v1.1",
+      "changeNotes": "Enhanced outdoor sunshine lighting and saturated lawn greenery for picnic episodes.",
+      "animationStyle": "High-quality cinematic 3D animated movie style, enhanced subsurface scattering",
+      "lighting": "Vivid morning sunlight with soft volumetric light rays and delicate rim highlights",
+      "colorPalette": "Fresh grassy green, radiant morning yellow, sky pastel cyan, blossom coral",
+      "cameraStyle": "Wide family master shots, low-angle dynamic child running tracking shots",
+      "environmentStyle": "Sunny outdoor backyard garden, lush green lawn, wooden patio deck, colorful flowerbeds",
+      "characterRendering": "Ultra-crisp 3D stylized models with high micro-contrast and expressive facial shapes",
+      "texture": "Soft denim fiber, cotton knit, puppy fluffy fur grooming, water droplet reflections",
+      "cinematography": "Dynamic cinematic framing, gentle motion blur, rich bokeh depth of field",
+      "aspectRatio": "16:9",
+      "resolution": "4K UHD (3840x2160)",
+      "fps": 24,
+      "targetPlatform": "YouTube Kids & Cinema Festivals",
+      "globalPrompt": "High-quality cinematic 3D animated movie style, polished 3D rendering, radiant outdoor morning sunlight, lush lawn, vibrant pastel colors, expressive child-friendly characters, rich bokeh, colorful family animation.",
+      "negativePrompt": "wrong character identity, inconsistent face, inconsistent hairstyle, inconsistent clothing, incorrect age, adult proportions, distorted anatomy, extra fingers, missing fingers, extra limbs, duplicated characters, deformed face, unnatural eyes, incorrect number of characters, duplicate person, cropped character, broken hands, malformed body, text, watermark, logo, blurry, low quality",
+      "status": "Draft",
+      "createdAt": "2026-02-14T11:00:00.000Z"
+    }
+  ],
+  "seasons": [
+    {
+      "id": "season_001",
+      "projectId": "proj_pikem_001",
+      "seasonNumber": 1,
+      "title": "Season 1: Joyful Daily Discoveries",
+      "vietnameseTitle": "Mùa 1: Những Khám Phá Nhỏ Diệu Kỳ",
+      "description": "The inaugural 12-episode season focusing on everyday family milestones, creative play at home, sibling empathy, and healthy habits.",
+      "theme": "Family Warmth, Creativity, Sibling Cooperation, and Emotional Growth",
+      "audience": "Children 3–8 & Family Co-viewing",
+      "startDate": "2026-01-01",
+      "endDate": "2026-12-31",
+      "episodeCount": 12,
+      "styleVersionId": "style_ver_1_0",
+      "seasonCharacters": [
+        "char_pi",
+        "char_kem",
+        "char_ethan",
+        "char_emma",
+        "char_mochi"
+      ],
+      "notes": "Season 1 strictly anchors Character DNA v1 across all episodes to guarantee brand consistency and visual recognition on streaming channels.",
+      "status": "In Production",
+      "createdAt": "2026-01-10T10:00:00.000Z",
+      "updatedAt": "2026-02-01T12:00:00.000Z"
+    }
+  ],
+  "episodes": [
+    {
+      "id": "ep_009",
+      "seasonId": "season_001",
+      "episodeNumber": 9,
+      "title": "Tập 9 – Cùng nhau vẽ tranh",
+      "storyIdea": "Mẹ trải một tấm bạt lớn giữa nhà để Pi và Kem cùng vẽ tranh màu nước.",
+      "theme": "Sáng tạo & Chia sẻ nghệ thuật (Creativity & Sibling Bond)",
+      "educationalMessage": "Khuyến khích trẻ em tự do biểu đạt cảm xúc qua hội họa, trân trọng nét vẽ của nhau, và cùng dọn dẹp sau khi chơi.",
+      "characterIds": [
+        "char_pi",
+        "char_kem",
+        "char_emma",
+        "char_ethan"
+      ],
+      "supportingCharacterIds": [
+        "char_mochi"
+      ],
+      "allowedCharacters": [
+        "char_pi",
+        "char_kem",
+        "char_emma",
+        "char_ethan",
+        "char_mochi"
+      ],
+      "excludedCharacters": [],
+      "props": [
+        "Tấm bạt trắng lớn",
+        "Khay màu nước rực rỡ",
+        "Cọ vẽ thân gỗ",
+        "Tạp dề trẻ em (vàng cho Pi, xanh cho Kem)",
+        "Quả bóng đá mini của Ba Trường"
+      ],
+      "language": "Tiếng Việt (Vietnamese)",
+      "durationLimit": "15s",
+      "continuityRules": [
+        "Mochi luôn đeo vòng cổ đỏ có chuông vàng nhỏ.",
+        "Tạp dề của Pi màu vàng in hình hoa hướng dương, tạp dề của Kem màu xanh mint.",
+        "Tấm bạt trắng phẳng phiu nằm chính giữa phòng khách.",
+        "Ánh sáng ban mai tự nhiên 5600K xuyên qua cửa sổ lớn, duy trì tông màu ấm áp và tươi vui.",
+        "Không xuất hiện thiết bị điện tử gây xao nhãng trong hoạt động vẽ tranh thủ công."
+      ],
+      "location": "Phòng khách gia đình ấm cúng (Living Room Canvas Area)",
+      "duration": "07:30 (Minutes)",
+      "targetDuration": "07:30 (Minutes)",
+      "targetAudience": "Preschool & Early Elementary (3–8 years)",
+      "additionalNotes": "Mẹ Vân đóng vai trò định hướng dịu dàng. Ba Trường mang tinh thần thể thao vui nhộn vào hội họa. Mochi tạo khoảnh khắc hài hước kinh điển.",
+      "targetPlatform": "YouTube Kids & OTT Streaming",
+      "status": "Story Generated",
+      "storyboardId": "sb_ep009",
+      "characterVersionSnapshots": {
+        "char_pi": "ver_pi_v1",
+        "char_kem": "ver_kem_v1",
+        "char_emma": "ver_emma_v1",
+        "char_ethan": "ver_ethan_v1",
+        "char_mochi": "ver_mochi_v1"
+      },
+      "styleVersionSnapshotId": "style_ver_1_0",
+      "storyDraft": {
+        "id": "draft_ep009_canonical",
+        "episodeId": "ep_009",
+        "title": "Tập 9 – Cùng nhau vẽ tranh",
+        "premise": "Mẹ Vân trải một tấm bạt lớn giữa phòng khách để Pi và Kem cùng nhau vẽ một bức tranh khổng lồ. Một tai nạn màu vẽ vui nhộn với chú cún Mochi biến thành cơ hội để cả nhà cùng sáng tạo và học bài học về sự chia sẻ.",
+        "educationalLesson": "Khuyến khích trẻ em tự do biểu đạt cảm xúc qua hội họa, trân trọng nét vẽ của nhau, và tự giác cùng dọn dẹp sau khi chơi.",
+        "targetAudience": "Preschool & Early Elementary (3–8 years)",
+        "targetDuration": "07:30 (Minutes)",
+        "additionalNotes": "Mẹ Vân đóng vai trò định hướng dịu dàng. Ba Trường mang tinh thần thể thao vui nhộn vào hội họa. Mochi tạo khoảnh khắc hài hước kinh điển.",
+        "beginning": "Mẹ Vân trải tấm bạt vẽ trắng tinh khôi giữa sàn gỗ phòng khách. Pi và Kem hào hứng đeo tạp dề đầy màu sắc, sẵn sàng cho buổi sáng hội họa.",
+        "middle": "Pi vẽ cầu vồng và khu vườn hoa rực rỡ trong khi Kem tò mò chấm các chấm tròn màu sắc. Bất ngờ, chú cún Mochi chạy qua giẫm phải khay màu xanh, in những dấu chân cún ngộ nghĩnh lên tranh khiến cả nhà giật mình. Ba Trường xuất hiện kịp thời, biến những vết chân thành các cầu thủ bóng đá tí hon.",
+        "ending": "Bức tranh hoàn thành với sự góp mặt của tất cả các thành viên qua những dấu vân tay ấm áp. Cả nhà cùng nhau rửa cọ, lau sàn và tắm cho Mochi trong tiếng cười rộn rã.",
+        "emotionalArc": "Hào hứng chờ đón → Say sưa sáng tạo → Bất ngờ bối rối → Bùng nổ tiếng cười & Sáng tạo → Gắn kết yêu thương",
+        "location": "Phòng khách gia đình ấm cúng (Living Room Canvas Area)",
+        "characterParticipation": [
+          {
+            "characterId": "char_pi",
+            "characterName": "Pi (Nancy)",
+            "characterRole": "Older Sister (5–7 yrs)",
+            "versionSnapshotId": "ver_pi_v1",
+            "participationRole": "Họa sĩ nhí khởi xướng – Vẽ cầu vồng và hướng dẫn em Kem pha màu"
+          },
+          {
+            "characterId": "char_kem",
+            "characterName": "Kem (Leo)",
+            "characterRole": "Younger Brother (2–3 yrs)",
+            "versionSnapshotId": "ver_kem_v1",
+            "participationRole": "Đồng đội tinh nghịch – Tạo các nét cọ trừu tượng và chơi cùng Mochi"
+          },
+          {
+            "characterId": "char_emma",
+            "characterName": "Mẹ Vân (Emma)",
+            "characterRole": "Mother (Career Consultant)",
+            "versionSnapshotId": "ver_emma_v1",
+            "participationRole": "Người hướng dẫn kiên nhẫn – Chuẩn bị dụng cụ và truyền cảm hứng"
+          },
+          {
+            "characterId": "char_ethan",
+            "characterName": "Ba Trường (Ethan)",
+            "characterRole": "Father (Programmer)",
+            "versionSnapshotId": "ver_ethan_v1",
+            "participationRole": "Cố vấn hài hước – Biến sự cố chân cún thành kiệt tác bóng đá sáng tạo"
+          },
+          {
+            "characterId": "char_mochi",
+            "characterName": "Mochi",
+            "characterRole": "Supporting Puppy Dog",
+            "versionSnapshotId": "ver_mochi_v1",
+            "participationRole": "Cún cưng vui nhộn – Tạo dấu chân màu xanh bất đắc dĩ"
+          }
+        ],
+        "styleVersionSnapshotId": "style_ver_1_0",
+        "scenes": [
+          {
+            "id": "scene_ep9_01",
+            "sceneNumber": 1,
+            "title": "Tấm bạt trắng & Lời mời gọi sắc màu",
+            "location": "Phòng khách gia đình – Khu vực sàn bạt trung tâm",
+            "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+            "lighting": "Ánh nắng 5600K rọi từ cửa sổ lớn, chiếu ấm các lọ màu nước và sàn gỗ",
+            "characterIds": [
+              "char_emma",
+              "char_pi",
+              "char_kem",
+              "char_mochi"
+            ],
+            "characterDnaReferences": {
+              "char_emma": "ver_emma_v1",
+              "char_pi": "ver_pi_v1",
+              "char_kem": "ver_kem_v1",
+              "char_mochi": "ver_mochi_v1"
+            },
+            "action": "Mẹ Vân trải rộng tấm bạt trắng lớn ra sàn. Pi đeo chiếc tạp dề vàng nhảy chân sáo vào phòng, trên tay cầm hai chiếc cọ vẽ. Kem lẫm chẫm chạy theo sau, chiếc tạp dề xanh dương quá khổ quét nhẹ xuống thảm. Mochi chạy vòng quanh sủa khẽ mừng rỡ.",
+            "dialogue": [
+              {
+                "characterId": "char_emma",
+                "characterName": "Mẹ Vân",
+                "line": "Hôm nay phòng khách của chúng ta sẽ là xưởng tranh kỳ diệu! Các họa sĩ nhí đã sẵn sàng chưa?",
+                "emotion": "Ấm áp, rạng rỡ"
+              },
+              {
+                "characterId": "char_pi",
+                "characterName": "Pi",
+                "line": "Dạ sẵn sàng! Con sẽ vẽ một cây cầu vồng siêu to khổng lồ bắc qua ngọn đồi!",
+                "emotion": "Hào hứng, tự tin"
+              },
+              {
+                "characterId": "char_kem",
+                "characterName": "Kem",
+                "line": "Kem vẽ... Kem vẽ ô tô màu đỏ! Bíp bíp!",
+                "emotion": "Hớn hở, ngộ nghĩnh"
+              }
+            ],
+            "emotion": "Tươi sáng, háo hức, tràn ngập năng lượng tích cực",
+            "storyPurpose": "Thiết lập bối cảnh câu chuyện (Setup) và giới thiệu hoạt động gia đình",
+            "educationalPurpose": "Khơi gợi niềm đam mê hội họa và tinh thần sẵn sàng tham gia hoạt động chung",
+            "cameraDirection": "Wide Shot toàn cảnh phòng khách, sau đó Dolly In vào nụ cười tươi tắn của Pi và Kem",
+            "estimatedDurationSeconds": 65
+          },
+          {
+            "id": "scene_ep9_02",
+            "sceneNumber": 2,
+            "title": "Nét vẽ đầu tiên & Bầu trời sắc màu",
+            "location": "Phòng khách gia đình – Bề mặt tấm bạt vẽ",
+            "timeOfDay": "Buổi sáng (Bright Daytime)",
+            "lighting": "Ánh sáng rõ nét, tương phản màu vẽ tươi sáng rực rỡ",
+            "characterIds": [
+              "char_pi",
+              "char_kem",
+              "char_emma"
+            ],
+            "characterDnaReferences": {
+              "char_pi": "ver_pi_v1",
+              "char_kem": "ver_kem_v1",
+              "char_emma": "ver_emma_v1"
+            },
+            "action": "Pi quỳ gối trên đệm, dùng cọ quét một dải màu vàng và xanh lam tạo thành vòm cung mềm mại. Kem ngồi bên cạnh dùng các ngón tay nhỏ xíu chấm màu vàng rồi in những dấu chấm tròn tròn lên góc bạt, miệng vừa chấm vừa cười khúc khích. Mẹ Vân ngồi bên cạnh hướng dẫn Kem cách cầm cọ nhẹ nhàng.",
+            "dialogue": [
+              {
+                "characterId": "char_pi",
+                "characterName": "Pi",
+                "line": "Kem ơi, em chấm nhẹ tay thôi nhé, nhìn này, màu vàng và màu xanh trộn lại sẽ ra màu xanh lá cây đấy!",
+                "emotion": "Hào hứng chia sẻ kiến thức"
+              },
+              {
+                "characterId": "char_kem",
+                "characterName": "Kem",
+                "line": "Woa... Biến hình ùi! Màu xanh lá giống cây kem matcha!",
+                "emotion": "Tròn mắt kinh ngạc"
+              },
+              {
+                "characterId": "char_emma",
+                "characterName": "Mẹ Vân",
+                "line": "Đúng rồi, hai chị em phối hợp giỏi lắm!",
+                "emotion": "Khen ngợi, khích lệ"
+              }
+            ],
+            "emotion": "Say sưa, hòa thuận, tràn đầy tình chị em",
+            "storyPurpose": "Phát triển câu chuyện (Rising Action), thể hiện sự hợp tác ban đầu",
+            "educationalPurpose": "Dạy trẻ về sự pha trộn màu sắc cơ bản và kỹ năng chia sẻ không gian sáng tạo",
+            "cameraDirection": "Close-Up góc nhìn từ trên cao (Top-down Bird Eye View) bao quát nét cọ chuyển màu sống động",
+            "estimatedDurationSeconds": 75
+          },
+          {
+            "id": "scene_ep9_03",
+            "sceneNumber": 3,
+            "title": "Sự cố bất ngờ: Dấu chân xanh của Mochi",
+            "location": "Phòng khách gia đình – Góc khay màu nước",
+            "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+            "lighting": "Ánh sáng tập trung vào vệt màu nước xanh dương tươi tắn",
+            "characterIds": [
+              "char_mochi",
+              "char_pi",
+              "char_kem"
+            ],
+            "characterDnaReferences": {
+              "char_mochi": "ver_mochi_v1",
+              "char_pi": "ver_pi_v1",
+              "char_kem": "ver_kem_v1"
+            },
+            "action": "Chú cún Mochi thấy một chú bướm đồ chơi bay lơ lửng, phấn khích nhảy xổ qua. Bàn chân sau của Mochi giẫm trúng khay màu xanh dương, sau đó lon ton bước bốn bước liên tiếp lên giữa vòm cầu vồng của Pi. Mochi dừng lại, ngơ ngác nhìn bốn dấu chân hình bông hoa màu xanh của mình.",
+            "dialogue": [
+              {
+                "characterId": "char_kem",
+                "characterName": "Kem",
+                "line": "A! Mochi vẽ hoa! Mochi vẽ hoa bằng chân kìa!",
+                "emotion": "Cười ngả nghiêng, vỗ tay thích thú"
+              },
+              {
+                "characterId": "char_pi",
+                "characterName": "Pi",
+                "line": "Ôi không! Cầu vồng của chị bị dính chân cún rồi... Mochi ơi!",
+                "emotion": "Bất ngờ, thoáng lo lắng và tiếc nuối"
+              }
+            ],
+            "emotion": "Bất ngờ, kịch tính nhẹ nhàng và hài hước",
+            "storyPurpose": "Nút thắt sự cố (Complication) tạo tình huống thử thách lòng kiên nhẫn và sự sáng tạo",
+            "educationalPurpose": "Giúp trẻ học cách đối diện với sự cố bất ngờ mà không bực bội hay la mắng",
+            "cameraDirection": "Slow-motion Tracking Shot theo bước chân của Mochi và zoom nhanh vào biểu cảm của Pi & Kem",
+            "estimatedDurationSeconds": 70
+          },
+          {
+            "id": "scene_ep9_04",
+            "sceneNumber": 4,
+            "title": "Sáng kiến bóng đá của Ba Trường",
+            "location": "Phòng khách gia đình – Bên cạnh tấm bạt",
+            "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+            "lighting": "Ánh sáng rực rỡ, năng động",
+            "characterIds": [
+              "char_ethan",
+              "char_pi",
+              "char_kem",
+              "char_emma"
+            ],
+            "characterDnaReferences": {
+              "char_ethan": "ver_ethan_v1",
+              "char_pi": "ver_pi_v1",
+              "char_kem": "ver_kem_v1",
+              "char_emma": "ver_emma_v1"
+            },
+            "action": "Ba Trường bước vào với quả bóng mini trên tay. Nhìn thấy dấu chân cún, Ba Trường mỉm cười nháy mắt, cúi xuống cầm cọ vẽ thêm vài đường kẻ trắng quanh dấu chân, biến chúng thành một sân cỏ tí hon với các cầu thủ cún con đang sút bóng.",
+            "dialogue": [
+              {
+                "characterId": "char_ethan",
+                "characterName": "Ba Trường",
+                "line": "Trọng tài VAR Ba Trường đã xem lại băng ghi hình! Đây không phải lỗi việt vị, mà là một siêu phẩm bàn thắng của tiền đạo Mochi!",
+                "emotion": "Hài hước, giọng bình luận viên bóng đá"
+              },
+              {
+                "characterId": "char_pi",
+                "characterName": "Pi",
+                "line": "Ồ! Nhìn giống một giải đấu cúp thế giới trên mây quá ba ơi! Con vẽ thêm khán đài cổ vũ nhé!",
+                "emotion": "Mắt sáng rực, lấy lại hứng khởi gấp đôi"
+              },
+              {
+                "characterId": "char_emma",
+                "characterName": "Mẹ Vân",
+                "line": "Một ý tưởng tuyệt vời! Không có bức tranh nào bị hỏng, chỉ có những cơ hội sáng tạo mới thôi.",
+                "emotion": "Tự hào, khích lệ cả nhà"
+              }
+            ],
+            "emotion": "Truyền cảm hứng, tràn ngập tiếng cười và sự lạc quan",
+            "storyPurpose": "Đỉnh điểm giải pháp (Creative Solution / Climax), gắn kết cá tính lập trình và bóng đá của Ba Trường",
+            "educationalPurpose": "Dạy tư duy linh hoạt: biến lỗi lầm hay sự cố ngoài ý muốn thành cơ hội sáng tạo độc đáo",
+            "cameraDirection": "Medium Shot quay Ba Trường đang vẽ, sau đó lia sang phản ứng reo hò của Pi và Kem",
+            "estimatedDurationSeconds": 80
+          },
+          {
+            "id": "scene_ep9_05",
+            "sceneNumber": 5,
+            "title": "Bức tranh hoàn hảo của gia đình",
+            "location": "Phòng khách gia đình – Toàn cảnh tấm bạt",
+            "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+            "lighting": "Ánh sáng vàng chan hòa phủ khắp căn phòng",
+            "characterIds": [
+              "char_ethan",
+              "char_emma",
+              "char_pi",
+              "char_kem",
+              "char_mochi"
+            ],
+            "characterDnaReferences": {
+              "char_ethan": "ver_ethan_v1",
+              "char_emma": "ver_emma_v1",
+              "char_pi": "ver_pi_v1",
+              "char_kem": "ver_kem_v1",
+              "char_mochi": "ver_mochi_v1"
+            },
+            "action": "Bức tranh đã phủ kín màu sắc: cầu vồng, sân bóng đá, những chú bướm và khu vườn hoa. Cả bốn người cùng nhúng bàn tay vào màu nước rồi in bốn dấu tay lớn nhỏ cạnh nhau ở góc tranh như chữ ký của gia đình. Mochi đặt nhẹ một dấu chân xanh bên cạnh.",
+            "dialogue": [
+              {
+                "characterId": "char_pi",
+                "characterName": "Pi",
+                "line": "Đây là bức tranh đẹp nhất từ trước đến nay của chúng mình!",
+                "emotion": "Hạnh phúc ngập tràn"
+              },
+              {
+                "characterId": "char_kem",
+                "characterName": "Kem",
+                "line": "Gia đình Pi Kem vô địch! Hoan hô!",
+                "emotion": "Giơ hai tay vỗ vang ròn rã"
+              }
+            ],
+            "emotion": "Gắn kết gia đình thiêng liêng, ấm áp và tự hào",
+            "storyPurpose": "Mở nút và hoàn thành mục tiêu (Resolution / Climax Completion)",
+            "educationalPurpose": "Tôn vinh giá trị của sự đoàn kết gia đình và niềm vui khi cùng nhau hoàn thành tác phẩm",
+            "cameraDirection": "Crane Shot nâng từ từ lên cao ghi trọn bức tranh khổng lồ cùng gia đình đang ôm nhau",
+            "estimatedDurationSeconds": 80
+          },
+          {
+            "id": "scene_ep9_06",
+            "sceneNumber": 6,
+            "title": "Cùng nhau dọn dẹp & Lời chúc ấm áp",
+            "location": "Phòng khách & Bồn rửa gian bếp",
+            "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+            "lighting": "Ánh sáng dịu nhẹ, tạo cảm giác ngăn nắp và sạch sẽ",
+            "characterIds": [
+              "char_ethan",
+              "char_emma",
+              "char_pi",
+              "char_kem",
+              "char_mochi"
+            ],
+            "characterDnaReferences": {
+              "char_ethan": "ver_ethan_v1",
+              "char_emma": "ver_emma_v1",
+              "char_pi": "ver_pi_v1",
+              "char_kem": "ver_kem_v1",
+              "char_mochi": "ver_mochi_v1"
+            },
+            "action": "Pi và Kem mỗi người cầm một chiếc khăn ẩm lau sạch các vết màu trên sàn gỗ. Ba Trường bế Mochi vào bồn rửa để Mẹ Vân rửa sạch bàn chân xanh bằng xà phòng êm dịu. Căn phòng trở lại gọn gàng, bức tranh được treo trang trọng lên tường.",
+            "dialogue": [
+              {
+                "characterId": "char_emma",
+                "characterName": "Mẹ Vân",
+                "line": "Họa sĩ giỏi là người biết giữ cho cây cọ của mình luôn sạch sẽ và căn phòng luôn ngăn nắp.",
+                "emotion": "Dịu dàng dặn dò"
+              },
+              {
+                "characterId": "char_pi",
+                "characterName": "Pi",
+                "line": "Con với Kem rửa sạch hết cọ rồi ạ! Lần sau chúng mình lại vẽ nữa nhé mẹ!",
+                "emotion": "Tự giác, vui vẻ"
+              },
+              {
+                "characterId": "char_ethan",
+                "characterName": "Ba Trường",
+                "line": "Nhất trí! Hẹn gặp lại các bạn nhỏ ở những cuộc phiêu lưu tiếp theo của gia đình Pi & Kem!",
+                "emotion": "Tươi cười nhìn vào ống kính vẫy tay"
+              }
+            ],
+            "emotion": "Bình yên, thỏa mãn, đúc kết bài học ý nghĩa",
+            "storyPurpose": "Kết màn và đúc kết giáo dục (Outro & Moral Reinforcement)",
+            "educationalPurpose": "Rèn luyện thói quen tự giác dọn dẹp đồ dùng sau khi vui chơi",
+            "cameraDirection": "Medium Shot toàn gia đình và Mochi vẫy tay chào khán giả với nụ cười rạng rỡ",
+            "estimatedDurationSeconds": 65
+          }
+        ],
+        "createdAt": "2026-02-10T09:00:00.000Z",
+        "updatedAt": "2026-02-15T15:30:00.000Z"
+      },
+      "scenes": [
+        {
+          "id": "scene_ep9_01",
+          "sceneNumber": 1,
+          "title": "Tấm bạt trắng & Lời mời gọi sắc màu",
+          "location": "Phòng khách gia đình – Khu vực sàn bạt trung tâm",
+          "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+          "lighting": "Ánh nắng 5600K rọi từ cửa sổ lớn, chiếu ấm các lọ màu nước và sàn gỗ",
+          "characterIds": [
+            "char_emma",
+            "char_pi",
+            "char_kem",
+            "char_mochi"
+          ],
+          "characterDnaReferences": {
+            "char_emma": "ver_emma_v1",
+            "char_pi": "ver_pi_v1",
+            "char_kem": "ver_kem_v1",
+            "char_mochi": "ver_mochi_v1"
+          },
+          "action": "Mẹ Vân trải rộng tấm bạt trắng lớn ra sàn. Pi đeo chiếc tạp dề vàng nhảy chân sáo vào phòng, trên tay cầm hai chiếc cọ vẽ. Kem lẫm chẫm chạy theo sau, chiếc tạp dề xanh dương quá khổ quét nhẹ xuống thảm. Mochi chạy vòng quanh sủa khẽ mừng rỡ.",
+          "dialogue": [
+            {
+              "characterId": "char_emma",
+              "characterName": "Mẹ Vân",
+              "line": "Hôm nay phòng khách của chúng ta sẽ là xưởng tranh kỳ diệu! Các họa sĩ nhí đã sẵn sàng chưa?",
+              "emotion": "Ấm áp, rạng rỡ"
+            },
+            {
+              "characterId": "char_pi",
+              "characterName": "Pi",
+              "line": "Dạ sẵn sàng! Con sẽ vẽ một cây cầu vồng siêu to khổng lồ bắc qua ngọn đồi!",
+              "emotion": "Hào hứng, tự tin"
+            },
+            {
+              "characterId": "char_kem",
+              "characterName": "Kem",
+              "line": "Kem vẽ... Kem vẽ ô tô màu đỏ! Bíp bíp!",
+              "emotion": "Hớn hở, ngộ nghĩnh"
+            }
+          ],
+          "emotion": "Tươi sáng, háo hức, tràn ngập năng lượng tích cực",
+          "storyPurpose": "Thiết lập bối cảnh câu chuyện (Setup) và giới thiệu hoạt động gia đình",
+          "educationalPurpose": "Khơi gợi niềm đam mê hội họa và tinh thần sẵn sàng tham gia hoạt động chung",
+          "cameraDirection": "Wide Shot toàn cảnh phòng khách, sau đó Dolly In vào nụ cười tươi tắn của Pi và Kem",
+          "estimatedDurationSeconds": 65
+        },
+        {
+          "id": "scene_ep9_02",
+          "sceneNumber": 2,
+          "title": "Nét vẽ đầu tiên & Bầu trời sắc màu",
+          "location": "Phòng khách gia đình – Bề mặt tấm bạt vẽ",
+          "timeOfDay": "Buổi sáng (Bright Daytime)",
+          "lighting": "Ánh sáng rõ nét, tương phản màu vẽ tươi sáng rực rỡ",
+          "characterIds": [
+            "char_pi",
+            "char_kem",
+            "char_emma"
+          ],
+          "characterDnaReferences": {
+            "char_pi": "ver_pi_v1",
+            "char_kem": "ver_kem_v1",
+            "char_emma": "ver_emma_v1"
+          },
+          "action": "Pi quỳ gối trên đệm, dùng cọ quét một dải màu vàng và xanh lam tạo thành vòm cung mềm mại. Kem ngồi bên cạnh dùng các ngón tay nhỏ xíu chấm màu vàng rồi in những dấu chấm tròn tròn lên góc bạt, miệng vừa chấm vừa cười khúc khích. Mẹ Vân ngồi bên cạnh hướng dẫn Kem cách cầm cọ nhẹ nhàng.",
+          "dialogue": [
+            {
+              "characterId": "char_pi",
+              "characterName": "Pi",
+              "line": "Kem ơi, em chấm nhẹ tay thôi nhé, nhìn này, màu vàng và màu xanh trộn lại sẽ ra màu xanh lá cây đấy!",
+              "emotion": "Hào hứng chia sẻ kiến thức"
+            },
+            {
+              "characterId": "char_kem",
+              "characterName": "Kem",
+              "line": "Woa... Biến hình ùi! Màu xanh lá giống cây kem matcha!",
+              "emotion": "Tròn mắt kinh ngạc"
+            },
+            {
+              "characterId": "char_emma",
+              "characterName": "Mẹ Vân",
+              "line": "Đúng rồi, hai chị em phối hợp giỏi lắm!",
+              "emotion": "Khen ngợi, khích lệ"
+            }
+          ],
+          "emotion": "Say sưa, hòa thuận, tràn đầy tình chị em",
+          "storyPurpose": "Phát triển câu chuyện (Rising Action), thể hiện sự hợp tác ban đầu",
+          "educationalPurpose": "Dạy trẻ về sự pha trộn màu sắc cơ bản và kỹ năng chia sẻ không gian sáng tạo",
+          "cameraDirection": "Close-Up góc nhìn từ trên cao (Top-down Bird Eye View) bao quát nét cọ chuyển màu sống động",
+          "estimatedDurationSeconds": 75
+        },
+        {
+          "id": "scene_ep9_03",
+          "sceneNumber": 3,
+          "title": "Sự cố bất ngờ: Dấu chân xanh của Mochi",
+          "location": "Phòng khách gia đình – Góc khay màu nước",
+          "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+          "lighting": "Ánh sáng tập trung vào vệt màu nước xanh dương tươi tắn",
+          "characterIds": [
+            "char_mochi",
+            "char_pi",
+            "char_kem"
+          ],
+          "characterDnaReferences": {
+            "char_mochi": "ver_mochi_v1",
+            "char_pi": "ver_pi_v1",
+            "char_kem": "ver_kem_v1"
+          },
+          "action": "Chú cún Mochi thấy một chú bướm đồ chơi bay lơ lửng, phấn khích nhảy xổ qua. Bàn chân sau của Mochi giẫm trúng khay màu xanh dương, sau đó lon ton bước bốn bước liên tiếp lên giữa vòm cầu vồng của Pi. Mochi dừng lại, ngơ ngác nhìn bốn dấu chân hình bông hoa màu xanh của mình.",
+          "dialogue": [
+            {
+              "characterId": "char_kem",
+              "characterName": "Kem",
+              "line": "A! Mochi vẽ hoa! Mochi vẽ hoa bằng chân kìa!",
+              "emotion": "Cười ngả nghiêng, vỗ tay thích thú"
+            },
+            {
+              "characterId": "char_pi",
+              "characterName": "Pi",
+              "line": "Ôi không! Cầu vồng của chị bị dính chân cún rồi... Mochi ơi!",
+              "emotion": "Bất ngờ, thoáng lo lắng và tiếc nuối"
+            }
+          ],
+          "emotion": "Bất ngờ, kịch tính nhẹ nhàng và hài hước",
+          "storyPurpose": "Nút thắt sự cố (Complication) tạo tình huống thử thách lòng kiên nhẫn và sự sáng tạo",
+          "educationalPurpose": "Giúp trẻ học cách đối diện với sự cố bất ngờ mà không bực bội hay la mắng",
+          "cameraDirection": "Slow-motion Tracking Shot theo bước chân của Mochi và zoom nhanh vào biểu cảm của Pi & Kem",
+          "estimatedDurationSeconds": 70
+        },
+        {
+          "id": "scene_ep9_04",
+          "sceneNumber": 4,
+          "title": "Sáng kiến bóng đá của Ba Trường",
+          "location": "Phòng khách gia đình – Bên cạnh tấm bạt",
+          "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+          "lighting": "Ánh sáng rực rỡ, năng động",
+          "characterIds": [
+            "char_ethan",
+            "char_pi",
+            "char_kem",
+            "char_emma"
+          ],
+          "characterDnaReferences": {
+            "char_ethan": "ver_ethan_v1",
+            "char_pi": "ver_pi_v1",
+            "char_kem": "ver_kem_v1",
+            "char_emma": "ver_emma_v1"
+          },
+          "action": "Ba Trường bước vào với quả bóng mini trên tay. Nhìn thấy dấu chân cún, Ba Trường mỉm cười nháy mắt, cúi xuống cầm cọ vẽ thêm vài đường kẻ trắng quanh dấu chân, biến chúng thành một sân cỏ tí hon với các cầu thủ cún con đang sút bóng.",
+          "dialogue": [
+            {
+              "characterId": "char_ethan",
+              "characterName": "Ba Trường",
+              "line": "Trọng tài VAR Ba Trường đã xem lại băng ghi hình! Đây không phải lỗi việt vị, mà là một siêu phẩm bàn thắng của tiền đạo Mochi!",
+              "emotion": "Hài hước, giọng bình luận viên bóng đá"
+            },
+            {
+              "characterId": "char_pi",
+              "characterName": "Pi",
+              "line": "Ồ! Nhìn giống một giải đấu cúp thế giới trên mây quá ba ơi! Con vẽ thêm khán đài cổ vũ nhé!",
+              "emotion": "Mắt sáng rực, lấy lại hứng khởi gấp đôi"
+            },
+            {
+              "characterId": "char_emma",
+              "characterName": "Mẹ Vân",
+              "line": "Một ý tưởng tuyệt vời! Không có bức tranh nào bị hỏng, chỉ có những cơ hội sáng tạo mới thôi.",
+              "emotion": "Tự hào, khích lệ cả nhà"
+            }
+          ],
+          "emotion": "Truyền cảm hứng, tràn ngập tiếng cười và sự lạc quan",
+          "storyPurpose": "Đỉnh điểm giải pháp (Creative Solution / Climax), gắn kết cá tính lập trình và bóng đá của Ba Trường",
+          "educationalPurpose": "Dạy tư duy linh hoạt: biến lỗi lầm hay sự cố ngoài ý muốn thành cơ hội sáng tạo độc đáo",
+          "cameraDirection": "Medium Shot quay Ba Trường đang vẽ, sau đó lia sang phản ứng reo hò của Pi và Kem",
+          "estimatedDurationSeconds": 80
+        },
+        {
+          "id": "scene_ep9_05",
+          "sceneNumber": 5,
+          "title": "Bức tranh hoàn hảo của gia đình",
+          "location": "Phòng khách gia đình – Toàn cảnh tấm bạt",
+          "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+          "lighting": "Ánh sáng vàng chan hòa phủ khắp căn phòng",
+          "characterIds": [
+            "char_ethan",
+            "char_emma",
+            "char_pi",
+            "char_kem",
+            "char_mochi"
+          ],
+          "characterDnaReferences": {
+            "char_ethan": "ver_ethan_v1",
+            "char_emma": "ver_emma_v1",
+            "char_pi": "ver_pi_v1",
+            "char_kem": "ver_kem_v1",
+            "char_mochi": "ver_mochi_v1"
+          },
+          "action": "Bức tranh đã phủ kín màu sắc: cầu vồng, sân bóng đá, những chú bướm và khu vườn hoa. Cả bốn người cùng nhúng bàn tay vào màu nước rồi in bốn dấu tay lớn nhỏ cạnh nhau ở góc tranh như chữ ký của gia đình. Mochi đặt nhẹ một dấu chân xanh bên cạnh.",
+          "dialogue": [
+            {
+              "characterId": "char_pi",
+              "characterName": "Pi",
+              "line": "Đây là bức tranh đẹp nhất từ trước đến nay của chúng mình!",
+              "emotion": "Hạnh phúc ngập tràn"
+            },
+            {
+              "characterId": "char_kem",
+              "characterName": "Kem",
+              "line": "Gia đình Pi Kem vô địch! Hoan hô!",
+              "emotion": "Giơ hai tay vỗ vang ròn rã"
+            }
+          ],
+          "emotion": "Gắn kết gia đình thiêng liêng, ấm áp và tự hào",
+          "storyPurpose": "Mở nút và hoàn thành mục tiêu (Resolution / Climax Completion)",
+          "educationalPurpose": "Tôn vinh giá trị của sự đoàn kết gia đình và niềm vui khi cùng nhau hoàn thành tác phẩm",
+          "cameraDirection": "Crane Shot nâng từ từ lên cao ghi trọn bức tranh khổng lồ cùng gia đình đang ôm nhau",
+          "estimatedDurationSeconds": 80
+        },
+        {
+          "id": "scene_ep9_06",
+          "sceneNumber": 6,
+          "title": "Cùng nhau dọn dẹp & Lời chúc ấm áp",
+          "location": "Phòng khách & Bồn rửa gian bếp",
+          "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+          "lighting": "Ánh sáng dịu nhẹ, tạo cảm giác ngăn nắp và sạch sẽ",
+          "characterIds": [
+            "char_ethan",
+            "char_emma",
+            "char_pi",
+            "char_kem",
+            "char_mochi"
+          ],
+          "characterDnaReferences": {
+            "char_ethan": "ver_ethan_v1",
+            "char_emma": "ver_emma_v1",
+            "char_pi": "ver_pi_v1",
+            "char_kem": "ver_kem_v1",
+            "char_mochi": "ver_mochi_v1"
+          },
+          "action": "Pi và Kem mỗi người cầm một chiếc khăn ẩm lau sạch các vết màu trên sàn gỗ. Ba Trường bế Mochi vào bồn rửa để Mẹ Vân rửa sạch bàn chân xanh bằng xà phòng êm dịu. Căn phòng trở lại gọn gàng, bức tranh được treo trang trọng lên tường.",
+          "dialogue": [
+            {
+              "characterId": "char_emma",
+              "characterName": "Mẹ Vân",
+              "line": "Họa sĩ giỏi là người biết giữ cho cây cọ của mình luôn sạch sẽ và căn phòng luôn ngăn nắp.",
+              "emotion": "Dịu dàng dặn dò"
+            },
+            {
+              "characterId": "char_pi",
+              "characterName": "Pi",
+              "line": "Con với Kem rửa sạch hết cọ rồi ạ! Lần sau chúng mình lại vẽ nữa nhé mẹ!",
+              "emotion": "Tự giác, vui vẻ"
+            },
+            {
+              "characterId": "char_ethan",
+              "characterName": "Ba Trường",
+              "line": "Nhất trí! Hẹn gặp lại các bạn nhỏ ở những cuộc phiêu lưu tiếp theo của gia đình Pi & Kem!",
+              "emotion": "Tươi cười nhìn vào ống kính vẫy tay"
+            }
+          ],
+          "emotion": "Bình yên, thỏa mãn, đúc kết bài học ý nghĩa",
+          "storyPurpose": "Kết màn và đúc kết giáo dục (Outro & Moral Reinforcement)",
+          "educationalPurpose": "Rèn luyện thói quen tự giác dọn dẹp đồ dùng sau khi vui chơi",
+          "cameraDirection": "Medium Shot toàn gia đình và Mochi vẫy tay chào khán giả với nụ cười rạng rỡ",
+          "estimatedDurationSeconds": 65
+        }
+      ],
+      "createdAt": "2026-02-10T09:00:00.000Z",
+      "updatedAt": "2026-02-15T15:30:00.000Z"
+    }
+  ],
+  "storyboards": [
+    {
+      "id": "sb_ep009",
+      "episodeId": "ep_009",
+      "episodeVersion": 1,
+      "status": "Ready for Video",
+      "characterVersionSnapshots": {
+        "char_pi": "ver_pi_v1",
+        "char_kem": "ver_kem_v1",
+        "char_emma": "ver_emma_v1",
+        "char_ethan": "ver_ethan_v1",
+        "char_mochi": "ver_mochi_v1"
+      },
+      "styleVersionSnapshotId": "style_ver_1_0",
+      "totalShots": 25,
+      "totalDurationSeconds": 435,
+      "createdAt": "2026-09-02T09:00:00.000Z",
+      "updatedAt": "2026-09-10T08:00:00.000Z",
+      "scenes": [
+        {
+          "id": "sb_scene_ep009_01",
+          "episodeSceneId": "scene_ep9_01",
+          "sceneNumber": 1,
+          "title": "Tấm bạt trắng & Lời mời gọi sắc màu",
+          "location": "Phòng khách gia đình – Khu vực sàn bạt trung tâm",
+          "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+          "lighting": "Ánh nắng 5600K rọi từ cửa sổ lớn, chiếu ấm các lọ màu nước và sàn gỗ",
+          "shots": [
+            {
+              "id": "shot_ep009_s01_01",
+              "storyboardSceneId": "sb_scene_ep009_01",
+              "sceneNumber": 1,
+              "shotNumber": 1,
+              "shotType": "Establishing Shot",
+              "durationSeconds": 15,
+              "cameraDirection": "Wide Shot toàn cảnh phòng khách, camera cố định nhẹ nhàng, góc mở rộng 24mm",
+              "framing": "Toàn cảnh bao quát không gian phòng khách ngập tràn ánh ban mai",
+              "cameraMovement": "Static tripod với chuyển động nhẹ nhàng từ từ Dolly In chậm",
+              "cameraAngle": "Eye-Level 0° hơi hướng xuống sàn gỗ",
+              "subject": "Mẹ Vân đang mở cuộn bạt trắng lớn trên sàn gỗ sáng màu",
+              "visualFocus": "Tấm bạt trắng tinh khôi và khay màu nước rực rỡ",
+              "action": "Mẹ Vân khéo léo trải rộng tấm bạt trắng lớn ra giữa sàn phòng khách. Bề mặt bạt phẳng phiu, các góc được gài nhẹ để không trơn trượt.",
+              "characterIds": [
+                "char_emma"
+              ],
+              "characterDnaReferences": {
+                "char_emma": "ver_emma_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Phòng khách gia đình – Khu vực sàn bạt trung tâm",
+              "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+              "lighting": "Ánh nắng 5600K rọi từ cửa sổ lớn, chiếu ấm các lọ màu nước và sàn gỗ",
+              "dialogue": "",
+              "emotion": "Ấm áp, chuẩn bị chu đáo",
+              "visualPurpose": "Thiết lập không gian sân chơi nghệ thuật của gia đình và chào đón ngày mới",
+              "sceneIntent": "Thiết lập không gian sân chơi nghệ thuật của gia đình và chào đón ngày mới sáng tạo",
+              "soundIntent": "Tiếng chim hót sớm ngoài ban công, tiếng mở tấm bạt xào xạc trên sàn gỗ, tiếng cười nói dịu dàng của Mẹ Vân",
+              "specialNotes": "Tấm bạt trắng tinh khôi chưa dính vệt màu nào. Ánh nắng 5600K rọi từ cửa sổ lớn, chiếu ấm các lọ màu nước và sàn gỗ.",
+              "cameraTimeline": [
+                {
+                  "timeRange": "0-3s",
+                  "description": "Wide establishing shot toàn cảnh phòng khách ngập nắng ban mai",
+                  "movement": "Static tripod",
+                  "framing": "Toàn cảnh (Wide Shot)",
+                  "focus": "Tấm bạt trắng và không gian phòng khách"
+                },
+                {
+                  "timeRange": "3-8s",
+                  "description": "Slow Dolly In tiến về phía Mẹ Vân đang trải cuộn bạt trắng lớn",
+                  "movement": "Slow Dolly In",
+                  "framing": "Trung toàn cảnh",
+                  "focus": "Mẹ Vân và tấm bạt trắng"
+                },
+                {
+                  "timeRange": "8-12s",
+                  "description": "Góc máy hạ thấp dừng lại ngang tầm tay Mẹ Vân gài mép bạt",
+                  "movement": "Pedestal Down",
+                  "framing": "Trung cảnh thấp",
+                  "focus": "Khay màu nước và các lọ màu tươi sáng"
+                },
+                {
+                  "timeRange": "12-15s",
+                  "description": "Cố định góc máy bao quát hướng về phía hành lang đón các bé",
+                  "movement": "Static",
+                  "framing": "Toàn cảnh mở rộng",
+                  "focus": "Lối vào phòng khách"
+                }
+              ],
+              "continuityNotes": {
+                "characterPositions": "Mẹ Vân quỳ gối ở góc trên bên trái tấm bạt",
+                "objectPositions": "Tấm bạt trắng nằm chính giữa phòng khách, khay màu và cọ vẽ đặt gọn gàng ở góc trên bên phải",
+                "environmentContinuity": "Cửa sổ mở nhẹ có rèm voan trắng bay khẽ, ánh sáng ban mai vàng dịu",
+                "propContinuity": "Các lọ màu nước xanh lá, xanh dương, vàng, đỏ đã sẵn sàng",
+                "actionContinuity": "Mở đầu tập phim, chưa có vệt màu nào trên bạt",
+                "previousShotRelationship": "Shot mở màn của tập phim"
+              },
+              "generationStatus": "Generated",
+              "activeImageOutputUrl": "data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1376\" height=\"768\" viewBox=\"0 0 1376 768\"><rect width=\"1376\" height=\"768\" fill=\"%230f172a\"/><rect x=\"229\" y=\"100\" width=\"918\" height=\"568\" rx=\"16\" fill=\"%231e293b\" stroke=\"%233b82f6\" stroke-width=\"2\"/><text x=\"688\" y=\"360\" fill=\"%2338bdf8\" font-family=\"sans-serif\" font-size=\"28\" font-weight=\"bold\" text-anchor=\"middle\">STORYBOARD KEYFRAME — EP009 S01 SHOT 01</text><text x=\"688\" y=\"410\" fill=\"%2394a3b8\" font-family=\"sans-serif\" font-size=\"16\" text-anchor=\"middle\">Spatial Blocking: Me Van kneeling at center canvas in sunny living room</text></svg>",
+              "activeImageJobId": "job_sb_ep009_s01_01_v1",
+              "activeOutputAssetId": "out_sb_ep009_s01_01",
+              "isProductionReadyKeyframe": true,
+              "outputMimeType": "image/jpeg"
+            },
+            {
+              "id": "shot_ep009_s01_02",
+              "storyboardSceneId": "sb_scene_ep009_01",
+              "sceneNumber": 1,
+              "shotNumber": 2,
+              "shotType": "Medium Shot",
+              "durationSeconds": 18,
+              "cameraDirection": "Medium tracking theo nhịp bước chân của Pi và Kem từ hành lang bước vào phòng",
+              "framing": "Khung hình ngang ngực hai bé, lấy trọn chiếc tạp dề vàng của Pi và tạp dề xanh của Kem",
+              "cameraMovement": "Tracking Pan từ trái sang phải theo bước nhảy chân sáo của Pi",
+              "cameraAngle": "Low Angle nhẹ (30cm so với sàn nhà) bắt trọn góc nhìn trẻ thơ",
+              "subject": "Pi nhảy chân sáo cầm hai chiếc cọ, Kem lẫm chẫm chạy theo sau",
+              "visualFocus": "Nụ cười rạng rỡ của Pi và dáng chạy ngộ nghĩnh của Kem",
+              "action": "Pi đeo tạp dề vàng nhảy chân sáo vào phòng, hai tay cầm cọ vẽ giơ cao. Kem lẫm chẫm chạy theo sau, chiếc tạp dề xanh dương quá khổ quét nhẹ xuống thảm.",
+              "characterIds": [
+                "char_pi",
+                "char_kem"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Lối vào phòng khách nối liền hành lang gỗ",
+              "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+              "lighting": "Ánh sáng viền tóc (rim light) tôn lên mái tóc bob của Pi và đôi má phúng phính của Kem",
+              "dialogue": "",
+              "emotion": "Háo hức, phấn khởi tột độ",
+              "visualPurpose": "Thể hiện năng lượng hoạt bát của hai chị em khi bắt đầu hoạt động yêu thích",
+              "continuityNotes": {
+                "characterPositions": "Pi đi trước ở vị trí 1/3 khung hình bên phải, Kem chạy sau ở 1/3 khung hình bên trái",
+                "objectPositions": "Pi cầm 2 cọ vẽ thân gỗ đầu lông mềm",
+                "environmentContinuity": "Hành lang gỗ thông suốt ra phòng khách",
+                "propContinuity": "Tạp dề Pi màu vàng tươi hình hoa hướng dương, tạp dề Kem màu xanh da trời",
+                "actionContinuity": "Tiếp nối sau khi Mẹ Vân đã trải xong bạt",
+                "previousShotRelationship": "Cắt từ toàn cảnh phòng khách sang bước chân bước vào của 2 bé"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s01_03",
+              "storyboardSceneId": "sb_scene_ep009_01",
+              "sceneNumber": 1,
+              "shotNumber": 3,
+              "shotType": "Medium Close-Up",
+              "durationSeconds": 16,
+              "cameraDirection": "Medium Close-Up chính diện Mẹ Vân với nụ cười hiền từ, hậu cảnh xóa phông nhẹ",
+              "framing": "Khung hình chân dung bán thân Mẹ Vân (bust shot)",
+              "cameraMovement": "Static với hơi thở ống kính mềm mại (soft focal breathing)",
+              "cameraAngle": "Eye-Level nhìn đối diện",
+              "subject": "Mẹ Vân hướng mắt về phía Pi và Kem",
+              "visualFocus": "Ánh mắt dịu dàng và nụ cười ấm áp của Mẹ Vân",
+              "action": "Mẹ Vân ngước lên nhìn hai con, nở nụ cười rạng rỡ, hai tay dang rộng đón chào.",
+              "characterIds": [
+                "char_emma"
+              ],
+              "characterDnaReferences": {
+                "char_emma": "ver_emma_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Bên mép tấm bạt trắng phòng khách",
+              "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+              "lighting": "Ánh sáng tản mềm (soft diffuse light) làm nổi bật vẻ đẹp dịu dàng của người mẹ",
+              "dialogue": "Hôm nay phòng khách của chúng ta sẽ là xưởng tranh kỳ diệu! Các họa sĩ nhí đã sẵn sàng chưa?",
+              "speakerCharacterId": "char_emma",
+              "speakerCharacterName": "Mẹ Vân",
+              "emotion": "Ấm áp, rạng rỡ, khích lệ",
+              "visualPurpose": "Thiết lập vai trò dẫn dắt tinh thần và tình yêu thương của Mẹ Vân",
+              "continuityNotes": {
+                "characterPositions": "Mẹ Vân ngồi quỳ bên mép bạt, hơi nghiêng người về phía trước",
+                "objectPositions": "Khay màu nước đặt ngay trước đầu gối Mẹ Vân",
+                "environmentContinuity": "Phía sau là kệ sách gia đình mờ ảo nhẹ nhàng",
+                "propContinuity": "Mẹ Vân đeo tạp dề màu be thanh lịch",
+                "actionContinuity": "Mẹ Vân phát biểu mở màn hoạt động vẽ tranh",
+                "previousShotRelationship": "Cắt cận vào Mẹ Vân ngay khi Pi và Kem chạy tới mép bạt"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s01_04",
+              "storyboardSceneId": "sb_scene_ep009_01",
+              "sceneNumber": 1,
+              "shotNumber": 4,
+              "shotType": "Two-Shot",
+              "durationSeconds": 16,
+              "cameraDirection": "Two-Shot ngang tầm mắt trẻ em ghi lại phản ứng hào hứng của Pi và Kem, Mochi chạy vào khung hình",
+              "framing": "Trung cảnh hai chị em ngồi xổm bên mép bạt",
+              "cameraMovement": "Slow Pan nhẹ từ Pi sang Kem rồi hạ thấp đón Mochi",
+              "cameraAngle": "Low Angle nhẹ (ngang tầm mắt Pi và Kem)",
+              "subject": "Pi giơ cao cọ vẽ tự tin, Kem múa tay hớn hở, Mochi vẫy đuôi",
+              "visualFocus": "Cử chỉ giơ cọ vẽ của Pi và điệu bộ bíp bíp của Kem",
+              "action": "Pi giơ cọ vẽ lên cao như chiếc đũa thần phép thuật. Kem nhún nhảy giơ hai tay làm động tác lái xe ô tô. Mochi chạy vòng quanh sủa khẽ mừng rỡ.",
+              "characterIds": [
+                "char_pi",
+                "char_kem",
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1",
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Mép tấm bạt trắng phòng khách",
+              "timeOfDay": "Buổi sáng nắng dịu (Morning Soft Daylight)",
+              "lighting": "Ánh sáng vàng ấm rọi từ trên xuống, tạo phản chiếu lấp lánh trong mắt các bé",
+              "dialogue": "Pi: \"Dạ sẵn sàng! Con sẽ vẽ cầu vồng khổng lồ!\" | Kem: \"Kem vẽ ô tô màu đỏ! Bíp bíp!\"",
+              "speakerCharacterId": "char_pi",
+              "speakerCharacterName": "Pi & Kem",
+              "emotion": "Tươi vui, tràn đầy năng lượng tích cực",
+              "visualPurpose": "Xác định mục tiêu sáng tạo cụ thể của từng nhân vật cho cảnh vẽ tiếp theo",
+              "continuityNotes": {
+                "characterPositions": "Pi ngồi bên trái, Kem ngồi bên phải, Mochi chạy vòng quanh phía sau",
+                "objectPositions": "Pi cầm cọ vẽ, Kem đưa hai tay giả vờ cầm vô lăng",
+                "environmentContinuity": "Ánh sáng phòng khách ổn định, tấm bạt trắng tinh nguyên vẹn",
+                "propContinuity": "Mochi đeo vòng cổ đỏ nhỏ có gắn chuông vàng nhỏ",
+                "actionContinuity": "Cả hai sẵn sàng nhúng cọ vào đĩa màu",
+                "previousShotRelationship": "Hồi đáp lại câu hỏi của Mẹ Vân từ Shot 03, chuẩn bị bước vào Scene 2"
+              },
+              "generationStatus": "Not Generated"
+            }
+          ]
+        },
+        {
+          "id": "sb_scene_ep009_02",
+          "episodeSceneId": "scene_ep9_02",
+          "sceneNumber": 2,
+          "title": "Nét vẽ đầu tiên & Bầu trời sắc màu",
+          "location": "Phòng khách gia đình – Bề mặt tấm bạt vẽ",
+          "timeOfDay": "Buổi sáng (Bright Daytime)",
+          "lighting": "Ánh sáng rõ nét, tương phản màu vẽ tươi sáng rực rỡ",
+          "shots": [
+            {
+              "id": "shot_ep009_s02_01",
+              "storyboardSceneId": "sb_scene_ep009_02",
+              "sceneNumber": 2,
+              "shotNumber": 1,
+              "shotType": "Medium Shot",
+              "durationSeconds": 19,
+              "cameraDirection": "Medium Shot góc 45° từ trên xuống ghi lại nét vẽ vòng cung đầu tiên của Pi trên bạt",
+              "framing": "Khung hình trung cảnh bao quát nửa trên tấm bạt và tư thế quỳ của Pi",
+              "cameraMovement": "Dolly In chậm theo quỹ đạo vệt cọ lượn sóng",
+              "cameraAngle": "High-Angle 45° hướng xuống bề mặt bạt vẽ",
+              "subject": "Pi quỳ gối quét dải màu vàng và xanh lam mềm mại",
+              "visualFocus": "Vệt sơn màu nước dầy bóng đang trải dần thành hình vòm cầu vồng",
+              "action": "Pi quỳ gối trên đệm êm, hai tay điều khiển chiếc cọ lớn lướt êm ái trên bạt, tạo thành một vệt màu vàng rực rỡ và xanh lam óng ánh.",
+              "characterIds": [
+                "char_pi"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Bề mặt tấm bạt trắng phòng khách",
+              "timeOfDay": "Buổi sáng (Bright Daytime)",
+              "lighting": "Ánh sáng chiếu xiên tôn lên chất liệu ướt bóng của màu nước vừa vẽ",
+              "dialogue": "",
+              "emotion": "Tập trung say mê, tràn đầy hứng khởi",
+              "visualPurpose": "Thể hiện sự tự tin và nét sáng tạo tiên phong của cô chị Pi",
+              "continuityNotes": {
+                "characterPositions": "Pi quỳ giữa tấm bạt hướng về phía Bắc",
+                "objectPositions": "Khay màu nước đặt bên tay phải của Pi",
+                "environmentContinuity": "Vệt màu cầu vồng bắt đầu hình thành góc trên bạt",
+                "propContinuity": "Đầu cọ dính màu nước vàng tươi",
+                "actionContinuity": "Nét cọ đầu tiên xuất hiện trên bạt trắng",
+                "previousShotRelationship": "Chuyển từ sự chuẩn bị ở Scene 1 sang hành động vẽ thực tế ở Scene 2"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s02_02",
+              "storyboardSceneId": "sb_scene_ep009_02",
+              "sceneNumber": 2,
+              "shotNumber": 2,
+              "shotType": "Close-Up",
+              "durationSeconds": 18,
+              "cameraDirection": "Close-Up cận cảnh những ngón tay nhỏ xíu của Kem chấm vào đĩa màu vàng rồi in lên bạt",
+              "framing": "Khung hình cận cảnh đôi bàn tay và khuôn mặt nghiêng của Kem",
+              "cameraMovement": "Static tập trung sâu (deep focus) vào từng giọt màu",
+              "cameraAngle": "Macro Close-Up ngang mặt bạt",
+              "subject": "Bàn tay múp míp của Kem chấm màu in lên nền bạt",
+              "visualFocus": "Dấu chấm vân tay tròn trĩnh màu vàng và nụ cười chúm chím của Kem",
+              "action": "Kem dùng ngón tay trỏ nhỏ xíu chấm vào khay màu vàng rồi in liên tiếp những chấm tròn lên góc bạt, miệng khúc khích cười.",
+              "characterIds": [
+                "char_kem"
+              ],
+              "characterDnaReferences": {
+                "char_kem": "ver_kem_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Góc dưới tấm bạt trắng",
+              "timeOfDay": "Buổi sáng (Bright Daytime)",
+              "lighting": "Ánh sáng trong veo, phản chiếu sắc vàng tươi sáng",
+              "dialogue": "",
+              "emotion": "Thích thú, ngây thơ, tò mò khám phá xúc giác",
+              "visualPurpose": "Khắc họa nét dễ thương và cách tiếp cận nghệ thuật mộc mạc của lứa tuổi nhà trẻ",
+              "continuityNotes": {
+                "characterPositions": "Kem ngồi xếp bằng ở góc dưới bên phải bạt",
+                "objectPositions": "Góc bạt có 5 chấm tròn màu vàng tạo thành chùm hoa nhỏ",
+                "environmentContinuity": "Bạt trắng xung quanh còn sạch sẽ",
+                "propContinuity": "Ngón tay Kem phủ một lớp màu nước vàng an toàn cho trẻ",
+                "actionContinuity": "Kem đang tự do in dấu tay bên cạnh cầu vồng của Pi",
+                "previousShotRelationship": "Cắt cận từ nét cọ của Pi sang đôi bàn tay của Kem"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s02_03",
+              "storyboardSceneId": "sb_scene_ep009_02",
+              "sceneNumber": 2,
+              "shotNumber": 3,
+              "shotType": "Medium Close-Up",
+              "durationSeconds": 19,
+              "cameraDirection": "Medium Close-Up Pi quay sang Kem, biểu cảm hào hứng chỉ dẫn pha màu",
+              "framing": "Khung hình bán thân Pi với ánh mắt lấp lánh niềm vui chia sẻ",
+              "cameraMovement": "Slow Tracking nhẹ nhàng quanh Pi",
+              "cameraAngle": "Eye-Level ngang tầm mắt Pi",
+              "subject": "Pi tươi cười nghiêng người sang phía em trai",
+              "visualFocus": "Ánh mắt thông minh và cử chỉ hướng dẫn ân cần của Pi",
+              "action": "Pi cầm cọ nhúng nhẹ vào màu xanh lam rồi đưa lại gần chấm vàng của Kem, hòa quyện hai vệt màu lại với nhau.",
+              "characterIds": [
+                "char_pi"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Khu vực trung tâm tấm bạt",
+              "timeOfDay": "Buổi sáng (Bright Daytime)",
+              "lighting": "Ánh sáng tươi tắn, nhấn vào nụ cười rạng rỡ của cô bé",
+              "dialogue": "Kem ơi, em chấm nhẹ tay thôi nhé, nhìn này, màu vàng và màu xanh trộn lại sẽ ra màu xanh lá cây đấy!",
+              "speakerCharacterId": "char_pi",
+              "speakerCharacterName": "Pi",
+              "emotion": "Hào hứng, tự hào làm cô giáo nhí",
+              "visualPurpose": "Thể hiện tinh thần sẻ chia kiến thức và tình cảm chị em khăng khít",
+              "continuityNotes": {
+                "characterPositions": "Pi ngồi kề sát bên Kem, tay phải cầm cọ, tay trái chống đệm",
+                "objectPositions": "Điểm giao thoa giữa vệt vàng và vệt xanh bắt đầu chuyển sang sắc xanh lục ngọc",
+                "environmentContinuity": "Phòng khách tràn ngập tiếng cười nhẹ",
+                "propContinuity": "Cọ vẽ của Pi đang hòa trộn hai màu",
+                "actionContinuity": "Pi thực hiện thí nghiệm pha màu trực tiếp cho Kem xem",
+                "previousShotRelationship": "Nối tiếp từ dấu chấm của Kem sang lời hướng dẫn của Pi"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s02_04",
+              "storyboardSceneId": "sb_scene_ep009_02",
+              "sceneNumber": 2,
+              "shotNumber": 4,
+              "shotType": "Two-Shot",
+              "durationSeconds": 19,
+              "cameraDirection": "Two-Shot ghi lại biểu cảm ngạc nhiên của Kem và cái xoa đầu trìu mến của Mẹ Vân",
+              "framing": "Trung cảnh hai mẹ con nhìn xuống vệt màu xanh lá kỳ diệu",
+              "cameraMovement": "Slow Crane hạ nhẹ xuống",
+              "cameraAngle": "Eye-Level ngang mặt Kem",
+              "subject": "Kem mở to mắt ngạc nhiên ngắm vệt màu xanh matcha, Mẹ Vân mỉm cười xoa đầu",
+              "visualFocus": "Đôi mắt mở to ngơ ngác của Kem và nụ cười khích lệ của Mẹ Vân",
+              "action": "Kem giơ hai tay lên má tròn xoe mắt kinh ngạc. Mẹ Vân cúi xuống khẽ xoa đầu Kem đầy âu yếm.",
+              "characterIds": [
+                "char_kem",
+                "char_emma"
+              ],
+              "characterDnaReferences": {
+                "char_kem": "ver_kem_v1",
+                "char_emma": "ver_emma_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Góc tấm bạt vẽ",
+              "timeOfDay": "Buổi sáng (Bright Daytime)",
+              "lighting": "Ánh sáng dịu ấm bao bọc hai mẹ con",
+              "dialogue": "Woa... Biến hình ùi! Màu xanh lá giống cây kem matcha!",
+              "speakerCharacterId": "char_kem",
+              "speakerCharacterName": "Kem",
+              "emotion": "Tròn mắt kinh ngạc, thích thú tột cùng",
+              "visualPurpose": "Đỉnh điểm cảm xúc khám phá đầu tiên của bài học nhận biết màu sắc",
+              "continuityNotes": {
+                "characterPositions": "Kem ngồi trước, Mẹ Vân ngồi ngay phía sau bên phải Kem",
+                "objectPositions": "Vệt màu xanh lá hiện rõ trên bạt",
+                "environmentContinuity": "Mochi đang nằm lim dim ở góc phòng quan sát",
+                "propContinuity": "Bàn tay Kem vẫn còn dính chút màu vàng",
+                "actionContinuity": "Kết thúc khoảnh khắc yên bình trước khi sự cố Mochi xảy ra ở Scene 3",
+                "previousShotRelationship": "Phản ứng trực tiếp trước phép thuật biến đổi màu sắc của Pi"
+              },
+              "generationStatus": "Not Generated"
+            }
+          ]
+        },
+        {
+          "id": "sb_scene_ep009_03",
+          "episodeSceneId": "scene_ep9_03",
+          "sceneNumber": 3,
+          "title": "Sự cố bất ngờ: Dấu chân xanh của Mochi",
+          "location": "Phòng khách gia đình – Góc khay màu nước",
+          "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+          "lighting": "Ánh sáng tập trung vào vệt màu nước xanh dương tươi tắn",
+          "shots": [
+            {
+              "id": "shot_ep009_s03_01",
+              "storyboardSceneId": "sb_scene_ep009_03",
+              "sceneNumber": 3,
+              "shotNumber": 1,
+              "shotType": "Tracking Shot",
+              "durationSeconds": 14,
+              "cameraDirection": "Tracking Shot bám sát theo chuyển động của chú cún Mochi đuổi theo con bướm đồ chơi",
+              "framing": "Góc máy ngang hông chú cún Mochi, bám theo hướng chạy",
+              "cameraMovement": "Fast Tracking từ góc phòng lao về phía tấm bạt",
+              "cameraAngle": "Ground-Level (5cm so với mặt sàn)",
+              "subject": "Chú cún Mochi lon ton nhảy chồm theo món đồ chơi bướm cam",
+              "visualFocus": "Bốn bàn chân lông trắng mềm mại và chiếc mũi đen ươn ướt của Mochi",
+              "action": "Mochi nhìn thấy chú bướm đồ chơi màu cam bay chập chờn trên không trung, hai tai dựng đứng phấn khích, bốn chân phóng nhanh về phía trước.",
+              "characterIds": [
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Sàn gỗ phòng khách bên cạnh tấm bạt",
+              "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+              "lighting": "Ánh sáng năng động, bóng đổ chuyển động nhanh theo bước chân cún con",
+              "dialogue": "",
+              "emotion": "Hiếu động, ngây ngô, siêu đáng yêu",
+              "visualPurpose": "Kích hoạt tình huống xung đột / biến cố hài hước (Inciting Incident)",
+              "continuityNotes": {
+                "characterPositions": "Mochi xuất phát từ mép thảm salon chạy chéo sang tấm bạt",
+                "objectPositions": "Con bướm đồ chơi treo lơ lửng phía trên khay màu xanh",
+                "environmentContinuity": "Cả nhà đang mải mê ngắm bức tranh",
+                "propContinuity": "Mochi có bộ lông trắng mềm mại xù xì",
+                "actionContinuity": "Mochi bắt đầu lao vào vùng cấm địa vẽ tranh",
+                "previousShotRelationship": "Cắt gắt từ nhịp điệu yên bình sang chuyển động nhanh của Mochi"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s03_02",
+              "storyboardSceneId": "sb_scene_ep009_03",
+              "sceneNumber": 3,
+              "shotNumber": 2,
+              "shotType": "Insert Shot",
+              "durationSeconds": 12,
+              "cameraDirection": "Insert Shot cận cảnh cực độ bàn chân sau của Mochi giẫm trúng khay màu xanh dương",
+              "framing": "Cận cảnh khay màu nước xanh dương đậm",
+              "cameraMovement": "Slow-motion 60fps khi chân cún chạm vào bề mặt chất lỏng",
+              "cameraAngle": "Top-Down 90° nhìn thẳng xuống khay màu",
+              "subject": "Bàn chân nhỏ nhắn của Mochi nhúng ngập vào màu xanh",
+              "visualFocus": "Giọt màu nước xanh dương bắn nhẹ tạo gợn sóng nhỏ xinh xắn",
+              "action": "Bàn chân sau của Mochi vô tình hạ cánh chuẩn xác ngay giữa khay màu xanh dương, màu nước phủ kín gan bàn chân và các đệm ngón.",
+              "characterIds": [
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Mép khay màu nước góc tấm bạt",
+              "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+              "lighting": "Ánh sáng phản chiếu giọt màu lóng lánh nổi bật",
+              "dialogue": "",
+              "emotion": "Hồi hộp, bất ngờ hài hước",
+              "visualPurpose": "Ghi lại khoảnh khắc then chốt khởi nguồn sự cố màu vẽ",
+              "continuityNotes": {
+                "characterPositions": "Chỉ thấy bàn chân sau bên phải của Mochi",
+                "objectPositions": "Khay màu xanh dương sóng sánh nhẹ",
+                "environmentContinuity": "Mép bạt trắng tinh khôi sát cạnh khay màu",
+                "propContinuity": "Màu nước xanh lam cobalt tươi tắn",
+                "actionContinuity": "Khoảnh khắc chân cún nhúng màu",
+                "previousShotRelationship": "Hệ quả trực tiếp từ cú nhảy ở Shot 01"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s03_03",
+              "storyboardSceneId": "sb_scene_ep009_03",
+              "sceneNumber": 3,
+              "shotNumber": 3,
+              "shotType": "Wide Shot",
+              "durationSeconds": 16,
+              "cameraDirection": "Wide Shot bao quát toàn bộ tấm bạt khi Mochi chạy qua để lại bốn dấu chân cún màu xanh ngộ nghĩnh",
+              "framing": "Toàn cảnh từ trên cao bao quát tấm bạt và vị trí các thành viên",
+              "cameraMovement": "Smooth Dolly Out mở rộng tầm nhìn",
+              "cameraAngle": "High-Angle 60°",
+              "subject": "Mochi chạy cắt ngang cầu vồng của Pi",
+              "visualFocus": "Bốn vết chân cún màu xanh nổi bật in đậm trên nền cầu vồng trắng vàng",
+              "action": "Mochi chạy thoăn thoắt 4 bước liên tiếp cắt ngang qua dải cầu vồng Pi vừa vẽ, in rõ từng đệm chân hình bông hoa màu xanh dương.",
+              "characterIds": [
+                "char_mochi",
+                "char_pi",
+                "char_kem"
+              ],
+              "characterDnaReferences": {
+                "char_mochi": "ver_mochi_v1",
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Giữa tấm bạt trắng phòng khách",
+              "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+              "lighting": "Ánh sáng tổng thể rõ nét, tôn lên độ tương phản của vệt chân xanh",
+              "dialogue": "",
+              "emotion": "Hài hước, sững sờ",
+              "visualPurpose": "Thể hiện hiện trường vụ việc một cách trực quan và sinh động",
+              "continuityNotes": {
+                "characterPositions": "Mochi dừng ở góc trái bạt, Pi quỳ bên phải, Kem bên dưới",
+                "objectPositions": "Bốn dấu chân cún nằm thẳng hàng qua dải cầu vồng",
+                "environmentContinuity": "Khay màu vẫn ở góc bạt",
+                "propContinuity": "Chân Mochi dính màu xanh dương",
+                "actionContinuity": "Dấu chân đã in cố định trên bạt",
+                "previousShotRelationship": "Hành động bước chạy ngay sau khi nhúng chân vào khay"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s03_04",
+              "storyboardSceneId": "sb_scene_ep009_03",
+              "sceneNumber": 3,
+              "shotNumber": 4,
+              "shotType": "Close-Up",
+              "durationSeconds": 14,
+              "cameraDirection": "Close-Up chú cún Mochi nghiêng đầu ngơ ngác nhìn bàn chân xanh của mình",
+              "framing": "Cận cảnh chân dung chú cún Mochi",
+              "cameraMovement": "Static tập trung vào đôi mắt tròn xoe",
+              "cameraAngle": "Ground-Level ngang mặt Mochi",
+              "subject": "Mochi nghiêng đầu 45° tai cụp tai xòe",
+              "visualFocus": "Khuôn mặt ngây thơ vô tội của Mochi và bàn chân xanh giơ lên ngắm nghía",
+              "action": "Mochi ngồi xuống, nhấc một bàn chân dính màu xanh lên ngắm nghía rồi chớp chớp mắt nhìn mọi người như muốn hỏi \"Em vừa làm gì sai ạ?\".",
+              "characterIds": [
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Mép tấm bạt vẽ",
+              "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+              "lighting": "Ánh sáng mềm mại làm nổi bật bộ lông trắng tơ của chú cún",
+              "dialogue": "",
+              "emotion": "Ngây thơ, vô tội, hài hước đáng yêu",
+              "visualPurpose": "Làm dịu sự cố bằng biểu cảm cưng xỉu của thú cưng gia đình",
+              "continuityNotes": {
+                "characterPositions": "Mochi ngồi tại chỗ",
+                "objectPositions": "Bàn chân trước giơ lên không trung dính màu xanh",
+                "environmentContinuity": "Không gian tĩnh lặng trong tích tắc",
+                "propContinuity": "Chuông cổ Mochi phát ra tiếng leng keng nhỏ",
+                "actionContinuity": "Mochi bất động chờ đợi phản ứng từ gia đình",
+                "previousShotRelationship": "Cận cảnh thủ phạm sau khi hoàn thành bức tranh dấu chân"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s03_05",
+              "storyboardSceneId": "sb_scene_ep009_03",
+              "sceneNumber": 3,
+              "shotNumber": 5,
+              "shotType": "Two-Shot",
+              "durationSeconds": 14,
+              "cameraDirection": "Two-Shot đối lập cảm xúc giữa Pi thoáng tiếc nuối và Kem vỗ tay thích thú",
+              "framing": "Trung cận hai chị em nhìn chằm chằm vào dấu chân",
+              "cameraMovement": "Pan nhanh từ mặt Pi sang nụ cười của Kem",
+              "cameraAngle": "Eye-Level ngang mặt hai bé",
+              "subject": "Pi giơ hai tay ôm má lo lắng, Kem cười ngả nghiêng",
+              "visualFocus": "Hai thái cực cảm xúc trẻ thơ đối diện sự cố ngoài ý muốn",
+              "action": "Kem chỉ tay vào dấu chân cười nắc nẻ. Pi tròn mắt tiếc nuối nhìn dải cầu vồng vừa bị giẫm trúng.",
+              "characterIds": [
+                "char_kem",
+                "char_pi"
+              ],
+              "characterDnaReferences": {
+                "char_kem": "ver_kem_v1",
+                "char_pi": "ver_pi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Bên cạnh dấu chân cún trên bạt",
+              "timeOfDay": "Buổi sáng ấm áp (Morning Warm)",
+              "lighting": "Ánh sáng kịch tính nhẹ, làm nổi bật biểu cảm tương phản",
+              "dialogue": "Kem: \"A! Mochi vẽ hoa! Mochi vẽ hoa bằng chân kìa!\" | Pi: \"Ôi không! Cầu vồng của chị bị dính chân cún rồi... Mochi ơi!\"",
+              "speakerCharacterId": "char_kem",
+              "speakerCharacterName": "Kem & Pi",
+              "emotion": "Kem: Vui nhộn thích thú | Pi: Tiếc nuối, bất ngờ",
+              "visualPurpose": "Thiết lập tiền đề cho Ba Trường can thiệp bằng giải pháp sáng tạo ở Scene 4",
+              "continuityNotes": {
+                "characterPositions": "Pi ngồi bên trái chống tay, Kem ngồi bên phải vỗ tay",
+                "objectPositions": "Dấu chân cún nằm ngay trước mặt hai bé",
+                "environmentContinuity": "Mẹ Vân đang đứng quan sát với nụ cười chuẩn bị lên tiếng",
+                "propContinuity": "Cọ vẽ của Pi vẫn cầm trên tay",
+                "actionContinuity": "Hai bé phát hiện sự cố và phản ứng theo tính cách riêng",
+                "previousShotRelationship": "Cắt từ Mochi sang phản ứng của hai nhân vật chính"
+              },
+              "generationStatus": "Not Generated"
+            }
+          ]
+        },
+        {
+          "id": "sb_scene_ep009_04",
+          "episodeSceneId": "scene_ep9_04",
+          "sceneNumber": 4,
+          "title": "Sáng kiến bóng đá của Ba Trường",
+          "location": "Phòng khách gia đình – Bên cạnh tấm bạt",
+          "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+          "lighting": "Ánh sáng rực rỡ, năng động",
+          "shots": [
+            {
+              "id": "shot_ep009_s04_01",
+              "storyboardSceneId": "sb_scene_ep009_04",
+              "sceneNumber": 4,
+              "shotNumber": 1,
+              "shotType": "Medium Shot",
+              "durationSeconds": 20,
+              "cameraDirection": "Medium Shot Ba Trường bước vào phòng khách với quả bóng mini trên tay, mỉm cười nháy mắt",
+              "framing": "Khung hình bán thân Ba Trường từ cửa phòng khách bước tới",
+              "cameraMovement": "Dolly Follow theo bước chân khỏe khoắn của Ba Trường",
+              "cameraAngle": "Eye-Level tự tin, phóng khoáng",
+              "subject": "Ba Trường cầm quả bóng da mini đen trắng trên tay",
+              "visualFocus": "Nụ cười hóm hỉnh đầy ý tưởng sáng tạo của Ba Trường",
+              "action": "Ba Trường bước vào, trên tay tung nhẹ quả bóng bóng đá mini. Nhìn thấy dấu chân cún và vẻ tiếc nuối của Pi, Ba Trường mỉm cười nháy mắt đầy tự tin.",
+              "characterIds": [
+                "char_ethan"
+              ],
+              "characterDnaReferences": {
+                "char_ethan": "ver_ethan_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Lối vào phòng khách",
+              "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+              "lighting": "Ánh sáng chan hòa làm nổi bật chiếc áo thun thể thao xanh navy của Ba Trường",
+              "dialogue": "",
+              "emotion": "Lạc quan, tự tin, mang tinh thần thể thao sôi nổi",
+              "visualPurpose": "Người giải cứu tình huống xuất hiện với góc nhìn tư duy tích cực",
+              "continuityNotes": {
+                "characterPositions": "Ba Trường tiến từ cửa vào mép tấm bạt",
+                "objectPositions": "Ba Trường cầm quả bóng mini đường kính 15cm",
+                "environmentContinuity": "Ánh sáng phòng khách chuyển sang gần trưa, sáng rực rỡ hơn",
+                "propContinuity": "Ba Trường đeo kính cận gọng đen thể thao",
+                "actionContinuity": "Ba Trường bước vào tiếp quản hiện trường",
+                "previousShotRelationship": "Chuyển từ sự bối rối ở Scene 3 sang giải pháp ở Scene 4"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s04_02",
+              "storyboardSceneId": "sb_scene_ep009_04",
+              "sceneNumber": 4,
+              "shotNumber": 2,
+              "shotType": "Medium Close-Up",
+              "durationSeconds": 22,
+              "cameraDirection": "Medium Close-Up Ba Trường cúi xuống vẽ thêm các đường vạch vôi sân cỏ và khung thành quanh dấu chân cún",
+              "framing": "Khung hình cận cảnh góc nghiêng Ba Trường cầm cọ vẽ nét trắng",
+              "cameraMovement": "Slow Orbit 30° quanh Ba Trường đang trổ tài",
+              "cameraAngle": "Low-Angle tôn vinh cử chỉ hài hước của người cha",
+              "subject": "Ba Trường vẽ đường kẻ sân cỏ bóng đá",
+              "visualFocus": "Nét cọ trắng uốn lượn biến dấu chân cún thành tiền đạo sút bóng",
+              "action": "Ba Trường cúi xuống, cầm cọ quẹt những đường kẻ vôi trắng tinh tế xung quanh 4 dấu chân, vẽ thêm hai khung thành tí hon và quả bóng lăn vào lưới.",
+              "characterIds": [
+                "char_ethan"
+              ],
+              "characterDnaReferences": {
+                "char_ethan": "ver_ethan_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Bề mặt tấm bạt vẽ",
+              "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+              "lighting": "Ánh sáng tập trung vào đôi tay khéo léo của Ba Trường",
+              "dialogue": "Trọng tài VAR Ba Trường đã xem lại băng ghi hình! Đây không phải lỗi việt vị, mà là một siêu phẩm bàn thắng của tiền đạo Mochi!",
+              "speakerCharacterId": "char_ethan",
+              "speakerCharacterName": "Ba Trường",
+              "emotion": "Hài hước, hào sảng như bình luận viên bóng đá cúp thế giới",
+              "visualPurpose": "Truyền tải bài học: biến sự cố ngoài ý muốn thành cơ hội sáng tạo độc đáo",
+              "continuityNotes": {
+                "characterPositions": "Ba Trường quỳ cạnh Pi và Kem",
+                "objectPositions": "Sân cỏ bóng đá mini hiện ra sinh động quanh dấu chân cún",
+                "environmentContinuity": "Cả nhà quây quần chăm chú theo dõi",
+                "propContinuity": "Cọ vẽ màu trắng trong tay Ba Trường",
+                "actionContinuity": "Bức tranh được nâng cấp lên một tầng sáng tạo mới",
+                "previousShotRelationship": "Cận cảnh hành động biến đổi bức tranh từ ý tưởng của Ba Trường"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s04_03",
+              "storyboardSceneId": "sb_scene_ep009_04",
+              "sceneNumber": 4,
+              "shotNumber": 3,
+              "shotType": "Close-Up",
+              "durationSeconds": 18,
+              "cameraDirection": "Close-Up khuôn mặt Pi bừng sáng, mắt long lanh lấy lại niềm vui nhân đôi",
+              "framing": "Cận cảnh chân dung biểu cảm Pi",
+              "cameraMovement": "Quick Push-In làm nổi bật khoảnh khắc \"Eureka\" của bé",
+              "cameraAngle": "Eye-Level trực diện",
+              "subject": "Pi mắt sáng rực reo lên vui sướng",
+              "visualFocus": "Nụ cười rạng rỡ hết cỡ và chiếc kẹp tóc vàng lắc lư theo cái gật đầu",
+              "action": "Pi vỗ tay reo lên, mắt sáng ngời, cầm ngay chiếc cọ vẽ màu đỏ sẵn sàng tiếp sức cho sân bóng cầu vồng.",
+              "characterIds": [
+                "char_pi"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Bên tấm bạt vẽ",
+              "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+              "lighting": "Ánh sáng vàng ấm rọi thẳng vào ánh mắt lấp lánh của Pi",
+              "dialogue": "Ồ! Nhìn giống một giải đấu cúp thế giới trên mây quá ba ơi! Con vẽ thêm khán đài cổ vũ nhé!",
+              "speakerCharacterId": "char_pi",
+              "speakerCharacterName": "Pi",
+              "emotion": "Vỡ òa vui sướng, bùng nổ ý tưởng mới",
+              "visualPurpose": "Chuyển hóa cảm xúc từ tiếc nuối sang thăng hoa sáng tạo",
+              "continuityNotes": {
+                "characterPositions": "Pi rướn người về phía trước bạt",
+                "objectPositions": "Pi cầm cọ vẽ màu đỏ",
+                "environmentContinuity": "Không khí bùng nổ tiếng cười",
+                "propContinuity": "Kẹp tóc vàng của Pi phản chiếu ánh sáng",
+                "actionContinuity": "Pi bắt đầu vẽ thêm khán đài trên mây",
+                "previousShotRelationship": "Phản ứng lập tức trước lời bình luận dí dỏm của Ba Trường"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s04_04",
+              "storyboardSceneId": "sb_scene_ep009_04",
+              "sceneNumber": 4,
+              "shotNumber": 4,
+              "shotType": "Two-Shot",
+              "durationSeconds": 20,
+              "cameraDirection": "Two-Shot Mẹ Vân và Ba Trường trao nhau ánh nhìn đồng điệu, Mẹ Vân khích lệ các con",
+              "framing": "Trung cảnh bố mẹ cùng mỉm cười nhìn các con vẽ tiếp",
+              "cameraMovement": "Slow Pan từ bố mẹ xuống hai bé đang cặm cụi tô màu",
+              "cameraAngle": "Eye-Level ấm áp",
+              "subject": "Mẹ Vân tự hào vỗ vai Ba Trường, cả hai mỉm cười hạnh phúc",
+              "visualFocus": "Sự gắn kết đồng lòng của cha mẹ trong cách nuôi dạy con",
+              "action": "Mẹ Vân gật đầu tán thưởng nhìn Ba Trường, sau đó quay sang vuốt nhẹ má Kem và cổ vũ cả nhà cùng tiếp tục.",
+              "characterIds": [
+                "char_emma",
+                "char_ethan"
+              ],
+              "characterDnaReferences": {
+                "char_emma": "ver_emma_v1",
+                "char_ethan": "ver_ethan_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Góc phòng khách bên tấm bạt",
+              "timeOfDay": "Buổi sáng gần trưa (Late Morning)",
+              "lighting": "Ánh nắng ấm áp bao bọc cha mẹ",
+              "dialogue": "Một ý tưởng tuyệt vời! Không có bức tranh nào bị hỏng, chỉ có những cơ hội sáng tạo mới thôi.",
+              "speakerCharacterId": "char_emma",
+              "speakerCharacterName": "Mẹ Vân",
+              "emotion": "Dịu dàng, sâu sắc, tự hào",
+              "visualPurpose": "Khắc sâu bài học đạo đức về sự lạc quan và không từ bỏ",
+              "continuityNotes": {
+                "characterPositions": "Ba Trường và Mẹ Vân ngồi cạnh nhau ở mép trên của bạt",
+                "objectPositions": "Hai con đang say sưa vẽ ở mép dưới",
+                "environmentContinuity": "Bức tranh ngày càng rực rỡ phong phú",
+                "propContinuity": "Quả bóng mini đặt gọn gàng cạnh mép thảm",
+                "actionContinuity": "Cả nhà cùng nhau bước vào giai đoạn hoàn thiện tranh ở Scene 5",
+                "previousShotRelationship": "Đúc kết thông điệp cốt lõi của cảnh 4 trước khi bước sang cao trào Scene 5"
+              },
+              "generationStatus": "Not Generated"
+            }
+          ]
+        },
+        {
+          "id": "sb_scene_ep009_05",
+          "episodeSceneId": "scene_ep9_05",
+          "sceneNumber": 5,
+          "title": "Bức tranh hoàn hảo của gia đình",
+          "location": "Phòng khách gia đình – Toàn cảnh tấm bạt",
+          "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+          "lighting": "Ánh sáng vàng chan hòa phủ khắp căn phòng",
+          "shots": [
+            {
+              "id": "shot_ep009_s05_01",
+              "storyboardSceneId": "sb_scene_ep009_05",
+              "sceneNumber": 5,
+              "shotNumber": 1,
+              "shotType": "Wide Shot",
+              "durationSeconds": 20,
+              "cameraDirection": "Wide Shot toàn cảnh 4 thành viên cùng Mochi đang cặm cụi hoàn thiện từng mảng màu trên tấm bạt",
+              "framing": "Toàn cảnh căn phòng rực rỡ sắc màu hội họa",
+              "cameraMovement": "Slow Pan 180° hình bán nguyệt quanh tấm bạt",
+              "cameraAngle": "High-Angle 45°",
+              "subject": "Gia đình 4 người cùng chú cún Mochi quây quần bên tác phẩm",
+              "visualFocus": "Bức tranh lớn ngập tràn chi tiết: cầu vồng, sân bóng, hoa lá, bướm lượn",
+              "action": "Pi vẽ thêm mặt trời cười, Kem in thêm các chấm màu cam, Ba Trường tô màu cho cầu môn, Mẹ Vân điểm xuyết những cánh hoa mềm mại. Mochi nằm chống cằm ngắm nhìn.",
+              "characterIds": [
+                "char_pi",
+                "char_kem",
+                "char_ethan",
+                "char_emma",
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1",
+                "char_ethan": "ver_ethan_v1",
+                "char_emma": "ver_emma_v1",
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Toàn cảnh phòng khách gia đình",
+              "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+              "lighting": "Ánh sáng ngập tràn khắp căn phòng, các mảng màu rực rỡ và hài hòa",
+              "dialogue": "",
+              "emotion": "Say sưa, hòa thuận, tràn đầy năng lượng nghệ thuật",
+              "visualPurpose": "Tái hiện không khí lao động sáng tạo tập thể của cả gia đình",
+              "continuityNotes": {
+                "characterPositions": "Ba Trường góc trên trái, Mẹ Vân góc trên phải, Pi góc dưới trái, Kem góc dưới phải, Mochi ở giữa mép dưới",
+                "objectPositions": "Bức tranh đã lấp đầy 90% diện tích bạt trắng",
+                "environmentContinuity": "Các khay màu được sử dụng gần hết, hòa lẫn hài hòa",
+                "propContinuity": "Tạp dề của các thành viên đều lấm tấm vài vết màu vui nhộn",
+                "actionContinuity": "Bức tranh bước vào những nét vẽ hoàn thiện cuối cùng",
+                "previousShotRelationship": "Mở đầu cảnh cao trào hoàn thành bức tranh"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s05_02",
+              "storyboardSceneId": "sb_scene_ep009_05",
+              "sceneNumber": 5,
+              "shotNumber": 2,
+              "shotType": "Insert Shot",
+              "durationSeconds": 20,
+              "cameraDirection": "Insert Shot cận cảnh bốn bàn tay lớn nhỏ cùng in dấu tay tạo thành chữ ký gia đình ở góc tranh",
+              "framing": "Top-Down cực cận góc dưới bên phải bức tranh",
+              "cameraMovement": "Static Focus chuẩn xác vào 4 dấu vân tay và 1 dấu chân cún",
+              "cameraAngle": "Top-Down 90°",
+              "subject": "Dấu tay Ba Trường, Mẹ Vân, Pi, Kem và dấu chân Mochi xếp cạnh nhau",
+              "visualFocus": "Bốn dấu tay màu sắc xếp so le ấm áp và dấu chân cún nhỏ xinh bên cạnh",
+              "action": "Lần lượt từng bàn tay nhúng màu nước in lên góc tranh: bàn tay lớn màu xanh lam của Ba Trường, bàn tay dịu dàng màu cam của Mẹ Vân, bàn tay nhỏ màu vàng của Pi, bàn tay tí hon màu đỏ của Kem, và Mochi ấn nhẹ một dấu chân xanh lá.",
+              "characterIds": [
+                "char_ethan",
+                "char_emma",
+                "char_pi",
+                "char_kem",
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_ethan": "ver_ethan_v1",
+                "char_emma": "ver_emma_v1",
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1",
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Góc ký tên của tấm bạt",
+              "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+              "lighting": "Ánh sáng sắc nét, làm nổi bật đường vân tay và giọt màu tươi tắn",
+              "dialogue": "",
+              "emotion": "Xúc động, gắn kết thiêng liêng",
+              "visualPurpose": "Biểu tượng hóa sự đoàn kết và dấu ấn tình yêu của cả gia đình",
+              "continuityNotes": {
+                "characterPositions": "Chỉ thấy bàn tay của các nhân vật hạ xuống theo thứ tự",
+                "objectPositions": "Dấu tay in rõ nét trên nền bạt trắng sạch sẽ",
+                "environmentContinuity": "Bức tranh đã vẽ hoàn chỉnh",
+                "propContinuity": "Màu nước phủ đều lòng bàn tay",
+                "actionContinuity": "Nghi thức \"ký tên\" hoàn thành tác phẩm",
+                "previousShotRelationship": "Hành động biểu tượng sau khi hoàn thành tranh"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s05_03",
+              "storyboardSceneId": "sb_scene_ep009_05",
+              "sceneNumber": 5,
+              "shotNumber": 3,
+              "shotType": "Medium Close-Up",
+              "durationSeconds": 18,
+              "cameraDirection": "Medium Close-Up Pi ôm chặt Kem, hai chị em nhìn ngắm bức tranh với ánh mắt mãn nguyện",
+              "framing": "Khung hình cận cảnh tình cảm hai chị em Pi và Kem",
+              "cameraMovement": "Slow Dolly In vào nụ cười tươi tắn của hai bé",
+              "cameraAngle": "Eye-Level ngang tầm mắt",
+              "subject": "Pi ôm nhẹ vai Kem, Kem giơ hai bàn tay đỏ hoe lên reo hò",
+              "visualFocus": "Hai nụ cười rạng rỡ của Pi và Kem bên cạnh bức tranh",
+              "action": "Pi cúi xuống ôm vai Kem, cả hai cùng nhìn xuống bức tranh lớn. Kem giơ hai bàn tay đỏ lên vỗ bốp bốp chúc mừng chiến thắng.",
+              "characterIds": [
+                "char_pi",
+                "char_kem"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Bên mép bức tranh hoàn thiện",
+              "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+              "lighting": "Ánh sáng ấm áp rực rỡ chiếu vào nụ cười trong trẻo của các bé",
+              "dialogue": "Pi: \"Đây là bức tranh đẹp nhất từ trước đến nay của chúng mình!\" | Kem: \"Gia đình Pi Kem vô địch! Hoan hô!\"",
+              "speakerCharacterId": "char_pi",
+              "speakerCharacterName": "Pi & Kem",
+              "emotion": "Tự hào, hạnh phúc ngập tràn, yêu thương gắn bó",
+              "visualPurpose": "Khắc họa khoảnh khắc thành tựu và niềm tự hào của trẻ thơ",
+              "continuityNotes": {
+                "characterPositions": "Pi và Kem ngồi sát nhau ở góc bạt",
+                "objectPositions": "Lòng bàn tay hai bé vẫn còn dính màu nước chữ ký",
+                "environmentContinuity": "Ba mẹ đứng phía sau ngắm nhìn hai con",
+                "propContinuity": "Mũi Pi dính một chấm màu vàng nhỏ ngộ nghĩnh",
+                "actionContinuity": "Hai chị em chúc mừng tác phẩm chung",
+                "previousShotRelationship": "Cắt từ dấu tay chữ ký sang biểu cảm hân hoan của hai bé"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s05_04",
+              "storyboardSceneId": "sb_scene_ep009_05",
+              "sceneNumber": 5,
+              "shotNumber": 4,
+              "shotType": "Wide Shot",
+              "durationSeconds": 22,
+              "cameraDirection": "Crane Shot nâng từ từ lên cao, góc nhìn chim bay (Bird’s Eye) thu trọn bức tranh khổng lồ cùng cả nhà đang ôm nhau cười",
+              "framing": "Toàn cảnh từ đỉnh trần phòng khách nhìn xuống",
+              "cameraMovement": "Smooth Crane Up từ độ cao 1.5m lên 3.5m kết hợp xoay nhẹ 15°",
+              "cameraAngle": "Top-Down Bird’s Eye View 85°",
+              "subject": "Bức tranh khổng lồ rực rỡ và gia đình 4 người ôm nhau chúc mừng",
+              "visualFocus": "Toàn bộ bố cục bức tranh hoàn chỉnh và vòng tay gia đình yêu thương",
+              "action": "Ba Trường bế Kem lên vai, Mẹ Vân ôm Pi vào lòng, Mochi chạy nhảy xung quanh vẫy đuôi. Bức tranh nằm trọn vẹn ở trung tâm khung hình.",
+              "characterIds": [
+                "char_ethan",
+                "char_emma",
+                "char_pi",
+                "char_kem",
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_ethan": "ver_ethan_v1",
+                "char_emma": "ver_emma_v1",
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1",
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Toàn cảnh trung tâm phòng khách",
+              "timeOfDay": "Trưa nắng ấm (Warm Noon)",
+              "lighting": "Ánh sáng điện ảnh 3D lung linh, phản chiếu mọi sắc thái màu vẽ",
+              "dialogue": "",
+              "emotion": "Viên mãn, hạnh phúc gia đình trọn vẹn",
+              "visualPurpose": "Shot biểu tượng khép lại cao trào nghệ thuật của tập phim",
+              "continuityNotes": {
+                "characterPositions": "Cả gia đình quây quần tại trung tâm phía trên bức tranh",
+                "objectPositions": "Bức tranh chiếm 70% khung hình phía dưới",
+                "environmentContinuity": "Phòng khách ấm cúng và đầy ắp kỷ niệm",
+                "propContinuity": "Bức tranh đã khô bề mặt, màu sắc định hình rõ ràng",
+                "actionContinuity": "Khoảnh khắc chụp ảnh kỷ niệm gia đình vô hình",
+                "previousShotRelationship": "Cao trào thị giác của toàn bộ tập phim"
+              },
+              "generationStatus": "Not Generated"
+            }
+          ]
+        },
+        {
+          "id": "sb_scene_ep009_06",
+          "episodeSceneId": "scene_ep9_06",
+          "sceneNumber": 6,
+          "title": "Cùng nhau dọn dẹp & Lời chúc ấm áp",
+          "location": "Phòng khách & Bồn rửa gian bếp",
+          "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+          "lighting": "Ánh sáng dịu nhẹ, tạo cảm giác ngăn nắp và sạch sẽ",
+          "shots": [
+            {
+              "id": "shot_ep009_s06_01",
+              "storyboardSceneId": "sb_scene_ep009_06",
+              "sceneNumber": 6,
+              "shotNumber": 1,
+              "shotType": "Medium Shot",
+              "durationSeconds": 15,
+              "cameraDirection": "Medium Shot Pi và Kem mỗi bé một chiếc khăn ẩm, vui vẻ lau sạch các vệt màu nước thừa trên sàn gỗ",
+              "framing": "Trung cảnh hai chị em cùng nhau lau sàn",
+              "cameraMovement": "Tracking ngang theo tay lau khăn của hai bé",
+              "cameraAngle": "Low-Angle 20° ngang tầm sàn gỗ",
+              "subject": "Pi và Kem lau sàn gỗ theo điệu nhạc vui nhộn",
+              "visualFocus": "Động tác lau khăn tự giác và sàn gỗ bóng loáng trở lại",
+              "action": "Pi cầm khăn vàng lau các mép sàn. Kem cầm khăn xanh chà chà theo chị, vừa lau vừa lắc lư đầu hát bài hát dọn dẹp quen thuộc.",
+              "characterIds": [
+                "char_pi",
+                "char_kem"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Sàn gỗ phòng khách",
+              "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+              "lighting": "Ánh nắng chiều vàng cam nhẹ nhàng xiên qua rèm cửa",
+              "dialogue": "",
+              "emotion": "Tự giác, vui vẻ, có trách nhiệm với không gian sống",
+              "visualPurpose": "Giáo dục ý thức giữ gìn vệ sinh và dọn dẹp sau khi chơi",
+              "continuityNotes": {
+                "characterPositions": "Pi bên trái, Kem bên phải cách nhau 1 mét",
+                "objectPositions": "Bức tranh lớn đã được cuộn cẩn thận đem phơi",
+                "environmentContinuity": "Sàn gỗ dần sạch bóng",
+                "propContinuity": "Hai chiếc khăn ẩm màu vàng và xanh",
+                "actionContinuity": "Bắt đầu quy trình dọn dẹp",
+                "previousShotRelationship": "Chuyển sang phân đoạn kết thúc bài học thực tế"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s06_02",
+              "storyboardSceneId": "sb_scene_ep009_06",
+              "sceneNumber": 6,
+              "shotNumber": 2,
+              "shotType": "Two-Shot",
+              "durationSeconds": 17,
+              "cameraDirection": "Two-Shot Ba Trường bế Mochi bên bồn rửa bếp để Mẹ Vân rửa sạch bàn chân dính màu xanh bằng xà phòng êm dịu",
+              "framing": "Trung cận cảnh Ba Trường và Mẹ Vân chăm sóc cún cưng",
+              "cameraMovement": "Static ấm áp tại khu vực đảo bếp",
+              "cameraAngle": "Eye-Level ngang bồn rửa",
+              "subject": "Mẹ Vân nhẹ nhàng rửa chân cho Mochi với bọt xà phòng trắng mịn",
+              "visualFocus": "Bọt xà phòng trắng làm sạch vết màu xanh trên chân cún và nụ cười dịu dàng của Mẹ Vân",
+              "action": "Ba Trường giữ nhẹ nách Mochi, Mẹ Vân xoa bọt xà phòng thơm dịu lên bốn bàn chân cún rồi xả nước ấm. Mochi thích thú liếm nhẹ tay Mẹ Vân.",
+              "characterIds": [
+                "char_ethan",
+                "char_emma",
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_ethan": "ver_ethan_v1",
+                "char_emma": "ver_emma_v1",
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Gian bếp gia đình – Bồn rửa đảo bếp",
+              "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+              "lighting": "Ánh sáng trong trẻo của gian bếp hiện đại, tia nước lóng lánh",
+              "dialogue": "Họa sĩ giỏi là người biết giữ cho cây cọ của mình luôn sạch sẽ và căn phòng luôn ngăn nắp.",
+              "speakerCharacterId": "char_emma",
+              "speakerCharacterName": "Mẹ Vân",
+              "emotion": "Dịu dàng, chăm sóc, ân cần nhắc nhở",
+              "visualPurpose": "Nhắc nhở nhẹ nhàng về tinh thần trách nhiệm và lòng yêu thương động vật",
+              "continuityNotes": {
+                "characterPositions": "Ba Trường đứng bên trái bồn rửa bế Mochi, Mẹ Vân đứng đối diện rửa chân",
+                "objectPositions": "Vòi nước chảy nhẹ nhàng, bọt xà phòng thơm",
+                "environmentContinuity": "Bếp sạch sẽ, ánh chiều êm dịu",
+                "propContinuity": "Khăn bông mềm để lau khô lông cho Mochi",
+                "actionContinuity": "Vết màu xanh trên chân Mochi được rửa sạch hoàn toàn",
+                "previousShotRelationship": "Phần dọn dẹp cho thành viên 4 chân của gia đình"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s06_03",
+              "storyboardSceneId": "sb_scene_ep009_06",
+              "sceneNumber": 6,
+              "shotNumber": 3,
+              "shotType": "Medium Shot",
+              "durationSeconds": 17,
+              "cameraDirection": "Medium Shot Pi xếp gọn các lọ màu và cọ vẽ lên kệ gỗ, Kem mang khay màu khô ráo đến xếp cạnh",
+              "framing": "Trung cảnh hai bé sắp xếp đồ dùng ngăn nắp",
+              "cameraMovement": "Slow Pan theo tay Pi đặt chiếc cọ vẽ cuối cùng",
+              "cameraAngle": "Eye-Level ngang kệ đồ chơi",
+              "subject": "Pi và Kem hoàn tất việc sắp xếp góc đồ dùng mỹ thuật",
+              "visualFocus": "Kệ cọ vẽ thẳng hàng ngay ngắn và nụ cười tự hào của Pi",
+              "action": "Pi cắm những cây cọ đã rửa sạch lông vào lọ gốm, Kem kiễng chân đặt hộp màu nước lên ngăn kệ dưới.",
+              "characterIds": [
+                "char_pi",
+                "char_kem"
+              ],
+              "characterDnaReferences": {
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Góc kệ học tập và sáng tạo phòng khách",
+              "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+              "lighting": "Ánh nắng chiều buông ấm, phản chiếu các lọ cọ sạch tinh tươm",
+              "dialogue": "Con với Kem rửa sạch hết cọ rồi ạ! Lần sau chúng mình lại vẽ nữa nhé mẹ!",
+              "speakerCharacterId": "char_pi",
+              "speakerCharacterName": "Pi",
+              "emotion": "Tự giác, hào hứng, mong chờ lần chơi tiếp theo",
+              "visualPurpose": "Khẳng định thói quen tốt đã được hình thành qua trải nghiệm thực tế",
+              "continuityNotes": {
+                "characterPositions": "Pi đứng bên kệ cao, Kem kiễng chân bên kệ thấp",
+                "objectPositions": "Các lọ màu xếp thẳng hàng theo dải cầu vồng",
+                "environmentContinuity": "Phòng khách sạch sẽ hoàn hảo như ban đầu",
+                "propContinuity": "Đầu lông cọ đã ráo nước sạch sẽ",
+                "actionContinuity": "Hoàn tất 100% công việc dọn dẹp",
+                "previousShotRelationship": "Phần hoàn thành trách nhiệm của hai bé"
+              },
+              "generationStatus": "Not Generated"
+            },
+            {
+              "id": "shot_ep009_s06_04",
+              "storyboardSceneId": "sb_scene_ep009_06",
+              "sceneNumber": 6,
+              "shotNumber": 4,
+              "shotType": "Wide Shot",
+              "durationSeconds": 16,
+              "cameraDirection": "Wide Shot cả gia đình đứng cạnh bức tranh đã lồng khung treo trên tường, cùng vẫy tay chào khán giả với nụ cười rạng rỡ",
+              "framing": "Toàn cảnh trung tâm phòng khách – Bức tranh treo trang trọng trên tường gỗ",
+              "cameraMovement": "Static kết hợp Slow Zoom Out nhẹ chào tạm biệt",
+              "cameraAngle": "Eye-Level trực diện ấm cúng",
+              "subject": "Cả gia đình 4 người và Mochi đứng cạnh bức tranh vẫy tay chào",
+              "visualFocus": "Bức tranh gia đình tỏa sáng trên tường và nụ cười rạng rỡ của tất cả nhân vật",
+              "action": "Ba Trường tươi cười nháy mắt, Mẹ Vân tựa đầu vào vai Ba Trường, Pi và Kem đứng phía trước giơ hai tay vẫy chào vui vẻ, Mochi ngồi ngoan ngoãn sủa vang một tiếng giòn giã.",
+              "characterIds": [
+                "char_ethan",
+                "char_emma",
+                "char_pi",
+                "char_kem",
+                "char_mochi"
+              ],
+              "characterDnaReferences": {
+                "char_ethan": "ver_ethan_v1",
+                "char_emma": "ver_emma_v1",
+                "char_pi": "ver_pi_v1",
+                "char_kem": "ver_kem_v1",
+                "char_mochi": "ver_mochi_v1"
+              },
+              "styleVersionSnapshotId": "style_ver_1_0",
+              "location": "Phòng khách gia đình ấm cúng",
+              "timeOfDay": "Buổi chiều dịu mát (Afternoon Soft)",
+              "lighting": "Ánh đèn ấm 3000K bật sáng hòa quyện ánh hoàng hôn nhẹ dịu",
+              "dialogue": "Nhất trí! Hẹn gặp lại các bạn nhỏ ở những cuộc phiêu lưu tiếp theo của gia đình Pi & Kem!",
+              "speakerCharacterId": "char_ethan",
+              "speakerCharacterName": "Ba Trường & Gia đình",
+              "emotion": "Hân hoan, ấm áp, kết thúc trọn vẹn giàu cảm xúc",
+              "visualPurpose": "Shot kết phim (End Shot) mang tính biểu tượng thương hiệu của series hoạt hình",
+              "continuityNotes": {
+                "characterPositions": "Ba Trường và Mẹ Vân đứng sau, Pi và Kem đứng trước ôm Mochi ở giữa",
+                "objectPositions": "Bức tranh vẽ treo ngay sau lưng gia đình",
+                "environmentContinuity": "Không gian ấm cúng, ánh đèn gia đình rạng ngời",
+                "propContinuity": "Các nhân vật đã cởi tạp dề, mặc trang phục thường ngày sạch sẽ",
+                "actionContinuity": "Cả gia đình cùng vẫy tay chào khán giả khi nhạc kết thúc vang lên",
+                "previousShotRelationship": "Shot kết thúc của toàn bộ tập phim Episode 9"
+              },
+              "generationStatus": "Not Generated"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "imageGenerationJobs": [],
+  "projectReferences": [
+    {
+      "id": "pref_char_pi_turnaround_real",
+      "name": "Pi Character Turnaround & Model Reference (Real CGI)",
+      "description": "Authentic 3D Pixar-style model sheet for Pi with front and three-quarter angles in sporty teal hoodie.",
+      "type": "image",
+      "source": "uploaded_image",
+      "uri": "/assets/aistudio/references/images/char_pi_turnaround.jpg",
+      "storagePath": "references/images/char_pi_turnaround.jpg",
+      "thumbnail": "/assets/aistudio/references/images/char_pi_turnaround.jpg",
+      "mimeType": "image/jpeg",
+      "tags": [
+        "Pi",
+        "Model Sheet",
+        "Real Image",
+        "Turnaround",
+        "3D CGI"
+      ],
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "createdAt": "2026-02-01T08:00:00.000Z",
+      "aspectRatio": "1:1",
+      "width": 1024,
+      "height": 1024,
+      "fileSize": 599410,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_vid_pi_motion_real",
+      "name": "Pi Studio Action & Turnaround Motion Clip",
+      "description": "High-definition 1280x720 video turnaround reference clip for character motion conditioning.",
+      "type": "video",
+      "source": "uploaded_video",
+      "uri": "/assets/aistudio/references/videos/pi_turnaround_motion.mp4",
+      "storagePath": "references/videos/pi_turnaround_motion.mp4",
+      "thumbnail": "/assets/aistudio/references/images/char_pi_turnaround.jpg",
+      "mimeType": "video/mp4",
+      "tags": [
+        "Video Reference",
+        "Motion Clip",
+        "MP4",
+        "Character Turnaround"
+      ],
+      "characterId": "char_pi",
+      "createdAt": "2026-02-02T09:00:00.000Z",
+      "durationSeconds": 2,
+      "aspectRatio": "16:9",
+      "width": 1280,
+      "height": 720,
+      "fileSize": 9129,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_style_warm_pixar_real",
+      "name": "Warm Cinematic Studio 3D Lighting Reference",
+      "description": "Photorealistic Pixar aesthetic lighting reference: soft morning sunlight streaming through studio windows.",
+      "type": "style",
+      "source": "style_guide",
+      "uri": "/assets/aistudio/references/styles/warm_pixar_style.jpg",
+      "storagePath": "references/styles/warm_pixar_style.jpg",
+      "thumbnail": "/assets/aistudio/references/styles/warm_pixar_style.jpg",
+      "mimeType": "image/jpeg",
+      "tags": [
+        "Style Guide",
+        "Lighting",
+        "Warm Studio",
+        "3D Pixar",
+        "Real Raster"
+      ],
+      "styleVersionId": "style_ver_1_0",
+      "createdAt": "2026-02-03T10:00:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1376,
+      "height": 768,
+      "fileSize": 695251,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_style_hanoi_01",
+      "name": "Hanoi Autumn Cinematic Lighting Guide",
+      "description": "Golden hour ambient light, warm peach tones, and cozy pastel gradients tailored for Season 1 episodes.",
+      "type": "style",
+      "source": "style_guide",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f59e0b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23ec4899%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Crect%20x%3D%22105%22%20y%3D%2265%22%20width%3D%22110%22%20height%3D%2280%22%20rx%3D%2212%22%20fill%3D%22%230f172a%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%223%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22140%22%20cy%3D%22100%22%20r%3D%2216%22%20fill%3D%22%23f59e0b%22%20fill-opacity%3D%220.7%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22175%22%20cy%3D%22105%22%20r%3D%2212%22%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.7%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M115%20135%20Q160%20115%20205%20135%22%20stroke%3D%22%2338bdf8%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%22100%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%23f59e0b%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f59e0b%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2268%22%20y%3D%2236.5%22%20fill%3D%22%23f59e0b%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20GLOBAL%20STYLE%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20STYLE%20GUIDE%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Hanoi%20Autumn%20Lighting%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Style%20v1.0%20Standard%20%E2%80%A2%20STYLE%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "references/style/pref_style_hanoi_01.png",
+      "styleVersionId": "style_ver_1_0",
+      "tags": [
+        "Style",
+        "Lighting",
+        "Hanoi Autumn",
+        "3D CGI",
+        "Golden Hour"
+      ],
+      "createdAt": "2026-02-01T10:00:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_loc_drawing_room_01",
+      "name": "Family Studio & Canvas Drawing Area",
+      "description": "Bright family living room interior with child-safe wooden furniture, colorful paint jars, and large white floor canvas.",
+      "type": "location",
+      "source": "uploaded_image",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%233b82f6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2310b981%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Crect%20x%3D%2295%22%20y%3D%2260%22%20width%3D%22130%22%20height%3D%2290%22%20rx%3D%2212%22%20fill%3D%22%230f172a%22%20stroke%3D%22%233b82f6%22%20stroke-width%3D%222.5%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M100%20135%20L135%2095%20L165%20125%20L190%20100%20L220%20135%20Z%22%20fill%3D%22%233b82f6%22%20fill-opacity%3D%220.5%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M140%20135%20L170%20110%20L200%20135%20Z%22%20fill%3D%22%2310b981%22%20fill-opacity%3D%220.6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22140%22%20cy%3D%2285%22%20r%3D%2210%22%20fill%3D%22%23fbbf24%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2272%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%233b82f6%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%233b82f6%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2254%22%20y%3D%2236.5%22%20fill%3D%22%233b82f6%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20LOCATION%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20UPLOADED%20IMAGE%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Studio%20%26%20Canvas%20Area%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Ep%209%20Primary%20Set%20%E2%80%A2%20LOCATION%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "references/locations/pref_loc_drawing_room_01.png",
+      "episodeId": "ep_009",
+      "tags": [
+        "Location",
+        "Living Room",
+        "Canvas",
+        "Drawing Area",
+        "Episode 9"
+      ],
+      "createdAt": "2026-02-05T14:30:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_char_pi_v1_sheet",
+      "name": "Pi v1.0 Character Model Turnaround",
+      "description": "Canonical 3D reference sheet for Pi: round energetic face, dark brown hair with cowlick, bright yellow polo with dinosaur crest.",
+      "type": "character",
+      "source": "character_sheet",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23eab308%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%233b82f6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22110%22%20r%3D%2245%22%20fill%3D%22%23eab308%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23eab308%22%20stroke-width%3D%223%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22100%22%20r%3D%2224%22%20fill%3D%22%23eab308%22%20fill-opacity%3D%220.8%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M115%20165%20C115%20130%2C%20205%20130%2C%20205%20165%20Z%22%20fill%3D%22%23eab308%22%20fill-opacity%3D%220.6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22152%22%20cy%3D%2298%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22168%22%20cy%3D%2298%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M154%20108%20Q160%20114%20166%20108%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2265%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%23eab308%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23eab308%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2250.5%22%20y%3D%2236.5%22%20fill%3D%22%23eab308%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20PI%20v1.0%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20CHARACTER%20SHEET%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Pi%20Turnaround%20Model%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20char_pi%20%2F%20ver_pi_v1%20%E2%80%A2%20CHARACTER%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "characters/char_pi/ver_pi_v1/pref_char_pi_v1_sheet.png",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "tags": [
+        "Pi",
+        "Main Character",
+        "Model Sheet",
+        "v1.0",
+        "Orthographic"
+      ],
+      "createdAt": "2026-02-10T09:00:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_char_emma_v1_sheet",
+      "name": "Emma (Kem) v1.0 Expression Sheet",
+      "description": "Canonical facial expression sheet for Emma: big curious eyes, twin puffy buns with peach clips, joyful pastel pink dress.",
+      "type": "character",
+      "source": "character_sheet",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23ec4899%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23a855f7%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22110%22%20r%3D%2245%22%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%223%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22100%22%20r%3D%2224%22%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.8%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M115%20165%20C115%20130%2C%20205%20130%2C%20205%20165%20Z%22%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22152%22%20cy%3D%2298%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22168%22%20cy%3D%2298%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M154%20108%20Q160%20114%20166%20108%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2279%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%23ec4899%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23ec4899%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2257.5%22%20y%3D%2236.5%22%20fill%3D%22%23ec4899%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20EMMA%20v1.0%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20CHARACTER%20SHEET%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Emma%20Expression%20Sheet%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20char_emma%20%2F%20ver_emma_v1%20%E2%80%A2%20CHARACTER%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "characters/char_emma/ver_emma_v1/pref_char_emma_v1_sheet.png",
+      "characterId": "char_emma",
+      "characterVersionId": "ver_emma_v1",
+      "tags": [
+        "Emma",
+        "Kem",
+        "Toddler",
+        "Expressions",
+        "v1.0"
+      ],
+      "createdAt": "2026-02-10T09:15:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_char_mochi_v1_sheet",
+      "name": "Mochi Golden Puppy Turnaround",
+      "description": "Fluffy golden fur, floppy ears, wagging tail, and playful mischievous poses for the family puppy Mochi.",
+      "type": "character",
+      "source": "character_sheet",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23f97316%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23eab308%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22110%22%20r%3D%2245%22%20fill%3D%22%23f97316%22%20fill-opacity%3D%220.25%22%20stroke%3D%22%23f97316%22%20stroke-width%3D%223%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22100%22%20r%3D%2224%22%20fill%3D%22%23f97316%22%20fill-opacity%3D%220.8%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M115%20165%20C115%20130%2C%20205%20130%2C%20205%20165%20Z%22%20fill%3D%22%23f97316%22%20fill-opacity%3D%220.6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22152%22%20cy%3D%2298%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22168%22%20cy%3D%2298%22%20r%3D%223%22%20fill%3D%22%23ffffff%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpath%20d%3D%22M154%20108%20Q160%20114%20166%20108%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%222%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2286%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%23f97316%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%23f97316%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2261%22%20y%3D%2236.5%22%20fill%3D%22%23f97316%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20MOCHI%20v1.0%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20CHARACTER%20SHEET%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Mochi%20Puppy%20Turnaround%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20char_mochi%20%2F%20ver_mochi_v1%20%E2%80%A2%20CHARACTER%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "characters/char_mochi/ver_mochi_v1/pref_char_mochi_v1_sheet.png",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "tags": [
+        "Mochi",
+        "Puppy",
+        "Pet",
+        "Golden Fur",
+        "v1.0"
+      ],
+      "createdAt": "2026-02-12T11:00:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": false
+    },
+    {
+      "id": "pref_keyframe_ep9_s1_01",
+      "name": "Shot 1-1 White Canvas Opening Keyframe (Real CGI Render)",
+      "description": "Approved production keyframe: High fidelity 3D Pixar render of Pi and Kem in the sunlit studio with the pristine floor canvas.",
+      "type": "image",
+      "source": "generated_image",
+      "uri": "/assets/aistudio/renders/episodes/ep_009/shots/shot_ep009_s01_01/shot_ep009_s01_01.jpg",
+      "storagePath": "renders/episodes/ep_009/shots/shot_ep009_s01_01/shot_ep009_s01_01.jpg",
+      "thumbnail": "/assets/aistudio/renders/episodes/ep_009/shots/shot_ep009_s01_01/shot_ep009_s01_01.jpg",
+      "mimeType": "image/jpeg",
+      "episodeId": "ep_009",
+      "shotId": "shot_ep009_s01_01",
+      "jobId": "job_ep009_s01_01_real",
+      "outputAssetId": "out_gemini-imagen_job_ep009_s01_01_real",
+      "characterId": "char_pi",
+      "characterVersionId": "ver_pi_v1",
+      "tags": [
+        "Episode 9",
+        "Scene 1",
+        "Shot 1",
+        "Keyframe",
+        "White Canvas",
+        "Approved",
+        "Real Production"
+      ],
+      "createdAt": "2026-02-18T16:20:00.000Z",
+      "aspectRatio": "16:9",
+      "width": 1376,
+      "height": 768,
+      "fileSize": 803212,
+      "isFavorite": true
+    },
+    {
+      "id": "pref_vid_splash_motion_01",
+      "name": "Color Splash Fluid Dynamics Reference",
+      "description": "High-speed fluid motion reference clip showing water splash arcs and droplet dispersion for painting scenes.",
+      "type": "video",
+      "source": "uploaded_video",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%238b5cf6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%2306b6d4%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Crect%20x%3D%22105%22%20y%3D%2270%22%20width%3D%22110%22%20height%3D%2280%22%20rx%3D%2214%22%20fill%3D%22%230f172a%22%20stroke%3D%22%238b5cf6%22%20stroke-width%3D%223%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpolygon%20points%3D%22148%2C95%20148%2C125%20174%2C110%22%20fill%3D%22%238b5cf6%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22110%22%20r%3D%2248%22%20fill%3D%22none%22%20stroke%3D%22%2306b6d4%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%226%2C4%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%2279%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%238b5cf6%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%238b5cf6%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2257.5%22%20y%3D%2236.5%22%20fill%3D%22%238b5cf6%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20VIDEO%20REF%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20UPLOADED%20VIDEO%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Color%20Splash%20Fluid%20Motion%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Fluid%20Dynamics%20%E2%80%A2%204.5s%20%E2%80%A2%20VIDEO%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "references/videos/pref_vid_splash_motion_01.mp4",
+      "tags": [
+        "Video Reference",
+        "Fluid Motion",
+        "Paint Splash",
+        "VFX",
+        "Animation"
+      ],
+      "createdAt": "2026-02-20T08:45:00.000Z",
+      "durationSeconds": 4.5,
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": false
+    },
+    {
+      "id": "pref_vid_mochi_run_01",
+      "name": "Mochi Pawprints Run Cycle Preview",
+      "description": "Generated video animation preview showing Mochi galloping across the canvas leaving cheerful cyan pawprints.",
+      "type": "video",
+      "source": "generated_video",
+      "uri": "data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20200%22%20width%3D%22320%22%20height%3D%22200%22%3E%0A%20%20%20%20%20%20%3Cdefs%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22bgGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%22100%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%23090d16%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%231e293b%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%20%20%3ClinearGradient%20id%3D%22barGrad%22%20x1%3D%220%25%22%20y1%3D%220%25%22%20x2%3D%22100%25%22%20y2%3D%220%25%22%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%220%25%22%20stop-color%3D%22%2310b981%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%20%20%3Cstop%20offset%3D%22100%25%22%20stop-color%3D%22%23f97316%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3C%2FlinearGradient%3E%0A%20%20%20%20%20%20%3C%2Fdefs%3E%0A%20%20%20%20%20%20%3Crect%20width%3D%22320%22%20height%3D%22200%22%20fill%3D%22url(%23bgGrad)%22%20rx%3D%2216%22%20%2F%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%221%22%20y%3D%221%22%20width%3D%22318%22%20height%3D%22198%22%20rx%3D%2215%22%20fill%3D%22none%22%20stroke%3D%22%23334155%22%20stroke-width%3D%221.5%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C!--%20Top%20Bar%20decoration%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2216%22%20y%3D%2214%22%20width%3D%22288%22%20height%3D%223%22%20rx%3D%221.5%22%20fill%3D%22url(%23barGrad)%22%20%2F%3E%0A%0A%20%20%20%20%20%20%3C!--%20Center%20Icon%20%2F%20Illustration%20--%3E%0A%20%20%20%20%20%20%3Cg%3E%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20%3Crect%20x%3D%22105%22%20y%3D%2270%22%20width%3D%22110%22%20height%3D%2280%22%20rx%3D%2214%22%20fill%3D%22%230f172a%22%20stroke%3D%22%2310b981%22%20stroke-width%3D%223%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Cpolygon%20points%3D%22148%2C95%20148%2C125%20174%2C110%22%20fill%3D%22%2310b981%22%20%2F%3E%0A%20%20%20%20%20%20%20%20%3Ccircle%20cx%3D%22160%22%20cy%3D%22110%22%20r%3D%2248%22%20fill%3D%22none%22%20stroke%3D%22%23f97316%22%20stroke-width%3D%222%22%20stroke-dasharray%3D%226%2C4%22%20%2F%3E%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%3C%2Fg%3E%0A%0A%20%20%20%20%20%20%3C!--%20Badge%20--%3E%0A%20%20%20%20%20%20%3Crect%20x%3D%2218%22%20y%3D%2224%22%20width%3D%22121%22%20height%3D%2218%22%20rx%3D%229%22%20fill%3D%22%2310b981%22%20fill-opacity%3D%220.2%22%20stroke%3D%22%2310b981%22%20stroke-width%3D%221%22%20%2F%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%2278.5%22%20y%3D%2236.5%22%20fill%3D%22%2310b981%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20GENERATED%20VIDEO%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Source%20pill%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22302%22%20y%3D%2236%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229%22%20font-weight%3D%22600%22%20text-anchor%3D%22end%22%3E%0A%20%20%20%20%20%20%20%20GENERATED%20VIDEO%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%0A%20%20%20%20%20%20%3C!--%20Title%20%26%20Type%20--%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22165%22%20fill%3D%22%23f8fafc%22%20font-family%3D%22sans-serif%22%20font-size%3D%2212%22%20font-weight%3D%22bold%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Mochi%20Pawprints%20Run%20Cycle%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%20%20%3Ctext%20x%3D%22160%22%20y%3D%22182%22%20fill%3D%22%2394a3b8%22%20font-family%3D%22sans-serif%22%20font-size%3D%229.5%22%20text-anchor%3D%22middle%22%3E%0A%20%20%20%20%20%20%20%20Scene%203%20Preview%20%E2%80%A2%203.2s%20%E2%80%A2%20VIDEO%0A%20%20%20%20%20%20%3C%2Ftext%3E%0A%20%20%20%20%3C%2Fsvg%3E",
+      "storagePath": "renders/episodes/ep_009/shots/shot_ep009_s03_01/video_preview.mp4",
+      "episodeId": "ep_009",
+      "shotId": "shot_ep009_s03_01",
+      "characterId": "char_mochi",
+      "characterVersionId": "ver_mochi_v1",
+      "tags": [
+        "Generated Video",
+        "Mochi",
+        "Run Cycle",
+        "Pawprints",
+        "Episode 9",
+        "Scene 3"
+      ],
+      "createdAt": "2026-02-22T13:10:00.000Z",
+      "durationSeconds": 3.2,
+      "aspectRatio": "16:9",
+      "width": 1920,
+      "height": 1080,
+      "isFavorite": true
+    }
+  ],
+  "productionPacks": [],
+  "flowGenerationJobs": [],
+  "productionAssets": [],
+  "updatedAt": "2026-09-22T14:10:46.490Z"
+}

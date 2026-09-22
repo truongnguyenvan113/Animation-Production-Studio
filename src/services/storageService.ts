@@ -70,9 +70,22 @@ export class StorageService {
   private static instance: StorageService;
   private db: StudioDatabase;
   private listeners: Array<() => void> = [];
+  private diskSyncStatus: {
+    connected: boolean;
+    syncing: boolean;
+    lastSaved: string | null;
+    error: string | null;
+  } = {
+    connected: false,
+    syncing: false,
+    lastSaved: null,
+    error: null,
+  };
+  private diskDebounceTimer: any = null;
 
   private constructor() {
     this.db = this.loadFromStorage();
+    this.initDiskSync();
   }
 
   public static getInstance(): StorageService {
@@ -82,15 +95,159 @@ export class StorageService {
     return StorageService.instance;
   }
 
-  private loadFromStorage(): StudioDatabase {
+  public getDiskSyncStatus() {
+    return { ...this.diskSyncStatus };
+  }
+
+  /**
+   * Initializes synchronization with local project folder (data/database.json).
+   * If the file exists on disk, it hydrates and updates local memory & cache.
+   * If not, it saves current state to seed data/database.json on disk.
+   */
+  public async initDiskSync(): Promise<void> {
+    if (typeof window === 'undefined') return;
     try {
-      if (typeof localStorage === 'undefined') {
-        return this.getInitialSeedDatabase();
+      const res = await fetch('/api/storage/database');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'ok' && json.data) {
+          console.info('[StorageService] 📁 Hydrated studio database from project folder (data/database.json)');
+          this.db = this.normalizeLoadedDatabase(json.data);
+          this.syncVersionsAndReferences();
+          this.diskSyncStatus = {
+            connected: true,
+            syncing: false,
+            lastSaved: this.db.updatedAt || new Date().toISOString(),
+            error: null,
+          };
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+            }
+          } catch {}
+          this.notify();
+          return;
+        } else if (json.status === 'not_found') {
+          console.info('[StorageService] 📁 data/database.json not found on disk. Initializing file on disk...');
+          await this.saveToDisk(this.db);
+        }
       }
-      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(ALT_STORAGE_KEY);
-      if (data) {
-        const parsed = JSON.parse(data);
-        if (parsed.project && Array.isArray(parsed.characters) && Array.isArray(parsed.characterVersions)) {
+    } catch (err: any) {
+      console.warn('[StorageService] Local disk backend not available or offline, operating in client mode:', err.message);
+      this.diskSyncStatus.connected = false;
+    }
+  }
+
+  /**
+   * Directly persists the current database to the project folder data/database.json
+   */
+  public async saveToDisk(databaseToSave?: StudioDatabase): Promise<boolean> {
+    if (typeof window === 'undefined') return false;
+    const target = databaseToSave || this.db;
+    try {
+      this.diskSyncStatus.syncing = true;
+      const res = await fetch('/api/storage/database', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: target }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        this.diskSyncStatus = {
+          connected: true,
+          syncing: false,
+          lastSaved: json.timestamp || new Date().toISOString(),
+          error: null,
+        };
+        return true;
+      } else {
+        const errJson = await res.json().catch(() => ({}));
+        this.diskSyncStatus.syncing = false;
+        this.diskSyncStatus.error = errJson.message || 'Error writing to project folder';
+        return false;
+      }
+    } catch (err: any) {
+      this.diskSyncStatus.syncing = false;
+      this.diskSyncStatus.connected = false;
+      this.diskSyncStatus.error = err.message;
+      return false;
+    }
+  }
+
+  /**
+   * Debounced sync to disk so rapid UI keystrokes don't flood disk I/O
+   */
+  public triggerDebouncedDiskSave(): void {
+    if (typeof window === 'undefined') return;
+    if (this.diskDebounceTimer) {
+      clearTimeout(this.diskDebounceTimer);
+    }
+    this.diskDebounceTimer = setTimeout(() => {
+      this.saveToDisk(this.db).then(() => {
+        this.notify();
+      });
+    }, 600);
+  }
+
+  /**
+   * Manually reload database state from data/database.json
+   */
+  public async reloadFromDisk(): Promise<{ success: boolean; message: string }> {
+    try {
+      const res = await fetch('/api/storage/database');
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'ok' && json.data) {
+          this.db = this.normalizeLoadedDatabase(json.data);
+          this.syncVersionsAndReferences();
+          this.diskSyncStatus = {
+            connected: true,
+            syncing: false,
+            lastSaved: this.db.updatedAt || new Date().toISOString(),
+            error: null,
+          };
+          try {
+            if (typeof localStorage !== 'undefined') {
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(this.db));
+            }
+          } catch {}
+          this.notify();
+          return { success: true, message: 'Đã nạp lại cơ sở dữ liệu từ tệp data/database.json thành công!' };
+        }
+      }
+      return { success: false, message: 'Không thể đọc tệp data/database.json từ máy chủ.' };
+    } catch (err: any) {
+      return { success: false, message: `Lỗi kết nối tệp: ${err.message}` };
+    }
+  }
+
+  /**
+   * Uploads reference image to public/storage/references folder and returns the static URL
+   */
+  public async uploadReferenceToDisk(
+    characterId: string,
+    versionId: string,
+    filename: string,
+    base64Data: string
+  ): Promise<string | null> {
+    try {
+      const res = await fetch('/api/storage/upload-reference', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ characterId, versionId, filename, base64Data }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.fileUrl || null;
+      }
+    } catch (err) {
+      console.warn('Failed to upload reference image to disk, falling back to data URL:', err);
+    }
+    return null;
+  }
+
+  public normalizeLoadedDatabase(parsed: any): StudioDatabase {
+    if (parsed && parsed.project && Array.isArray(parsed.characters) && Array.isArray(parsed.characterVersions)) {
           // Verify canonical character compliance and gently guarantee defaults without destroying database
           const ethanVer = parsed.characterVersions.find((v: CharacterVersion) => v.characterId === 'char_ethan');
           if (ethanVer && (!ethanVer.occupation || !ethanVer.occupation.includes('Programmer'))) {
@@ -308,8 +465,20 @@ export class StorageService {
             });
           }
 
-          return parsed;
-        }
+      return parsed;
+    }
+    return this.getInitialSeedDatabase();
+  }
+
+  private loadFromStorage(): StudioDatabase {
+    try {
+      if (typeof localStorage === 'undefined') {
+        return this.getInitialSeedDatabase();
+      }
+      const data = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(ALT_STORAGE_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        return this.normalizeLoadedDatabase(parsed);
       }
     } catch (e) {
       console.warn('Could not load existing studio database from localStorage, initializing with seed data.', e);
@@ -404,6 +573,8 @@ export class StorageService {
         }
       }
     }
+    // Asynchronously synchronize with project folder (data/database.json)
+    this.triggerDebouncedDiskSave();
     this.notify();
   }
 
@@ -420,6 +591,7 @@ export class StorageService {
     } catch (e) {
       console.error('Failed to reset localStorage:', e);
     }
+    this.saveToDisk(this.db);
     this.notify();
   }
 

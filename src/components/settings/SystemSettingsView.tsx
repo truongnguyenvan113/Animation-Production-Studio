@@ -27,6 +27,8 @@ import {
   FileJson,
   Eye,
   CheckCircle,
+  HardDrive,
+  RefreshCw,
 } from 'lucide-react';
 
 interface SystemSettingsViewProps {
@@ -52,10 +54,55 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
   const [importJsonText, setImportJsonText] = useState('');
   const [copiedJson, setCopiedJson] = useState(false);
   const [storageStatusMessage, setStorageStatusMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [diskStatus, setDiskStatus] = useState(() => storageService.getDiskSyncStatus());
+  const [isSavingDisk, setIsSavingDisk] = useState(false);
+  const [isReloadingDisk, setIsReloadingDisk] = useState(false);
 
   useEffect(() => {
     setSettings(systemSettingsService.getSettings());
+    const unsub = storageService.subscribe(() => {
+      setDiskStatus(storageService.getDiskSyncStatus());
+    });
+    return unsub;
   }, []);
+
+  const handleForceSyncDisk = async () => {
+    setIsSavingDisk(true);
+    try {
+      const ok = await storageService.saveToDisk();
+      if (ok) {
+        setStorageStatusMessage({ type: 'success', text: 'Đã lưu toàn bộ cơ sở dữ liệu vào tệp data/database.json trong dự án thành công!' });
+      } else {
+        setStorageStatusMessage({ type: 'error', text: 'Không thể ghi vào tệp data/database.json trên máy chủ.' });
+      }
+    } catch (err: any) {
+      setStorageStatusMessage({ type: 'error', text: `Lỗi: ${err.message}` });
+    } finally {
+      setIsSavingDisk(false);
+      setTimeout(() => setStorageStatusMessage(null), 3500);
+    }
+  };
+
+  const handleReloadFromDisk = async () => {
+    if (!window.confirm('Tải lại toàn bộ dữ liệu từ tệp data/database.json trên đĩa? Dữ liệu đang hiển thị sẽ được đồng bộ theo tệp trên đĩa.')) {
+      return;
+    }
+    setIsReloadingDisk(true);
+    try {
+      const res = await storageService.reloadFromDisk();
+      if (res.success) {
+        setStorageStatusMessage({ type: 'success', text: res.message });
+        if (onRefreshAll) onRefreshAll();
+      } else {
+        setStorageStatusMessage({ type: 'error', text: res.message });
+      }
+    } catch (err: any) {
+      setStorageStatusMessage({ type: 'error', text: `Lỗi: ${err.message}` });
+    } finally {
+      setIsReloadingDisk(false);
+      setTimeout(() => setStorageStatusMessage(null), 3500);
+    }
+  };
 
   const handleSave = () => {
     systemSettingsService.updateSettings(settings);
@@ -936,6 +983,74 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
                 <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
                   <span className="text-slate-400 text-[11px] block">Tập Phim (Episodes)</span>
                   <span className="text-lg font-bold text-emerald-400">{episodeCount}</span>
+                </div>
+              </div>
+
+              {/* SECTION 0: LOCAL PROJECT FOLDER STORAGE */}
+              <div className="p-5 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 rounded-xl border border-amber-500/30 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-amber-500/20 text-amber-400">
+                        <HardDrive className="w-4 h-4" />
+                      </div>
+                      <h4 className="font-bold text-sm text-white">
+                        Lưu Trữ Tệp Dự Án (Project Folder: data/database.json)
+                      </h4>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        diskStatus.connected
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                      }`}>
+                        {diskStatus.connected ? 'Máy Chủ Local Đang Kết Nối' : 'Chế Độ Dự Phòng'}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300">
+                      Toàn bộ nhân vật, phiên bản DNA, prompt chuẩn hóa, kịch bản tập phim và storyboard hiện được lưu trực tiếp vào tệp <code className="text-amber-300 font-mono font-semibold bg-slate-900 px-1.5 py-0.5 rounded">data/database.json</code> trong thư mục dự án của bạn.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs bg-slate-950/80 p-3 rounded-lg border border-slate-800">
+                  <div>
+                    <span className="text-slate-400 text-[11px] block">Đường dẫn tệp trên đĩa:</span>
+                    <span className="font-mono text-amber-400 text-[11px] font-semibold break-all">data/database.json</span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[11px] block">Trạng thái tự động ghi:</span>
+                    <span className="text-emerald-400 text-[11px] font-semibold flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      Tự động lưu sau mỗi thao tác (Auto-save)
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 text-[11px] block">Lần lưu tệp gần nhất:</span>
+                    <span className="text-slate-300 text-[11px]">
+                      {diskStatus.lastSaved ? new Date(diskStatus.lastSaved).toLocaleTimeString('vi-VN') : 'Vừa khởi tạo'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleForceSyncDisk}
+                    disabled={isSavingDisk}
+                    className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-bold text-xs inline-flex items-center gap-2 transition-colors shadow-sm"
+                  >
+                    <Save className="w-4 h-4" />
+                    {isSavingDisk ? 'Đang lưu vào data/database.json...' : 'Ghi ngay vào tệp data/database.json'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleReloadFromDisk}
+                    disabled={isReloadingDisk}
+                    className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 font-semibold text-xs inline-flex items-center gap-1.5 border border-slate-700 transition-colors"
+                  >
+                    <RefreshCw className={`w-4 h-4 text-sky-400 ${isReloadingDisk ? 'animate-spin' : ''}`} />
+                    {isReloadingDisk ? 'Đang nạp lại...' : 'Tải lại dữ liệu từ tệp dự án'}
+                  </button>
                 </div>
               </div>
 
