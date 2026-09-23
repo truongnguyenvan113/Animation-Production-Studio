@@ -75,6 +75,7 @@ export interface PublishingPack {
   facebook: FacebookPublishingData;
   assets: PublishingAssetsData;
   status: PublishingReadinessStatus;
+  overallStatus?: PublishingStatus;
   templateVersions?: {
     youtube?: string;
     facebook?: string;

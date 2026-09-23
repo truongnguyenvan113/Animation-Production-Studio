@@ -78,11 +78,11 @@ ${pack.facebook.post}`;
     setTimeout(() => setCopiedHeader(false), 2000);
   };
 
-  // Readiness stats
-  const isVideoReady = !!(pack.assets.finalVideoUrl || pack.youtube.videoUrl);
-  const isThumbReady = !!(pack.assets.thumbnailUrl || pack.youtube.thumbnailUrl);
-  const isYTReady = !!(pack.youtube.title && pack.youtube.description);
-  const isFBReady = !!(pack.facebook.post);
+  // Readiness stats from canonical pack.status
+  const isVideoReady = pack.status?.videoReady ?? !!(pack.assets?.finalVideoUrl || pack.youtube?.videoUrl || pack.assets?.finalVideoAssetId || pack.youtube?.videoAssetId);
+  const isThumbReady = pack.status?.thumbnailReady ?? !!(pack.assets?.thumbnailUrl || pack.youtube?.thumbnailUrl || pack.assets?.thumbnailAssetId || pack.youtube?.thumbnailAssetId);
+  const isYTReady = pack.status?.youtubeReady ?? !!(pack.youtube?.title && pack.youtube?.description);
+  const isFBReady = pack.status?.facebookReady ?? !!(pack.facebook?.post);
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -135,6 +135,32 @@ ${pack.facebook.post}`;
 
         {/* Readiness Badges & Quick Action */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Lifecycle Status selector */}
+          <div className="relative inline-block">
+            <select
+              value={pack.overallStatus || 'draft'}
+              onChange={(e) => {
+                const updated = publishingService.updateOverallStatus(pack.episodeId, e.target.value as any);
+                setPack(updated);
+              }}
+              className={`appearance-none pl-2.5 pr-7 py-1 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
+                pack.overallStatus === 'published'
+                  ? 'bg-purple-950/40 text-purple-300 border-purple-500/50'
+                  : pack.overallStatus === 'scheduled'
+                  ? 'bg-blue-950/40 text-blue-300 border-blue-500/50'
+                  : pack.overallStatus === 'ready'
+                  ? 'bg-emerald-950/40 text-emerald-300 border-emerald-500/50'
+                  : 'bg-slate-950 text-slate-400 border-slate-700'
+              }`}
+            >
+              <option value="draft">Bản nháp (Draft)</option>
+              <option value="ready">Sẵn sàng (Ready)</option>
+              <option value="scheduled">Đã lên lịch (Scheduled)</option>
+              <option value="published">Đã phát hành (Published)</option>
+            </select>
+            <ChevronDown className="w-3 h-3 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
           {/* Status chips */}
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px]">
             <span className="text-slate-400">Tiến độ:</span>

@@ -7,6 +7,7 @@ import {
   PublishingAssetsData,
   PublishingReadinessStatus,
   PublishingRevision,
+  PublishingStatus,
   Episode,
 } from '../types';
 import { storageService } from './storageService';
@@ -234,9 +235,20 @@ export class PublishingService {
     const currentPacks = Array.isArray(db.publishingPacks) ? [...db.publishingPacks] : [...SEED_PUBLISHING_PACKS];
 
     const updatedStatus = this.recomputeStatus(pack);
+    const resolvedOverallStatus: PublishingStatus =
+      pack.overallStatus ||
+      (pack.youtube?.publishStatus === 'published' || pack.facebook?.status === 'published'
+        ? 'published'
+        : pack.youtube?.publishStatus === 'scheduled' || pack.facebook?.status === 'ready'
+        ? 'scheduled'
+        : updatedStatus.videoReady && updatedStatus.thumbnailReady && updatedStatus.youtubeReady && updatedStatus.facebookReady
+        ? 'ready'
+        : 'draft');
+
     const updatedPack: PublishingPack = {
       ...pack,
       status: updatedStatus,
+      overallStatus: resolvedOverallStatus,
       updatedAt: new Date().toISOString(),
     };
 
@@ -377,6 +389,46 @@ export class PublishingService {
         ...pack.facebook,
         imageAssetId: updatedAssets.thumbnailAssetId || pack.facebook.imageAssetId,
         imageUrl: updatedAssets.thumbnailUrl || pack.facebook.imageUrl,
+      },
+    };
+    return this.savePublishingPack(updated);
+  }
+
+  /**
+   * Updates overall lifecycle status (Draft -> Ready -> Scheduled -> Published)
+   */
+  public updateOverallStatus(
+    episodeId: string,
+    newStatus: PublishingStatus
+  ): PublishingPack {
+    const pack = this.getOrCreatePublishingPack(episodeId);
+    let ytStatus = pack.youtube?.publishStatus || 'draft';
+    let fbStatus = pack.facebook?.status || 'draft';
+
+    if (newStatus === 'draft') {
+      ytStatus = 'draft';
+      fbStatus = 'draft';
+    } else if (newStatus === 'ready') {
+      ytStatus = 'draft';
+      fbStatus = 'ready';
+    } else if (newStatus === 'scheduled') {
+      ytStatus = 'scheduled';
+      fbStatus = 'ready';
+    } else if (newStatus === 'published') {
+      ytStatus = 'published';
+      fbStatus = 'published';
+    }
+
+    const updated: PublishingPack = {
+      ...pack,
+      overallStatus: newStatus,
+      youtube: {
+        ...pack.youtube,
+        publishStatus: ytStatus,
+      },
+      facebook: {
+        ...pack.facebook,
+        status: fbStatus,
       },
     };
     return this.savePublishingPack(updated);

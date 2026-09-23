@@ -28,7 +28,7 @@ export const PublishingLibraryView: React.FC<PublishingLibraryViewProps> = ({
   onSelectEpisode,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'scheduled' | 'published'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'draft' | 'ready' | 'scheduled' | 'published'>('all');
   const [copiedEpisodeId, setCopiedEpisodeId] = useState<string | null>(null);
 
   const db = storageService.getDatabase();
@@ -62,15 +62,20 @@ export const PublishingLibraryView: React.FC<PublishingLibraryViewProps> = ({
     if (!matchesSearch) return false;
 
     if (statusFilter === 'all') return true;
-    if (statusFilter === 'draft') {
-      return pack.youtube.publishStatus === 'draft' && pack.facebook.status === 'draft';
-    }
-    if (statusFilter === 'scheduled') {
-      return pack.youtube.publishStatus === 'scheduled' || pack.facebook.status === 'ready';
-    }
-    if (statusFilter === 'published') {
-      return pack.youtube.publishStatus === 'published' || pack.facebook.status === 'published';
-    }
+    const currentOverall =
+      pack.overallStatus ||
+      (pack.youtube.publishStatus === 'published' || pack.facebook.status === 'published'
+        ? 'published'
+        : pack.youtube.publishStatus === 'scheduled'
+        ? 'scheduled'
+        : pack.status?.youtubeReady && pack.status?.facebookReady
+        ? 'ready'
+        : 'draft');
+
+    if (statusFilter === 'draft') return currentOverall === 'draft';
+    if (statusFilter === 'ready') return currentOverall === 'ready';
+    if (statusFilter === 'scheduled') return currentOverall === 'scheduled';
+    if (statusFilter === 'published') return currentOverall === 'published';
     return true;
   });
 
@@ -186,10 +191,21 @@ ${pack.facebook.post}`;
           </button>
           <button
             type="button"
+            onClick={() => setStatusFilter('ready')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              statusFilter === 'ready'
+                ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
+                : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            Sẵn sàng
+          </button>
+          <button
+            type="button"
             onClick={() => setStatusFilter('scheduled')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               statusFilter === 'scheduled'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                ? 'bg-blue-500 text-slate-950 font-bold shadow-xs'
                 : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -200,7 +216,7 @@ ${pack.facebook.post}`;
             onClick={() => setStatusFilter('published')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               statusFilter === 'published'
-                ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
+                ? 'bg-purple-500 text-white font-bold shadow-xs'
                 : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
             }`}
           >

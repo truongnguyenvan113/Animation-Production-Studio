@@ -9,6 +9,7 @@ interface AssetSelectorModalProps {
   currentAssetId?: string;
   currentUrl?: string;
   title?: string;
+  assetType?: 'image' | 'video';
 }
 
 export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
@@ -17,17 +18,64 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
   onSelect,
   currentAssetId,
   currentUrl,
-  title = 'Chọn Hình Ảnh / Thumbnail Từ Thư Viện',
+  title,
+  assetType = 'image',
 }) => {
-  const [tab, setTab] = useState<'references' | 'shots' | 'custom'>('references');
+  const [tab, setTab] = useState<'references' | 'shots' | 'videos' | 'custom'>(
+    assetType === 'video' ? 'videos' : 'references'
+  );
   const [customInputUrl, setCustomInputUrl] = useState(currentUrl || '');
+  const [customAssetId, setCustomAssetId] = useState(currentAssetId || '');
 
   if (!isOpen) return null;
+
+  const resolvedTitle =
+    title ||
+    (assetType === 'video'
+      ? 'Chọn Video Thành Phẩm (Final Video Asset)'
+      : 'Chọn Hình Ảnh / Thumbnail Từ Thư Viện');
 
   const db = storageService.getDatabase();
   const projectRefs = db.projectReferences || [];
   const charRefs = db.characterReferences || [];
   const storyboards = db.storyboards || [];
+  const productionAssets = db.productionAssets || [];
+
+  // Available video assets from production or canonical exports
+  const videoAssetCandidates: Array<{ id: string; name: string; url: string; note: string }> = [
+    {
+      id: 'asset_capcut_final_ep010',
+      name: 'CapCut Final Assembly Master — EP10 (Chiếc Đèn Lồng Đặc Biệt)',
+      url: '/assets/video/ep010_final_master_1080p.mp4',
+      note: 'Bản dựng hoàn chỉnh CapCut 1080p 24fps (Âm thanh lồng tiếng + SFX)',
+    },
+    {
+      id: 'asset_capcut_final_ep009',
+      name: 'CapCut Final Assembly Master — EP09 (Cùng Nhau Vẽ Tranh)',
+      url: '/assets/video/ep009_final_master_1080p.mp4',
+      note: 'Bản dựng hoàn chỉnh CapCut 1080p 24fps (Bản xuất bản chuẩn)',
+    },
+    {
+      id: 'asset_flow_ep010_composite',
+      name: 'Google Flow Composite Sequence EP10',
+      url: '/assets/video/flow_composite_ep010.mp4',
+      note: 'Ghép nối chuỗi phân cảnh từ Google Flow Director',
+    },
+  ];
+
+  // Also include any productionAssets marked as video
+  productionAssets.forEach((pa) => {
+    if (pa.mimeType?.includes('video') || pa.imageUrl?.endsWith('.mp4')) {
+      if (!videoAssetCandidates.some((v) => v.id === pa.asset_id)) {
+        videoAssetCandidates.push({
+          id: pa.asset_id,
+          name: `Production Asset: ${pa.asset_id}`,
+          url: pa.imageUrl,
+          note: `Khung thời lượng: ${pa.durationSeconds || 5}s • ${pa.provider}`,
+        });
+      }
+    }
+  });
 
   // Extract shots with images
   const shotImages: Array<{ id: string; title: string; url: string; shotCode: string }> = [];
@@ -52,13 +100,19 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
         {/* Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950/60">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
-              <ImageIcon className="w-5 h-5" />
+            <div className={`p-2 rounded-xl border ${
+              assetType === 'video'
+                ? 'bg-rose-500/20 text-rose-400 border-rose-500/30'
+                : 'bg-amber-500/20 text-amber-400 border-amber-500/30'
+            }`}>
+              {assetType === 'video' ? <Film className="w-5 h-5" /> : <ImageIcon className="w-5 h-5" />}
             </div>
             <div>
-              <h3 className="text-base font-bold text-white">{title}</h3>
+              <h3 className="text-base font-bold text-white">{resolvedTitle}</h3>
               <p className="text-xs text-slate-400">
-                Chọn từ kho tham chiếu, khung hình Storyboard hoặc dán liên kết ảnh trực tiếp
+                {assetType === 'video'
+                  ? 'Chọn từ kho bản dựng CapCut/Flow hoặc dán liên kết video thành phẩm'
+                  : 'Chọn từ kho tham chiếu, khung hình Storyboard hoặc dán liên kết ảnh trực tiếp'}
               </p>
             </div>
           </div>
@@ -72,43 +126,114 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
 
         {/* Tab switch */}
         <div className="flex border-b border-slate-800 bg-slate-950/30 px-4 pt-2 gap-2 text-xs font-semibold">
-          <button
-            onClick={() => setTab('references')}
-            className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
-              tab === 'references'
-                ? 'border-amber-400 text-amber-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Thư viện Tham chiếu ({projectRefs.length + charRefs.length})</span>
-          </button>
-          <button
-            onClick={() => setTab('shots')}
-            className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
-              tab === 'shots'
-                ? 'border-amber-400 text-amber-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <Film className="w-3.5 h-3.5" />
-            <span>Khung hình Storyboard ({shotImages.length})</span>
-          </button>
-          <button
-            onClick={() => setTab('custom')}
-            className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
-              tab === 'custom'
-                ? 'border-amber-400 text-amber-300'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <LinkIcon className="w-3.5 h-3.5" />
-            <span>Dán liên kết ảnh (URL)</span>
-          </button>
+          {assetType === 'video' ? (
+            <>
+              <button
+                onClick={() => setTab('videos')}
+                className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+                  tab === 'videos'
+                    ? 'border-rose-400 text-rose-300'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Film className="w-3.5 h-3.5" />
+                <span>Video Kho Dự Án & CapCut ({videoAssetCandidates.length})</span>
+              </button>
+              <button
+                onClick={() => setTab('custom')}
+                className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+                  tab === 'custom'
+                    ? 'border-rose-400 text-rose-300'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+                <span>Dán liên kết Video (URL)</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setTab('references')}
+                className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+                  tab === 'references'
+                    ? 'border-amber-400 text-amber-300'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Thư viện Tham chiếu ({projectRefs.length + charRefs.length})</span>
+              </button>
+              <button
+                onClick={() => setTab('shots')}
+                className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+                  tab === 'shots'
+                    ? 'border-amber-400 text-amber-300'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Film className="w-3.5 h-3.5" />
+                <span>Khung hình Storyboard ({shotImages.length})</span>
+              </button>
+              <button
+                onClick={() => setTab('custom')}
+                className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+                  tab === 'custom'
+                    ? 'border-amber-400 text-amber-300'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <LinkIcon className="w-3.5 h-3.5" />
+                <span>Dán liên kết ảnh (URL)</span>
+              </button>
+            </>
+          )}
         </div>
 
         {/* Content area */}
         <div className="p-4 overflow-y-auto flex-1 custom-scrollbar">
+          {tab === 'videos' && (
+            <div className="space-y-3">
+              {videoAssetCandidates.map((v) => {
+                const isSelected = currentAssetId === v.id || currentUrl === v.url;
+                return (
+                  <div
+                    key={v.id}
+                    onClick={() => {
+                      onSelect(v.id, v.url);
+                      onClose();
+                    }}
+                    className={`p-3.5 rounded-xl border cursor-pointer transition-all flex items-start justify-between gap-3 ${
+                      isSelected
+                        ? 'border-rose-400 bg-rose-950/20 ring-2 ring-rose-400/40'
+                        : 'border-slate-800 bg-slate-950 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="p-2 rounded-lg bg-rose-500/20 text-rose-400 mt-0.5 shrink-0">
+                        <Film className="w-4 h-4" />
+                      </div>
+                      <div className="space-y-1">
+                        <div className="text-xs font-bold text-white flex items-center gap-2">
+                          <span>{v.name}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                            {v.id}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400">{v.note}</p>
+                        <p className="text-[10px] text-slate-400 font-mono truncate">{v.url}</p>
+                      </div>
+                    </div>
+                    {isSelected && (
+                      <div className="p-1 rounded-full bg-rose-500 text-white shrink-0">
+                        <Check className="w-3 h-3 stroke-[3]" />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
           {tab === 'references' && (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {projectRefs.map((ref) => {
@@ -240,18 +365,35 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
             <div className="max-w-md mx-auto py-6 space-y-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Đường dẫn ảnh (URL hoặc đường dẫn cục bộ):
+                  Mã định danh Asset ID (tùy chọn):
+                </label>
+                <input
+                  type="text"
+                  value={customAssetId}
+                  onChange={(e) => setCustomAssetId(e.target.value)}
+                  placeholder={assetType === 'video' ? 'asset_video_custom_001' : 'asset_img_custom_001'}
+                  className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-xs focus:outline-hidden focus:border-amber-500 font-mono mb-3"
+                />
+
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  {assetType === 'video'
+                    ? 'Đường dẫn Video (URL, file MP4 cục bộ, YouTube hoặc CapCut export):'
+                    : 'Đường dẫn ảnh (URL hoặc đường dẫn cục bộ):'}
                 </label>
                 <input
                   type="text"
                   value={customInputUrl}
                   onChange={(e) => setCustomInputUrl(e.target.value)}
-                  placeholder="https://example.com/thumbnail.jpg hoặc /storage/..."
+                  placeholder={
+                    assetType === 'video'
+                      ? 'https://storage.../final_ep010.mp4 hoặc https://youtu.be/...'
+                      : 'https://example.com/thumbnail.jpg hoặc /storage/...'
+                  }
                   className="w-full px-3 py-2 rounded-xl bg-slate-950 border border-slate-700 text-slate-200 text-sm focus:outline-hidden focus:border-amber-500"
                 />
               </div>
 
-              {customInputUrl && (
+              {customInputUrl && assetType === 'image' && (
                 <div className="rounded-xl border border-slate-800 p-2 bg-slate-950">
                   <div className="text-[11px] text-slate-400 mb-1.5 font-medium">Xem trước ảnh:</div>
                   <div className="aspect-video rounded-lg overflow-hidden bg-slate-900 flex items-center justify-center">
@@ -271,13 +413,22 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
               <button
                 disabled={!customInputUrl.trim()}
                 onClick={() => {
-                  onSelect(`custom_${Date.now()}`, customInputUrl.trim());
+                  const fallbackId =
+                    customAssetId.trim() ||
+                    (assetType === 'video'
+                      ? `asset_video_${Date.now()}`
+                      : `asset_img_${Date.now()}`);
+                  onSelect(fallbackId, customInputUrl.trim());
                   onClose();
                 }}
-                className="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-slate-950 font-bold text-xs transition-colors flex items-center justify-center gap-2"
+                className={`w-full py-2.5 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed font-bold text-xs transition-colors flex items-center justify-center gap-2 ${
+                  assetType === 'video'
+                    ? 'bg-rose-500 hover:bg-rose-400 text-white'
+                    : 'bg-amber-500 hover:bg-amber-400 text-slate-950'
+                }`}
               >
                 <Check className="w-4 h-4" />
-                <span>Xác nhận sử dụng ảnh này</span>
+                <span>{assetType === 'video' ? 'Xác nhận sử dụng video này' : 'Xác nhận sử dụng ảnh này'}</span>
               </button>
             </div>
           )}
