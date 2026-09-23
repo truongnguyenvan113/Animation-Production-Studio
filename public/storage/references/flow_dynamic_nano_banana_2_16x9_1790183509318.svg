@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+            <defs>
+              <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="hsl(5, 80%, 15%)" />
+                <stop offset="50%" stop-color="hsl(45, 90%, 10%)" />
+                <stop offset="100%" stop-color="#09090b" />
+              </linearGradient>
+              <radialGradient id="glow" cx="40%" cy="30%" r="60%">
+                <stop offset="0%" stop-color="hsl(65, 100%, 65%)" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <rect width="1280" height="720" fill="url(#bgGrad)"/>
+            <rect width="1280" height="720" fill="url(#glow)"/>
+            
+            <g transform="translate(76.8, 144)">
+              <rect x="0" y="0" width="260" height="34" rx="17" fill="hsl(5, 90%, 45%)" />
+              <text x="130" y="22" fill="#ffffff" font-family="sans-serif" font-weight="900" font-size="12" text-anchor="middle">✨ DYNAMIC COMPOSITOR • NANO BANANA 2</text>
+              <text x="0" y="75" fill="#ffffff" font-family="sans-serif" font-weight="900" font-size="36">Pi  Kem Hoạt Hình</text>
+              <text x="0" y="115" fill="hsl(65, 100%, 75%)" font-family="sans-serif" font-weight="700" font-size="18">Tết Trung Thu gia đình lung linh</text>
+              <text x="0" y="150" fill="#e2e8f0" font-family="sans-serif" font-size="13">Khung cảnh 3D rực rỡ, Pi và Kem háo hức cười tươi rạng rỡ, cầm đèn lồn...</text>
+              <text x="0" y="185" fill="#38bdf8" font-family="monospace" font-size="11">RATIO: 16:9 • SEED: #196745 • STYLE: 3D Pixar Stylized</text>
+            </g>
+          </svg>
