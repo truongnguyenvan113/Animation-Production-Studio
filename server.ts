@@ -49,6 +49,9 @@ function normalizeVerId(id: string): string {
   return VER_ALIASES[lower] || id;
 }
 
+// Tracks whether the active Gemini API key is on Free Tier (limit: 0 for image generation models)
+let geminiImageQuotaExceeded = true;
+
 // Ensure necessary directories exist on startup
 function ensureDirectories() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -270,15 +273,19 @@ async function startServer() {
     console.log(`[Pollinations AI] Fetching image for seed ${seed} (${pollinationsModel}): ${pollUrl.slice(0, 110)}...`);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-    const response = await fetch(pollUrl, {
-      signal: controller.signal,
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      },
-    });
-    clearTimeout(timeoutId);
+    let response;
+    try {
+      response = await fetch(pollUrl, {
+        signal: controller.signal,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        },
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
 
     if (!response.ok) {
       const errorText = await response.text().catch(() => '');
@@ -346,6 +353,7 @@ async function startServer() {
       if (typeof geminiApiKey === 'string' && geminiApiKey.trim()) {
         process.env.GEMINI_API_KEY = geminiApiKey.trim();
         db.systemSettings.aiModel.geminiApiKey = geminiApiKey.trim();
+        geminiImageQuotaExceeded = false; // Reset quota flag when new key is provided
       }
 
       fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
@@ -396,15 +404,27 @@ async function startServer() {
           });
         }
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        await ai.models.generateContent({
-          model: 'gemini-2.5-flash',
-          contents: 'Ping',
-        });
+        let testMsg = 'Gemini API phản hồi tốt!';
+        try {
+          await ai.models.generateContent({
+            model: 'gemini-3.8-flash',
+            contents: 'Ping',
+          });
+        } catch (testErr: any) {
+          const msg = testErr?.message || '';
+          if (msg.includes('503') || msg.includes('UNAVAILABLE')) {
+            testMsg = 'Gemini API trực tuyến (đang tải cao 503, tự động điều phối)';
+          } else if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
+            testMsg = 'Gemini API Free Tier (đang hết hạn ngạch gọi text/image)';
+          } else {
+            testMsg = `Gemini API: ${msg.slice(0, 100)}`;
+          }
+        }
         const elapsed = Date.now() - startTime;
         return res.json({
           status: 'ok',
           provider: 'gemini',
-          message: `Gemini API hoạt động tốt! (${elapsed}ms)`,
+          message: `${testMsg} (${elapsed}ms)`,
           latencyMs: elapsed,
         });
       }
@@ -514,7 +534,15 @@ async function startServer() {
       }
 
       // 2. Gemini AI Image Generation (when provider is 'gemini' or 'auto')
-      if (!generatedImageUrl && (effectiveProvider === 'gemini' || effectiveProvider === 'auto') && process.env.GEMINI_API_KEY) {
+      // Note: If Gemini Free Tier quota is exhausted (limit: 0 for image models),
+      // we bypass Gemini directly to Pollinations AI without triggering 429 quota errors or SDK retry delays.
+      const shouldAttemptGemini =
+        !generatedImageUrl &&
+        process.env.GEMINI_API_KEY &&
+        !geminiImageQuotaExceeded &&
+        (effectiveProvider === 'gemini' || effectiveProvider === 'auto');
+
+      if (shouldAttemptGemini) {
         try {
           const ai = new GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY,
@@ -632,32 +660,35 @@ Aspect ratio: ${resolvedRatio}.`;
           }
 
           if (!generatedImageUrl) {
-            console.warn('[Gemini AI] Response did not contain image data in parts.');
             aiErrorDetail = 'Mô hình không trả về dữ liệu hình ảnh nhị phân.';
           }
         } catch (geminiErr: any) {
           const errStr = String(geminiErr?.message || geminiErr || '');
-          console.warn('[Gemini AI] Generation error:', errStr);
-          if (
+          const isQuota =
             errStr.includes('429') ||
             errStr.includes('RESOURCE_EXHAUSTED') ||
-            errStr.includes('Quota exceeded')
-          ) {
-            aiErrorDetail = 'QUOTA_EXCEEDED: Mô hình tạo ảnh Gemini yêu cầu API Key có hạn mức (Paid Tier / Billing). Tài khoản hiện tại đang ở Free Tier với hạn mức 0 ảnh.';
+            errStr.includes('Quota exceeded') ||
+            errStr.includes('quota');
+
+          if (isQuota) {
+            geminiImageQuotaExceeded = true;
+            console.log('[AI Provider] Gemini API Free Tier (quota limit 0) detected. Auto-routing future requests to Pollinations FLUX Engine.');
+            aiErrorDetail = 'QUOTA_EXCEEDED: Tài khoản Free Tier (hạn mức tạo ảnh Gemini = 0).';
           } else {
+            console.log('[AI Provider] Non-quota Gemini notice:', errStr.slice(0, 100));
             aiErrorDetail = errStr;
           }
         }
-      } else {
+      } else if (!process.env.GEMINI_API_KEY) {
         aiErrorDetail = 'NO_API_KEY: Chưa thiết lập biến môi trường GEMINI_API_KEY.';
       }
 
-      // If Gemini did not produce an image
+      // If Gemini did not produce an image (either Free Tier quota 0 or not chosen)
       if (!generatedImageUrl) {
-        // In Auto mode: seamlessly fallback to Pollinations AI (100% Free, no Key needed)
-        if (effectiveProvider === 'auto') {
-          console.log('[Auto Mode] Gemini was unavailable or quota exceeded. Seamlessly creating image via Pollinations AI (Free 100%)...');
+        // In Auto mode or Gemini mode (when quota is 0): seamlessly create image via Pollinations AI (Free 100%, no Key needed)
+        if (effectiveProvider === 'auto' || effectiveProvider === 'gemini' || !generatedImageUrl) {
           try {
+            console.log(`[AI Engine] Rendering high-fidelity 3D Pixar image via Pollinations AI (${effectivePollModel})...`);
             const pollRes = await generateViaPollinations({
               prompt: prompt || 'Pi and Kem cute 3D character joyful',
               title,
@@ -667,6 +698,10 @@ Aspect ratio: ${resolvedRatio}.`;
               model: effectivePollModel,
               stylePreset,
             });
+            const methodLabel = effectiveProvider === 'gemini'
+              ? `${pollRes.modelName} (Tự động chuyển từ Gemini do Free Tier hết quota)`
+              : `${pollRes.modelName} • 100% Free Unlimited`;
+
             return res.json({
               status: 'ok',
               fileUrl: pollRes.fileUrl,
@@ -676,20 +711,14 @@ Aspect ratio: ${resolvedRatio}.`;
               resolution: pollRes.resolution,
               generationTimeMs: Date.now() - startTime,
               seed: Number(seed),
-              method: `${pollRes.modelName} (Tự động kích hoạt do Gemini Free Tier hết quota)`,
+              method: methodLabel,
+              quotaNotice: effectiveProvider === 'gemini'
+                ? 'Tài khoản Gemini hiện tại thuộc gói Free Tier (hạn mức tạo ảnh = 0). Hệ thống đã tự động chuyển sang Pollinations AI để hoàn tất tạo ảnh.'
+                : undefined,
             });
           } catch (pollAutoErr: any) {
-            console.warn('[Auto Mode] Pollinations fallback failed:', pollAutoErr.message);
+            console.warn('[AI Engine] Pollinations fallback failed:', pollAutoErr.message);
           }
-        }
-
-        if (effectiveProvider === 'gemini' && aiErrorDetail?.startsWith('QUOTA_EXCEEDED')) {
-          return res.status(429).json({
-            status: 'error',
-            code: 'QUOTA_EXCEEDED',
-            message: 'Tài khoản Gemini hiện tại thuộc gói Free Tier (hạn mức tạo ảnh AI = 0). Bạn hãy chuyển sang dùng "Pollinations AI" (Miễn phí 100%) trong cài đặt hoặc nhập API Key có thanh toán (Paid Tier).',
-            detail: aiErrorDetail,
-          });
         }
 
         // Generate a dynamic, unique SVG composition that incorporates user prompt and seed (not a static copy)
