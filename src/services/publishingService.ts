@@ -131,9 +131,11 @@ export class PublishingService {
       episode?.educationalMessage ||
       episode?.storyDraft?.educationalLesson ||
       'Tình yêu thương gia đình và sự sẻ chia là bài học quý giá nhất.';
-    const episodeType = episode?.durationLimit?.includes('15s') || episode?.duration?.includes('15s')
-      ? 'Shorts / Điểm tin ngắn'
-      : 'Tập chuẩn (Standard)';
+    const episodeType =
+      String(episode?.durationLimit || '').includes('15s') ||
+      String(episode?.duration || '').includes('15s')
+        ? 'Shorts / Điểm tin ngắn'
+        : 'Tập chuẩn (Standard)';
 
     const brief: EpisodePublishingBrief = {
       title: cleanTitle,
