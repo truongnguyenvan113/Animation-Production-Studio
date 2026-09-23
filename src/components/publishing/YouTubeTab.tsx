@@ -32,6 +32,7 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [showAssetModal, setShowAssetModal] = useState(false);
+  const [thumbnailModalTab, setThumbnailModalTab] = useState<'generate' | 'upload' | 'references'>('generate');
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
   const [previewDescription, setPreviewDescription] = useState(false);
@@ -281,17 +282,23 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
 
               <button
                 type="button"
-                onClick={() => setShowAssetModal(true)}
-                className="px-2.5 py-1 rounded-lg bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-xs font-semibold border border-amber-800/60 transition-colors flex items-center gap-1.5"
-                title="Tạo ảnh thumbnail bằng AI từ ảnh tham khảo"
+                onClick={() => {
+                  setThumbnailModalTab('generate');
+                  setShowAssetModal(true);
+                }}
+                className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500/25 via-rose-500/25 to-indigo-500/25 hover:from-amber-500/35 hover:to-indigo-500/35 text-amber-300 text-xs font-bold border border-amber-500/50 transition-all flex items-center gap-1.5 shadow-sm active:scale-95 ring-1 ring-amber-500/30"
+                title="Mở Google Flow AI Studio: Chọn model Nano Banana và tỷ lệ 16:9, 4:3, 9:16"
               >
-                <Sparkles className="w-3 h-3 text-amber-400" />
-                <span>Tạo bằng AI</span>
+                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                <span>Tạo bằng AI (Google Flow • Model & Tỷ lệ 16:9)</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setShowAssetModal(true)}
+                onClick={() => {
+                  setThumbnailModalTab('references');
+                  setShowAssetModal(true);
+                }}
                 className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
                 title="Mở thư viện ảnh tham chiếu & Storyboard"
               >
@@ -315,7 +322,7 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
               )}
             </div>
 
-            <div className="flex-1 min-w-0 text-xs space-y-1">
+            <div className="flex-1 min-w-0 text-xs space-y-1.5">
               <div className="text-slate-300 font-semibold truncate flex items-center gap-2">
                 <span>{data.thumbnailUrl ? 'Đã liên kết ảnh đại diện' : 'Chưa chọn ảnh đại diện'}</span>
                 {data.thumbnailAssetId && (
@@ -327,6 +334,27 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
               <p className="text-[11px] text-slate-400 truncate">
                 {data.thumbnailUrl || 'Tải ảnh từ máy tính, tạo tự động bằng AI từ ảnh tham khảo hoặc chọn từ thư viện'}
               </p>
+
+              {/* Quick AI Model & Ratio Guide Bar */}
+              <div className="pt-0.5 flex flex-wrap items-center gap-1.5 text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setThumbnailModalTab('generate');
+                    setShowAssetModal(true);
+                  }}
+                  className="px-2 py-0.5 rounded-md bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 font-semibold flex items-center gap-1 transition-colors"
+                >
+                  <Sparkles className="w-2.5 h-2.5" />
+                  <span>Model: Nano Banana 2 • Lite • Pro</span>
+                </button>
+                <span className="px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono">
+                  Tỷ lệ: 16:9 • 4:3 • 9:16
+                </span>
+                <span className="text-slate-500 text-[10px]">
+                  (Nhấp vào nút &quot;Tạo bằng AI&quot; ở trên để mở studio chỉnh thông số)
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -612,6 +640,7 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
         episodeTitle={pack.episodeTitle}
         episodeSynopsis={pack.episodeSynopsis}
         defaultRatio="16:9"
+        initialTab={thumbnailModalTab}
       />
 
       {/* Final Video Asset Selector Modal */}

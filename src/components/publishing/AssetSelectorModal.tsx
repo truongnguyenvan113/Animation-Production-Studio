@@ -38,6 +38,7 @@ interface AssetSelectorModalProps {
   episodeTitle?: string;
   episodeSynopsis?: string;
   defaultRatio?: '16:9' | '1:1' | '4:3' | '9:16';
+  initialTab?: 'references' | 'shots' | 'upload' | 'generate' | 'videos' | 'custom';
 }
 
 export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
@@ -52,9 +53,10 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
   episodeTitle,
   episodeSynopsis,
   defaultRatio = '16:9',
+  initialTab,
 }) => {
   const [tab, setTab] = useState<'references' | 'shots' | 'upload' | 'generate' | 'videos' | 'custom'>(
-    assetType === 'video' ? 'videos' : 'references'
+    initialTab || (assetType === 'video' ? 'videos' : 'generate')
   );
 
   // Custom URL state
@@ -107,6 +109,14 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
   // Initialize generation context when modal opens
   useEffect(() => {
     if (isOpen) {
+      if (initialTab) {
+        setTab(initialTab);
+      } else if (assetType === 'video') {
+        setTab('videos');
+      } else {
+        setTab('generate');
+      }
+
       setCustomInputUrl(currentUrl || '');
       setCustomAssetId(currentAssetId || '');
       setUploadError(null);
@@ -444,7 +454,23 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
             </>
           ) : (
             <>
-              {/* Tab 1: Upload from local */}
+              {/* Tab 1: AI Generate with Google Flow & Nano Banana */}
+              <button
+                onClick={() => setTab('generate')}
+                className={`pb-2.5 px-3.5 border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                  tab === 'generate'
+                    ? 'border-amber-400 text-amber-300 bg-amber-950/30 rounded-t-lg font-bold shadow-sm'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <span>Google Flow (Tạo ảnh AI Nano Banana)</span>
+                <span className="ml-1 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[9px] font-mono border border-amber-500/30">
+                  Model & Tỷ lệ 16:9
+                </span>
+              </button>
+
+              {/* Tab 2: Upload from local */}
               <button
                 onClick={() => setTab('upload')}
                 className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
@@ -455,19 +481,6 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
               >
                 <Upload className="w-3.5 h-3.5 text-sky-400" />
                 <span>Tải lên từ máy (Upload)</span>
-              </button>
-
-              {/* Tab 2: AI Generate from reference images */}
-              <button
-                onClick={() => setTab('generate')}
-                className={`pb-2.5 px-3 border-b-2 transition-colors flex items-center gap-1.5 whitespace-nowrap ${
-                  tab === 'generate'
-                    ? 'border-amber-400 text-amber-300 bg-amber-950/20 rounded-t-lg'
-                    : 'border-transparent text-slate-400 hover:text-slate-200'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Google Flow (Tạo ảnh AI Nano Banana)</span>
               </button>
 
               {/* Tab 3: References library */}
