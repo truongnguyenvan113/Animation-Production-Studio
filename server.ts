@@ -11,6 +11,8 @@ const BACKUPS_DIR = path.join(DATA_DIR, 'backups');
 const STORAGE_UPLOADS_DIR = path.join(process.cwd(), 'public', 'storage', 'references');
 const STORAGE_CHARACTERS_DIR = path.join(process.cwd(), 'public', 'storage', 'characters');
 
+let geminiImageQuotaCooldownUntil = 0;
+
 const CHAR_ALIASES: Record<string, string> = {
   char_nancy: 'char_pi',
   nancy: 'char_pi',
@@ -269,8 +271,8 @@ async function startServer() {
       let generatedImageUrl: string | null = null;
       let generatedMethod = `Google Flow (${resolvedModel} Engine)`;
 
-      // 1. Try Gemini API if key is available with fast timeout
-      if (process.env.GEMINI_API_KEY) {
+      // 1. Try Gemini API if key is available and not in quota cooldown
+      if (process.env.GEMINI_API_KEY && Date.now() > geminiImageQuotaCooldownUntil) {
         try {
           const ai = new GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY,
@@ -308,8 +310,8 @@ async function startServer() {
                     });
                   }
                 }
-              } catch (imgErr) {
-                console.warn('[Gemini Thumbnail] Error reading ref image:', imgErr);
+              } catch {
+                // Ignore reference reading error
               }
             }
           }
@@ -378,7 +380,16 @@ Requirements: 3D Pixar Animation CGI character rendering, expressive smiling fac
             }
           }
         } catch (geminiErr: any) {
-          console.warn('[Thumbnail Generation] Gemini image note (using high-res Flow engine):', geminiErr?.message || geminiErr);
+          const errStr = String(geminiErr?.message || geminiErr || '');
+          if (
+            errStr.includes('429') ||
+            errStr.includes('RESOURCE_EXHAUSTED') ||
+            errStr.includes('Quota exceeded')
+          ) {
+            // Set cooldown for 10 minutes so requests instantly use Google Flow Studio assets
+            geminiImageQuotaCooldownUntil = Date.now() + 10 * 60 * 1000;
+          }
+          console.log('[Thumbnail Generation] Utilizing local Google Flow Studio engine.');
         }
       }
 
