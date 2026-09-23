@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Youtube,
   Copy,
@@ -16,6 +16,7 @@ import {
   Eye,
   Edit3,
   ExternalLink,
+  Upload,
 } from 'lucide-react';
 import { PublishingPack, YouTubePublishingData, YouTubePublishStatus } from '../../types';
 import { publishingService } from '../../services/publishingService';
@@ -34,6 +35,42 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [newTagInput, setNewTagInput] = useState('');
   const [previewDescription, setPreviewDescription] = useState(false);
+  const directFileInputRef = useRef<HTMLInputElement>(null);
+  const [isDirectUploading, setIsDirectUploading] = useState(false);
+
+  const handleDirectUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsDirectUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const base64Data = ev.target?.result as string;
+        try {
+          const res = await fetch('/api/storage/upload-reference', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              base64Data,
+              characterId: 'youtube_thumbnail',
+            }),
+          });
+          const resData = await res.json();
+          const targetUrl = resData.fileUrl || base64Data;
+          const targetId = resData.assetId || `asset_upload_${Date.now()}`;
+          handleSelectThumbnail(targetId, targetUrl);
+        } catch {
+          handleSelectThumbnail(`asset_upload_${Date.now()}`, base64Data);
+        } finally {
+          setIsDirectUploading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setIsDirectUploading(false);
+    }
+  };
 
   // Synchronize local data whenever pack changes
   useEffect(() => {
@@ -217,23 +254,55 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
 
         {/* Thumbnail Asset Box */}
         <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <label className="text-xs font-bold text-white flex items-center gap-2">
               <ImageIcon className="w-4 h-4 text-amber-400" />
-              <span>Ảnh Đại Diện (Thumbnail)</span>
+              <span>Ảnh Đại Diện Video (YouTube Thumbnail)</span>
             </label>
-            <button
-              type="button"
-              onClick={() => setShowAssetModal(true)}
-              className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
-            >
-              <ImageIcon className="w-3 h-3 text-amber-400" />
-              <span>{data.thumbnailUrl ? 'Thay đổi ảnh' : 'Chọn ảnh đại diện'}</span>
-            </button>
+
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <input
+                type="file"
+                ref={directFileInputRef}
+                onChange={handleDirectUpload}
+                accept="image/*"
+                className="hidden"
+              />
+              <button
+                type="button"
+                disabled={isDirectUploading}
+                onClick={() => directFileInputRef.current?.click()}
+                className="px-2.5 py-1 rounded-lg bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 text-xs font-semibold border border-sky-800/60 transition-colors flex items-center gap-1.5"
+                title="Tải ảnh đại diện từ máy tính cá nhân"
+              >
+                <Upload className="w-3 h-3 text-sky-400" />
+                <span>{isDirectUploading ? 'Đang tải...' : 'Tải từ máy'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowAssetModal(true)}
+                className="px-2.5 py-1 rounded-lg bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-xs font-semibold border border-amber-800/60 transition-colors flex items-center gap-1.5"
+                title="Tạo ảnh thumbnail bằng AI từ ảnh tham khảo"
+              >
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>Tạo bằng AI</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowAssetModal(true)}
+                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
+                title="Mở thư viện ảnh tham chiếu & Storyboard"
+              >
+                <ImageIcon className="w-3 h-3 text-slate-400" />
+                <span>{data.thumbnailUrl ? 'Thay đổi ảnh' : 'Chọn ảnh'}</span>
+              </button>
+            </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="w-24 h-16 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center shrink-0">
+            <div className="w-28 h-18 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
               {data.thumbnailUrl ? (
                 <img
                   src={data.thumbnailUrl}
@@ -247,11 +316,16 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
             </div>
 
             <div className="flex-1 min-w-0 text-xs space-y-1">
-              <div className="text-slate-300 font-medium truncate">
-                {data.thumbnailUrl ? 'Đã liên kết ảnh đại diện' : 'Chưa chọn ảnh đại diện'}
+              <div className="text-slate-300 font-semibold truncate flex items-center gap-2">
+                <span>{data.thumbnailUrl ? 'Đã liên kết ảnh đại diện' : 'Chưa chọn ảnh đại diện'}</span>
+                {data.thumbnailAssetId && (
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 truncate max-w-[150px]">
+                    {data.thumbnailAssetId}
+                  </span>
+                )}
               </div>
               <p className="text-[11px] text-slate-400 truncate">
-                {data.thumbnailUrl || 'Chọn từ Thư viện Tham chiếu hoặc Khung hình Storyboard'}
+                {data.thumbnailUrl || 'Tải ảnh từ máy tính, tạo tự động bằng AI từ ảnh tham khảo hoặc chọn từ thư viện'}
               </p>
             </div>
           </div>
@@ -532,8 +606,12 @@ export const YouTubeTab: React.FC<YouTubeTabProps> = ({ pack, onPackUpdated }) =
         onSelect={handleSelectThumbnail}
         currentAssetId={data.thumbnailAssetId}
         currentUrl={data.thumbnailUrl}
-        title="Chọn Thumbnail Cho Video YouTube"
+        title="Chọn hoặc Tạo Thumbnail YouTube"
         assetType="image"
+        episodeId={pack.episodeId}
+        episodeTitle={pack.episodeTitle}
+        episodeSynopsis={pack.episodeSynopsis}
+        defaultRatio="16:9"
       />
 
       {/* Final Video Asset Selector Modal */}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Facebook,
   Copy,
@@ -14,6 +14,7 @@ import {
   Share2,
   Globe,
   Link2,
+  Upload,
 } from 'lucide-react';
 import { PublishingPack, FacebookPublishingData, FacebookPublishStatus } from '../../types';
 import { publishingService } from '../../services/publishingService';
@@ -29,6 +30,42 @@ export const FacebookTab: React.FC<FacebookTabProps> = ({ pack, onPackUpdated })
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [showAssetModal, setShowAssetModal] = useState(false);
+  const directFileInputRef = useRef<HTMLInputElement>(null);
+  const [isDirectUploading, setIsDirectUploading] = useState(false);
+
+  const handleDirectUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsDirectUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const base64Data = ev.target?.result as string;
+        try {
+          const res = await fetch('/api/storage/upload-reference', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              base64Data,
+              characterId: 'facebook_image',
+            }),
+          });
+          const resData = await res.json();
+          const targetUrl = resData.fileUrl || base64Data;
+          const targetId = resData.assetId || `asset_upload_${Date.now()}`;
+          handleSelectImage(targetId, targetUrl);
+        } catch {
+          handleSelectImage(`asset_upload_${Date.now()}`, base64Data);
+        } finally {
+          setIsDirectUploading(false);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setIsDirectUploading(false);
+    }
+  };
 
   // Synchronize local data whenever pack changes
   useEffect(() => {
@@ -187,24 +224,55 @@ export const FacebookTab: React.FC<FacebookTabProps> = ({ pack, onPackUpdated })
 
           {/* Image Asset Box */}
           <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <label className="text-xs font-bold text-white flex items-center gap-2">
                 <ImageIcon className="w-4 h-4 text-amber-400" />
                 <span>Hình Ảnh Kèm Bài Viết Facebook</span>
               </label>
 
-              <button
-                type="button"
-                onClick={() => setShowAssetModal(true)}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
-              >
-                <ImageIcon className="w-3 h-3 text-amber-400" />
-                <span>Chọn ảnh đính kèm</span>
-              </button>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <input
+                  type="file"
+                  ref={directFileInputRef}
+                  onChange={handleDirectUpload}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <button
+                  type="button"
+                  disabled={isDirectUploading}
+                  onClick={() => directFileInputRef.current?.click()}
+                  className="px-2.5 py-1 rounded-lg bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 text-xs font-semibold border border-sky-800/60 transition-colors flex items-center gap-1.5"
+                  title="Tải ảnh từ máy tính cá nhân"
+                >
+                  <Upload className="w-3 h-3 text-sky-400" />
+                  <span>{isDirectUploading ? 'Đang tải...' : 'Tải từ máy'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAssetModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-xs font-semibold border border-amber-800/60 transition-colors flex items-center gap-1.5"
+                  title="Tạo ảnh Facebook bằng AI từ ảnh tham khảo"
+                >
+                  <Sparkles className="w-3 h-3 text-amber-400" />
+                  <span>Tạo bằng AI</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowAssetModal(true)}
+                  className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-colors flex items-center gap-1.5"
+                  title="Mở thư viện ảnh tham chiếu & Storyboard"
+                >
+                  <ImageIcon className="w-3 h-3 text-slate-400" />
+                  <span>{displayImage ? 'Thay đổi ảnh' : 'Chọn ảnh'}</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-24 h-16 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center shrink-0">
+              <div className="w-24 h-24 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden flex items-center justify-center shrink-0 shadow-inner">
                 {displayImage ? (
                   <img
                     src={displayImage}
@@ -218,11 +286,16 @@ export const FacebookTab: React.FC<FacebookTabProps> = ({ pack, onPackUpdated })
               </div>
 
               <div className="flex-1 min-w-0 text-xs space-y-1">
-                <div className="text-slate-300 font-medium truncate">
-                  {displayImage ? 'Ảnh hiển thị (mặc định lấy Thumbnail)' : 'Chưa có ảnh kèm'}
+                <div className="text-slate-300 font-semibold truncate flex items-center gap-2">
+                  <span>{displayImage ? 'Đã liên kết ảnh Facebook' : 'Chưa có ảnh kèm'}</span>
+                  {data.imageAssetId && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-amber-400 truncate max-w-[150px]">
+                      {data.imageAssetId}
+                    </span>
+                  )}
                 </div>
                 <p className="text-[11px] text-slate-400 truncate">
-                  {displayImage || 'Khuyến nghị đính kèm hình ảnh sắc nét để tăng lượt tiếp cận trên Newsfeed'}
+                  {displayImage || 'Tải ảnh từ máy tính, tạo tự động bằng AI từ ảnh tham khảo hoặc chọn từ thư viện'}
                 </p>
               </div>
             </div>
@@ -402,7 +475,12 @@ export const FacebookTab: React.FC<FacebookTabProps> = ({ pack, onPackUpdated })
         onSelect={handleSelectImage}
         currentAssetId={data.imageAssetId}
         currentUrl={data.imageUrl}
-        title="Chọn Hình Ảnh Kèm Bài Viết Facebook"
+        title="Chọn hoặc Tạo Hình Ảnh Bài Viết Facebook"
+        assetType="image"
+        episodeId={pack.episodeId}
+        episodeTitle={pack.episodeTitle}
+        episodeSynopsis={pack.episodeSynopsis}
+        defaultRatio="1:1"
       />
     </div>
   );

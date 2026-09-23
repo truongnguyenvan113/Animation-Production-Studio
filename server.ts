@@ -2,6 +2,7 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
+import { GoogleGenAI } from '@google/genai';
 
 const PORT = 3000;
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -203,10 +204,12 @@ async function startServer() {
       const publicUrl = `/storage/references/${safeFilename}`;
       console.log(`[Storage] Saved uploaded image to ${targetPath}`);
 
+      const assetId = `asset_upload_${Date.now()}`;
       res.json({
         status: 'ok',
         fileUrl: publicUrl,
         filename: safeFilename,
+        assetId,
         sizeBytes: buffer.length,
       });
     } catch (err: any) {
@@ -214,6 +217,182 @@ async function startServer() {
       res.status(500).json({
         status: 'error',
         message: `Failed to upload reference: ${err.message}`,
+      });
+    }
+  });
+
+  // Generate thumbnail endpoint with Gemini and composite fallback
+  app.post('/api/publishing/generate-thumbnail', async (req, res) => {
+    try {
+      const {
+        episodeId,
+        title,
+        prompt,
+        theme,
+        aspectRatio = '16:9',
+        referenceImageUrls = [],
+      } = req.body;
+      ensureDirectories();
+
+      let generatedImageUrl: string | null = null;
+      let generatedMethod = 'composite';
+
+      // 1. Try Gemini API if key is available
+      if (process.env.GEMINI_API_KEY) {
+        try {
+          const ai = new GoogleGenAI({
+            apiKey: process.env.GEMINI_API_KEY,
+            httpOptions: {
+              headers: { 'User-Agent': 'aistudio-build' },
+            },
+          });
+
+          const parts: any[] = [];
+
+          // If reference images provided, read existing local files
+          if (Array.isArray(referenceImageUrls)) {
+            for (const refUrl of referenceImageUrls.slice(0, 3)) {
+              try {
+                if (typeof refUrl === 'string' && refUrl.startsWith('data:image/')) {
+                  const match = refUrl.match(/^data:image\/(\w+);base64,(.+)$/);
+                  if (match) {
+                    parts.push({
+                      inlineData: {
+                        mimeType: `image/${match[1]}`,
+                        data: match[2],
+                      },
+                    });
+                  }
+                } else if (typeof refUrl === 'string' && refUrl.startsWith('/storage/')) {
+                  const localPath = path.join(process.cwd(), 'public', refUrl.replace(/^\//, ''));
+                  if (fs.existsSync(localPath)) {
+                    const ext = path.extname(localPath).replace('.', '') || 'png';
+                    const data = fs.readFileSync(localPath).toString('base64');
+                    parts.push({
+                      inlineData: {
+                        mimeType: `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+                        data,
+                      },
+                    });
+                  }
+                }
+              } catch (imgErr) {
+                console.warn('[Gemini Thumbnail] Error reading ref image:', imgErr);
+              }
+            }
+          }
+
+          const enhancedPrompt = `3D animated movie official thumbnail for children animated series "Pi & Kem Family" (Kem Tivi).
+Title: "${title || 'Pi & Kem Hoạt Hình'}".
+Theme: "${theme || 'Tết Trung Thu gia đình'}".
+Scene Description: ${prompt || 'Pi and Kem holding a handmade star lantern celebrating Mid-Autumn festival together with warm joyful smiles'}.
+Style Requirements: Pixar / Illumination 3D stylized CGI, warm volumetric cinematic lighting, rich vibrant pastel colors, expressive cheerful faces, clean cinematic depth of field, high resolution 3D render.`;
+
+          parts.push({ text: enhancedPrompt });
+
+          const targetRatio = (aspectRatio === '1:1' ? '1:1' : aspectRatio === '4:3' ? '4:3' : '16:9') as any;
+          const aiResponse = await ai.models.generateContent({
+            model: 'gemini-3.1-flash-lite-image',
+            contents: { parts },
+            config: {
+              imageConfig: {
+                aspectRatio: targetRatio,
+              },
+            },
+          });
+
+          const candidateParts = aiResponse.candidates?.[0]?.content?.parts || [];
+          for (const part of candidateParts) {
+            if (part.inlineData?.data) {
+              const base64Data = part.inlineData.data;
+              const safeFilename = `ai_thumb_${Date.now()}_ep_${episodeId || 'custom'}.png`;
+              const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
+              fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
+              generatedImageUrl = `/storage/references/${safeFilename}`;
+              generatedMethod = 'gemini-3.1-flash-lite-image';
+              break;
+            }
+          }
+        } catch (geminiErr: any) {
+          console.warn('[Thumbnail Generation] Gemini image generation error, falling back to composite:', geminiErr?.message || geminiErr);
+        }
+      }
+
+      // 2. Fallback generator: creates an authentic SVG/PNG poster composite from references & title
+      if (!generatedImageUrl) {
+        const safeFilename = `comp_thumb_${Date.now()}_ep_${episodeId || 'custom'}.svg`;
+        const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
+
+        const w = aspectRatio === '1:1' ? 1080 : aspectRatio === '4:3' ? 1200 : 1280;
+        const h = aspectRatio === '1:1' ? 1080 : aspectRatio === '4:3' ? 900 : 720;
+
+        let embeddedImgTag = '';
+        if (Array.isArray(referenceImageUrls) && referenceImageUrls.length > 0) {
+          const firstRef = referenceImageUrls[0];
+          let imgHref = firstRef;
+          if (typeof firstRef === 'string' && firstRef.startsWith('/storage/')) {
+            const localP = path.join(process.cwd(), 'public', firstRef.replace(/^\//, ''));
+            if (fs.existsSync(localP)) {
+              const b64 = fs.readFileSync(localP).toString('base64');
+              imgHref = `data:image/png;base64,${b64}`;
+            }
+          }
+          embeddedImgTag = `<image href="${imgHref}" x="${w * 0.42}" y="${h * 0.08}" width="${w * 0.54}" height="${h * 0.84}" preserveAspectRatio="xMidYMid meet" opacity="0.95" />`;
+        }
+
+        const safeTitle = (title || 'Pi & Kem Hoạt Hình').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeTheme = (theme || 'Phim Hoạt Hình 3D Gia Đình').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e1b4b" />
+              <stop offset="45%" stop-color="#2e1065" />
+              <stop offset="100%" stop-color="#090d16" />
+            </linearGradient>
+            <radialGradient id="glow" cx="25%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4" />
+              <stop offset="60%" stop-color="#ec4899" stop-opacity="0.15" />
+              <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+            </radialGradient>
+            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+            </filter>
+          </defs>
+          <rect width="${w}" height="${h}" fill="url(#bgGrad)" />
+          <rect width="${w}" height="${h}" fill="url(#glow)" />
+          ${embeddedImgTag}
+          <g transform="translate(60, ${h * 0.4})" filter="url(#shadow)">
+            <rect x="-12" y="-34" width="220" height="32" rx="8" fill="#f59e0b" />
+            <text x="98" y="-13" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="13" text-anchor="middle" letter-spacing="1.5">KEM TIVI 4K OFFICIAL</text>
+            <text x="0" y="44" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="${w > 1100 ? 42 : 34}">
+              ${safeTitle}
+            </text>
+            <text x="0" y="88" fill="#fde047" font-family="system-ui, sans-serif" font-weight="700" font-size="20">
+              ✨ ${safeTheme}
+            </text>
+            <rect x="0" y="118" width="260" height="40" rx="10" fill="#ef4444" />
+            <text x="130" y="143" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="800" font-size="15" text-anchor="middle">XEM NGAY • FULL HD</text>
+          </g>
+        </svg>`;
+
+        fs.writeFileSync(targetPath, svgContent, 'utf-8');
+        generatedImageUrl = `/storage/references/${safeFilename}`;
+      }
+
+      const assetId = `thumb_gen_${Date.now()}`;
+      res.json({
+        status: 'ok',
+        fileUrl: generatedImageUrl,
+        assetId,
+        method: generatedMethod,
+        message: 'Tạo ảnh đại diện thành công!',
+      });
+    } catch (err: any) {
+      console.error('Error generating thumbnail:', err);
+      res.status(500).json({
+        status: 'error',
+        message: `Lỗi tạo ảnh: ${err.message}`,
       });
     }
   });
