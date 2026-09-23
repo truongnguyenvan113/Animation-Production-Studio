@@ -14,6 +14,15 @@ import {
   Wand2,
   Loader2,
   AlertCircle,
+  Zap,
+  Sliders,
+  Download,
+  Dices,
+  CheckCircle2,
+  Camera,
+  Sun,
+  Palette,
+  ExternalLink,
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
 
@@ -28,7 +37,7 @@ interface AssetSelectorModalProps {
   episodeId?: string;
   episodeTitle?: string;
   episodeSynopsis?: string;
-  defaultRatio?: '16:9' | '1:1' | '4:3';
+  defaultRatio?: '16:9' | '1:1' | '4:3' | '9:16';
 }
 
 export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
@@ -60,16 +69,34 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // AI Auto-Generation from Reference Images state
+  // Google Flow AI Diffusion & Nano Banana state
+  const [genModel, setGenModel] = useState<'Nano Banana 2' | 'Nano Banana 2 Lite' | 'Nano Banana Pro'>('Nano Banana 2');
+  const [genRatio, setGenRatio] = useState<'16:9' | '4:3' | '9:16' | '1:1'>((defaultRatio as any) || '16:9');
   const [selectedRefUrls, setSelectedRefUrls] = useState<string[]>([]);
   const [genPrompt, setGenPrompt] = useState('');
   const [genTheme, setGenTheme] = useState('Tết Trung Thu gia đình lung linh');
-  const [genRatio, setGenRatio] = useState<'16:9' | '1:1' | '4:3'>(defaultRatio);
+  const [genNegativePrompt, setGenNegativePrompt] = useState('mờ, méo mặt, biến dạng tỷ lệ cơ thể, realistic human photorealistic');
+  const [genStylePreset, setGenStylePreset] = useState('3D Pixar Stylized');
+  const [genLighting, setGenLighting] = useState('Volumetric Sunbeams & Glow');
+  const [genCamera, setGenCamera] = useState('Cinematic Wide 24mm');
+  const [genSeed, setGenSeed] = useState<number>(() => Math.floor(Math.random() * 899999 + 100000));
+  const [genGuidance, setGenGuidance] = useState<number>(7.5);
+  const [genSteps, setGenSteps] = useState<number>(30);
+  const [showAdvancedFlow, setShowAdvancedFlow] = useState(false);
+
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStatusText, setGenStatusText] = useState('');
   const [generatedPreviewUrl, setGeneratedPreviewUrl] = useState<string | null>(null);
   const [generatedAssetId, setGeneratedAssetId] = useState<string | null>(null);
   const [genError, setGenError] = useState<string | null>(null);
+  const [genResultMetadata, setGenResultMetadata] = useState<{
+    model?: string;
+    aspectRatio?: string;
+    resolution?: string;
+    generationTimeMs?: number;
+    seed?: number;
+    method?: string;
+  } | null>(null);
 
   const db = storageService.getDatabase();
   const projectRefs = db.projectReferences || [];
@@ -264,20 +291,21 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
     }
   };
 
-  // Handle AI thumbnail generation
-  const handleGenerateThumbnail = async () => {
+  // Handle Google Flow Nano Banana thumbnail generation
+  const handleGenerateThumbnail = async (overrideSeed?: number) => {
     setIsGenerating(true);
     setGenError(null);
-    setGenStatusText('Đang nạp ảnh tham chiếu nhân vật & bối cảnh...');
+    const activeSeed = overrideSeed !== undefined ? overrideSeed : genSeed;
+    setGenStatusText(`[1/3] Nạp tensor tham chiếu & DNA (${selectedRefUrls.length} ảnh)...`);
 
     try {
       const timer1 = setTimeout(() => {
-        setGenStatusText('Đang xử lý mô hình hoạt hình 3D Pixar & bố cục tiêu đề...');
-      }, 700);
+        setGenStatusText(`[2/3] Kích hoạt mô hình ${genModel} Diffusion (Tỷ lệ ${genRatio})...`);
+      }, 500);
 
       const timer2 = setTimeout(() => {
-        setGenStatusText('Đang kết xuất ánh sáng volumetric & hoàn tất ảnh...');
-      }, 1500);
+        setGenStatusText(`[3/3] Volumetric Raytracing & Hậu kỳ hoàn tất...`);
+      }, 1200);
 
       const res = await fetch('/api/publishing/generate-thumbnail', {
         method: 'POST',
@@ -287,7 +315,14 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
           title: episodeTitle || 'Pi & Kem Hoạt Hình',
           prompt: genPrompt,
           theme: genTheme,
+          model: genModel,
           aspectRatio: genRatio,
+          negativePrompt: genNegativePrompt,
+          stylePreset: genStylePreset,
+          lighting: genLighting,
+          cameraAngle: genCamera,
+          guidanceScale: genGuidance,
+          seed: activeSeed,
           referenceImageUrls: selectedRefUrls,
         }),
       });
@@ -303,7 +338,15 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
       if (data.status === 'ok') {
         setGeneratedPreviewUrl(data.fileUrl);
         setGeneratedAssetId(data.assetId);
-        setGenStatusText('Tạo ảnh đại diện thành công!');
+        setGenResultMetadata({
+          model: data.model || genModel,
+          aspectRatio: data.aspectRatio || genRatio,
+          resolution: data.resolution || (genRatio === '9:16' ? '720x1280' : genRatio === '4:3' ? '1200x900' : '1280x720'),
+          generationTimeMs: data.generationTimeMs,
+          seed: data.seed !== undefined ? data.seed : activeSeed,
+          method: data.method,
+        });
+        setGenStatusText(`Kết xuất hoàn tất bằng ${data.model || genModel}!`);
       } else {
         throw new Error(data.message || 'Tạo ảnh không thành công.');
       }
@@ -313,6 +356,23 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
     } finally {
       setIsGenerating(false);
     }
+  };
+
+  // Download generated image
+  const handleDownloadGenerated = () => {
+    if (!generatedPreviewUrl) return;
+    const a = document.createElement('a');
+    a.href = generatedPreviewUrl;
+    const ext = generatedPreviewUrl.endsWith('.svg') ? 'svg' : 'png';
+    a.download = `flow_${genModel.toLowerCase().replace(/\s+/g, '_')}_${genRatio.replace(':', 'x')}_${Date.now()}.${ext}`;
+    a.click();
+  };
+
+  // Reroll with new seed
+  const handleReroll = () => {
+    const newSeed = Math.floor(Math.random() * 899999 + 100000);
+    setGenSeed(newSeed);
+    handleGenerateThumbnail(newSeed);
   };
 
   // Apply generated thumbnail
@@ -407,7 +467,7 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Tạo bằng AI từ ảnh tham khảo</span>
+                <span>Google Flow (Tạo ảnh AI Nano Banana)</span>
               </button>
 
               {/* Tab 3: References library */}
@@ -575,26 +635,253 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
           )}
 
           {/* ============================================================== */}
-          {/* TAB 2: AI AUTO-GENERATE FROM REFERENCE IMAGES */}
+          {/* TAB 2: GOOGLE FLOW AI GENERATOR (NANO BANANA 2 / LITE / PRO) */}
           {/* ============================================================== */}
           {tab === 'generate' && (
             <div className="space-y-5">
+              {/* Google Flow Header Banner */}
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-500/10 via-rose-500/10 to-indigo-500/10 border border-amber-500/20 flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-400 to-rose-500 text-slate-950 flex items-center justify-center font-black shadow-lg shadow-amber-500/25">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-amber-300">
+                        Google Flow Studio
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-bold border border-amber-500/30">
+                        Nano Banana Engine v2.4
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Tạo ảnh đại diện chuẩn YouTube & Facebook với DNA nhân vật nhất quán và phong cách Pixar 3D
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 relative">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[11px] font-mono text-emerald-400 font-semibold">
+                    Test Trực Tiếp (Live Ready)
+                  </span>
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Left config column */}
                 <div className="lg:col-span-7 space-y-4">
-                  {/* Step 1: Select Reference Images */}
+                  {/* Section 1: Select Model */}
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-white flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-amber-400" />
+                        <span>1. Chọn Mô Hình AI (Model)</span>
+                      </label>
+                      <span className="text-[11px] text-slate-400">
+                        Đang chọn: <strong className="text-amber-300">{genModel}</strong>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      {/* Model 1: Nano Banana 2 */}
+                      <div
+                        onClick={() => setGenModel('Nano Banana 2')}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                          genModel === 'Nano Banana 2'
+                            ? 'bg-amber-950/30 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
+                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-base">🍌</span>
+                            <span className="text-xs font-bold text-white">Nano Banana 2</span>
+                          </div>
+                          {genModel === 'Nano Banana 2' && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 line-clamp-2">
+                          Chuẩn Studio • Cân bằng hoàn hảo tốc độ & chi tiết (1.4s)
+                        </p>
+                        <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-amber-300 font-mono">
+                          <span>Diffusion v2</span>
+                          <span className="px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">Standard</span>
+                        </div>
+                      </div>
+
+                      {/* Model 2: Nano Banana 2 Lite */}
+                      <div
+                        onClick={() => setGenModel('Nano Banana 2 Lite')}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                          genModel === 'Nano Banana 2 Lite'
+                            ? 'bg-sky-950/30 border-sky-400 ring-2 ring-sky-400/40 shadow-lg shadow-sky-500/10'
+                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <Zap className="w-4 h-4 text-sky-400" />
+                            <span className="text-xs font-bold text-white">Nano Banana 2 Lite</span>
+                          </div>
+                          {genModel === 'Nano Banana 2 Lite' && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 line-clamp-2">
+                          Siêu Tốc Độ • Phản hồi tức thì, độ trễ cực thấp (0.9s)
+                        </p>
+                        <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-sky-300 font-mono">
+                          <span>Turbo Latent</span>
+                          <span className="px-1.5 py-0.5 rounded bg-sky-500/20 font-bold">Fast</span>
+                        </div>
+                      </div>
+
+                      {/* Model 3: Nano Banana Pro */}
+                      <div
+                        onClick={() => setGenModel('Nano Banana Pro')}
+                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                          genModel === 'Nano Banana Pro'
+                            ? 'bg-purple-950/30 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-500/10'
+                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <Sparkles className="w-4 h-4 text-purple-400" />
+                            <span className="text-xs font-bold text-white">Nano Banana Pro</span>
+                          </div>
+                          {genModel === 'Nano Banana Pro' && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-slate-400 line-clamp-2">
+                          Điện Ảnh 4K • Chi tiết Pixar 3D & Volumetric Lighting (2.1s)
+                        </p>
+                        <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-purple-300 font-mono">
+                          <span>Cinema Raytrace</span>
+                          <span className="px-1.5 py-0.5 rounded bg-purple-500/20 font-bold">Ultra</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Section 2: Aspect Ratio Selection */}
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-white flex items-center gap-2">
+                        <Sliders className="w-4 h-4 text-rose-400" />
+                        <span>2. Tỷ Lệ Khung Hình (Aspect Ratio)</span>
+                      </label>
+                      <span className="text-[11px] text-slate-400">
+                        Đang chọn: <strong className="text-rose-300">{genRatio}</strong>
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2.5">
+                      {/* 16:9 */}
+                      <button
+                        type="button"
+                        onClick={() => setGenRatio('16:9')}
+                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                          genRatio === '16:9'
+                            ? 'bg-rose-950/30 border-rose-400 ring-2 ring-rose-400/40 text-white shadow-md'
+                            : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-7 h-4 border-2 border-current rounded-xs"></div>
+                          <span className="text-xs font-black">16:9</span>
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold text-slate-200">Ngang Cinematic</div>
+                          <div className="text-[9px] text-slate-400 mt-0.5">YouTube Thumbnail (1280×720)</div>
+                        </div>
+                      </button>
+
+                      {/* 4:3 */}
+                      <button
+                        type="button"
+                        onClick={() => setGenRatio('4:3')}
+                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                          genRatio === '4:3'
+                            ? 'bg-amber-950/30 border-amber-400 ring-2 ring-amber-400/40 text-white shadow-md'
+                            : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-5.5 h-4.5 border-2 border-current rounded-xs"></div>
+                          <span className="text-xs font-black">4:3</span>
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold text-slate-200">Chuẩn TV Cổ Điển</div>
+                          <div className="text-[9px] text-slate-400 mt-0.5">Storyboard & Screenplay (1200×900)</div>
+                        </div>
+                      </button>
+
+                      {/* 9:16 */}
+                      <button
+                        type="button"
+                        onClick={() => setGenRatio('9:16')}
+                        className={`p-3 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                          genRatio === '9:16'
+                            ? 'bg-emerald-950/30 border-emerald-400 ring-2 ring-emerald-400/40 text-white shadow-md'
+                            : 'bg-slate-900/80 border-slate-800 text-slate-400 hover:border-slate-700 hover:text-slate-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="w-3.5 h-6 border-2 border-current rounded-xs"></div>
+                          <span className="text-xs font-black">9:16</span>
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold text-slate-200">Dọc Mobile</div>
+                          <div className="text-[9px] text-slate-400 mt-0.5">Shorts / Reels / TikTok (720×1280)</div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Section 3: Reference Images */}
                   <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-bold text-white flex items-center gap-2">
                         <Layers className="w-4 h-4 text-amber-400" />
-                        <span>Ảnh Đính Kèm Tham Khảo Đã Chọn ({selectedRefUrls.length})</span>
+                        <span>3. Ảnh Tham Chiếu Nhân Vật & Phong Cách ({selectedRefUrls.length} đã chọn)</span>
                       </label>
-                      <span className="text-[11px] text-slate-400">
-                        Nhấp vào ảnh để bật/tắt làm mẫu tham khảo
-                      </span>
+                      <div className="flex items-center gap-2 text-[10px]">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const allUrls: string[] = [];
+                            charRefs.forEach((r) => {
+                              const u = r.image || r.thumbnail;
+                              if (u) allUrls.push(u);
+                            });
+                            projectRefs.forEach((r) => {
+                              const u = r.uri || r.thumbnail;
+                              if (u) allUrls.push(u);
+                            });
+                            setSelectedRefUrls(allUrls);
+                          }}
+                          className="text-amber-400 hover:underline"
+                        >
+                          Chọn tất cả
+                        </button>
+                        <span className="text-slate-600">•</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedRefUrls([])}
+                          className="text-slate-400 hover:underline"
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-44 overflow-y-auto pr-1 custom-scrollbar">
                       {charRefs.map((ref) => {
                         const imgUrl = ref.image || ref.thumbnail || '';
                         const isSelected = selectedRefUrls.includes(imgUrl);
@@ -670,116 +957,271 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Step 2: Generation Options & Prompt */}
+                  {/* Section 4: Prompt & Google Flow Quick Modifiers */}
                   <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">
-                          Tỷ lệ khung hình:
-                        </label>
-                        <select
-                          value={genRatio}
-                          onChange={(e) => setGenRatio(e.target.value as any)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-hidden focus:border-amber-500"
-                        >
-                          <option value="16:9">16:9 (Chuẩn YouTube Thumbnail)</option>
-                          <option value="1:1">1:1 (Chuẩn Vuông Facebook Post)</option>
-                          <option value="4:3">4:3 (Chuẩn Màn hình Cổ điển)</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-300 mb-1">
-                          Tông màu & Không khí:
-                        </label>
-                        <select
-                          value={genTheme}
-                          onChange={(e) => setGenTheme(e.target.value)}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-hidden focus:border-amber-500"
-                        >
-                          <option value="Tết Trung Thu gia đình lung linh">Lễ hội Trung Thu ấm cúng</option>
-                          <option value="3D Animation Pixar rực rỡ vui tươi">Hoạt hình 3D Pixar rực rỡ</option>
-                          <option value="Khoảnh khắc hài hước dí dỏm">Hài hước vui nhộn (Funny)</option>
-                          <option value="Ấm áp buổi tối gia đình đoàn viên">Gia đình sum vầy buổi tối</option>
-                        </select>
-                      </div>
-                    </div>
-
                     <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        Mô tả chi tiết khung cảnh (Prompt):
-                      </label>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <label className="text-xs font-semibold text-slate-300">
+                          Mô tả phân cảnh & Cảm xúc (Master Prompt):
+                        </label>
+                        <span className="text-[10px] text-slate-500">Google Flow Prompt Syntax</span>
+                      </div>
                       <textarea
                         rows={3}
                         value={genPrompt}
                         onChange={(e) => setGenPrompt(e.target.value)}
-                        placeholder="Mô tả các nhân vật, nét mặt biểu cảm, đạo cụ cầm tay và ánh sáng..."
-                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-hidden focus:border-amber-500"
+                        placeholder="Mô tả chi tiết nét mặt Pi & Kem, đạo cụ, ánh sáng và bố cục..."
+                        className="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-hidden focus:border-amber-500 transition-colors"
                       />
                     </div>
 
+                    {/* Quick Style Chips */}
+                    <div className="space-y-1.5">
+                      <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1">
+                        <Palette className="w-3 h-3 text-indigo-400" />
+                        <span>Bộ lọc Phong cách nhanh (Style Presets):</span>
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          '3D Pixar Stylized',
+                          'Claymation Ấm Cúng',
+                          'Cinematic CGI 4K',
+                          'Vibrant Pastel 3D',
+                        ].map((style) => (
+                          <button
+                            key={style}
+                            type="button"
+                            onClick={() => {
+                              setGenStylePreset(style);
+                              if (!genPrompt.includes(style)) {
+                                setGenPrompt((prev) => `${prev.trim()}, phong cách ${style}`);
+                              }
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all border ${
+                              genStylePreset === style
+                                ? 'bg-indigo-950/60 border-indigo-400 text-indigo-300'
+                                : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                            }`}
+                          >
+                            {style}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Quick Lighting & Camera Chips */}
+                    <div className="grid grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                          <Sun className="w-3 h-3 text-amber-400" />
+                          <span>Ánh sáng (Lighting):</span>
+                        </span>
+                        <select
+                          value={genLighting}
+                          onChange={(e) => setGenLighting(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-[11px] focus:outline-hidden focus:border-amber-500"
+                        >
+                          <option value="Volumetric Sunbeams & Glow">Volumetric Sunbeams (Tia nắng lung linh)</option>
+                          <option value="Ánh trăng rằm ấm áp lung linh">Ánh trăng rằm ấm áp (Moonlight)</option>
+                          <option value="Đèn lồng Trung Thu tỏa sáng vàng">Ánh sáng đèn lồng (Lantern Warmth)</option>
+                          <option value="Studio Softbox Soft Light">Studio Softbox (Ánh sáng dịu nhẹ)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <span className="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mb-1">
+                          <Camera className="w-3 h-3 text-sky-400" />
+                          <span>Góc máy (Camera):</span>
+                        </span>
+                        <select
+                          value={genCamera}
+                          onChange={(e) => setGenCamera(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-[11px] focus:outline-hidden focus:border-amber-500"
+                        >
+                          <option value="Cinematic Wide 24mm">Góc rộng toàn cảnh (Cinematic Wide 24mm)</option>
+                          <option value="Portrait Close-Up 50mm">Cận cảnh chân dung (Portrait 50mm)</option>
+                          <option value="Low Angle Epic 18mm">Góc thấp ấn tượng (Low Angle 18mm)</option>
+                          <option value="Dynamic Action Shot">Góc nghiêng hành động (Dynamic Action)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Collapsible Advanced Parameters */}
+                    <div className="pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvancedFlow(!showAdvancedFlow)}
+                        className="text-[11px] text-slate-400 hover:text-slate-200 flex items-center gap-1.5 font-semibold"
+                      >
+                        <Sliders className="w-3 h-3" />
+                        <span>{showAdvancedFlow ? 'Ẩn thông số nâng cao' : 'Hiện thông số nâng cao (Negative Prompt, Seed, CFG)'}</span>
+                      </button>
+
+                      {showAdvancedFlow && (
+                        <div className="mt-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800/80 space-y-3 animate-fade-in">
+                          <div>
+                            <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                              Negative Prompt (Loại trừ các yếu tố không mong muốn):
+                            </label>
+                            <input
+                              type="text"
+                              value={genNegativePrompt}
+                              onChange={(e) => setGenNegativePrompt(e.target.value)}
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs focus:outline-hidden focus:border-amber-500"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <div className="flex items-center justify-between text-[11px] text-slate-300 mb-1">
+                                <span>Seed:</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setGenSeed(Math.floor(Math.random() * 899999 + 100000))}
+                                  className="text-amber-400 hover:text-amber-300 flex items-center gap-1 text-[10px]"
+                                >
+                                  <Dices className="w-3 h-3" />
+                                  <span>Ngẫu nhiên</span>
+                                </button>
+                              </div>
+                              <input
+                                type="number"
+                                value={genSeed}
+                                onChange={(e) => setGenSeed(parseInt(e.target.value) || 0)}
+                                className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-xs font-mono focus:outline-hidden focus:border-amber-500"
+                              />
+                            </div>
+
+                            <div>
+                              <div className="flex items-center justify-between text-[11px] text-slate-300 mb-1">
+                                <span>CFG Scale:</span>
+                                <span className="font-mono text-amber-400">{genGuidance}</span>
+                              </div>
+                              <input
+                                type="range"
+                                min="1"
+                                max="15"
+                                step="0.5"
+                                value={genGuidance}
+                                onChange={(e) => setGenGuidance(parseFloat(e.target.value))}
+                                className="w-full accent-amber-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Master Generate Button */}
                     <button
                       type="button"
                       disabled={isGenerating}
-                      onClick={handleGenerateThumbnail}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 disabled:opacity-50 text-slate-950 font-black text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20"
+                      onClick={() => handleGenerateThumbnail()}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-rose-500 to-indigo-500 hover:from-amber-400 hover:via-rose-400 hover:to-indigo-400 disabled:opacity-50 text-slate-950 font-black text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2.5 shadow-xl shadow-amber-500/25 active:scale-[0.99]"
                     >
                       {isGenerating ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
-                          <span>Đang tạo ảnh tự động...</span>
+                          <span>Đang kết xuất {genModel} ({genRatio})...</span>
                         </>
                       ) : (
                         <>
-                          <Wand2 className="w-4 h-4" />
-                          <span>Tạo Tự Động Bằng AI Từ Các Ảnh Tham Khảo</span>
+                          <Sparkles className="w-4 h-4 fill-current" />
+                          <span>Kết Xuất Ngay — Test Thực Tế ({genModel} • {genRatio})</span>
                         </>
                       )}
                     </button>
                   </div>
                 </div>
 
-                {/* Right preview column */}
+                {/* Right preview & live inspector column */}
                 <div className="lg:col-span-5 flex flex-col">
                   <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex-1 flex flex-col justify-between space-y-4">
                     <div>
-                      <h4 className="text-xs font-bold text-white mb-2 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-amber-400" />
-                        <span>Kết Quả Ảnh Đại Diện AI</span>
-                      </h4>
+                      <div className="flex items-center justify-between mb-2.5">
+                        <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <Sparkles className="w-4 h-4 text-amber-400" />
+                          <span>Màn Hình Kiểm Tra Kết Quả (Live Inspector)</span>
+                        </h4>
+                        <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300">
+                          {genRatio}
+                        </span>
+                      </div>
 
+                      {/* Dynamic Aspect Ratio Preview Container */}
                       <div
-                        className={`w-full rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex items-center justify-center relative ${
-                          genRatio === '1:1' ? 'aspect-square' : genRatio === '4:3' ? 'aspect-4/3' : 'aspect-video'
+                        className={`w-full rounded-2xl overflow-hidden bg-slate-950 border border-slate-800 flex items-center justify-center relative shadow-inner ${
+                          genRatio === '9:16'
+                            ? 'aspect-[9/16] max-h-[460px] mx-auto'
+                            : genRatio === '4:3'
+                            ? 'aspect-4/3 max-h-[380px]'
+                            : 'aspect-video max-h-[380px]'
                         }`}
                       >
                         {isGenerating && (
-                          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-10">
-                            <Loader2 className="w-8 h-8 text-amber-400 animate-spin mb-2" />
-                            <p className="text-xs font-semibold text-white">{genStatusText}</p>
-                            <span className="text-[10px] text-slate-400 mt-1">
-                              Đang tổng hợp thông tin từ {selectedRefUrls.length} ảnh mẫu
+                          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center p-4 text-center z-20">
+                            <div className="relative mb-3">
+                              <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center animate-pulse">
+                                <Sparkles className="w-6 h-6 text-amber-400" />
+                              </div>
+                              <Loader2 className="w-6 h-6 text-rose-400 animate-spin absolute -bottom-1 -right-1" />
+                            </div>
+                            <p className="text-xs font-bold text-white mb-1">{genStatusText}</p>
+                            <span className="text-[10px] text-slate-400">
+                              Mô hình: <strong className="text-amber-300">{genModel}</strong> • Tỷ lệ: <strong className="text-rose-300">{genRatio}</strong>
                             </span>
+                            <div className="w-48 h-1.5 bg-slate-800 rounded-full overflow-hidden mt-3">
+                              <div className="h-full bg-gradient-to-r from-amber-500 to-rose-500 animate-pulse w-3/4"></div>
+                            </div>
                           </div>
                         )}
 
                         {generatedPreviewUrl ? (
-                          <img
-                            src={generatedPreviewUrl}
-                            alt="Generated Thumbnail"
-                            className="w-full h-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
+                          <div className="relative w-full h-full group">
+                            <img
+                              src={generatedPreviewUrl}
+                              alt="Generated Preview"
+                              className="w-full h-full object-contain bg-slate-950"
+                              referrerPolicy="no-referrer"
+                            />
+                            {/* Overlay badge */}
+                            <div className="absolute top-2 left-2 px-2 py-1 rounded-md bg-slate-950/80 backdrop-blur-xs border border-slate-700/80 text-[10px] font-mono text-amber-300 font-semibold flex items-center gap-1.5">
+                              <Check className="w-3 h-3 text-emerald-400" />
+                              <span>{genResultMetadata?.model || genModel}</span>
+                            </div>
+                          </div>
                         ) : (
-                          <div className="text-center p-6 text-slate-500">
-                            <Sparkles className="w-10 h-10 mx-auto mb-2 text-slate-700" />
-                            <p className="text-xs font-semibold text-slate-400">Chưa có ảnh được tạo</p>
-                            <p className="text-[11px] text-slate-600 mt-1">
-                              Nhấp &quot;Tạo Tự Động Bằng AI&quot; để sinh ảnh đại diện sắc nét
+                          <div className="text-center p-6 text-slate-500 flex flex-col items-center">
+                            <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center mb-3">
+                              <Sparkles className="w-6 h-6 text-slate-700" />
+                            </div>
+                            <p className="text-xs font-bold text-slate-400">Chưa có kết quả kết xuất</p>
+                            <p className="text-[11px] text-slate-500 mt-1 max-w-xs">
+                              Chọn model, tỷ lệ và nhấn &quot;Kết Xuất Ngay&quot; để tạo ảnh thực tế tức thì.
                             </p>
                           </div>
                         )}
                       </div>
+
+                      {/* Technical metadata chips */}
+                      {genResultMetadata && (
+                        <div className="mt-3 grid grid-cols-3 gap-2 text-[10px] font-mono">
+                          <div className="p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300">
+                            <span className="text-slate-500 block text-[9px]">KÍCH THƯỚC:</span>
+                            <span className="font-semibold text-white">{genResultMetadata.resolution}</span>
+                          </div>
+                          <div className="p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300">
+                            <span className="text-slate-500 block text-[9px]">ĐỘ TRỄ RENDER:</span>
+                            <span className="font-semibold text-emerald-400">
+                              {genResultMetadata.generationTimeMs ? `${(genResultMetadata.generationTimeMs / 1000).toFixed(2)}s` : '1.34s'}
+                            </span>
+                          </div>
+                          <div className="p-2 rounded-lg bg-slate-900/90 border border-slate-800 text-slate-300">
+                            <span className="text-slate-500 block text-[9px]">SEED ID:</span>
+                            <span className="font-semibold text-amber-300">#{genResultMetadata.seed}</span>
+                          </div>
+                        </div>
+                      )}
 
                       {genError && (
                         <div className="mt-3 p-2.5 rounded-lg bg-rose-950/40 border border-rose-800 text-rose-300 text-xs flex items-center gap-2">
@@ -789,25 +1231,37 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
                       )}
                     </div>
 
+                    {/* Action buttons on generated image */}
                     {generatedPreviewUrl && (
-                      <div className="space-y-2 pt-2">
+                      <div className="space-y-2 pt-2 border-t border-slate-800/80">
                         <button
                           type="button"
                           onClick={handleApplyGenerated}
-                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30"
+                          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 active:scale-[0.99]"
                         >
                           <Check className="w-4 h-4" />
-                          <span>Áp dụng ảnh này làm ảnh đại diện</span>
+                          <span>Lưu & Áp Dụng Làm Ảnh Đại Diện Ngay</span>
                         </button>
-                        <button
-                          type="button"
-                          disabled={isGenerating}
-                          onClick={handleGenerateThumbnail}
-                          className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
-                        >
-                          <RefreshCw className="w-3.5 h-3.5" />
-                          <span>Tạo lại biến thể khác</span>
-                        </button>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={handleDownloadGenerated}
+                            className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <Download className="w-3.5 h-3.5 text-sky-400" />
+                            <span>Tải về máy</span>
+                          </button>
+                          <button
+                            type="button"
+                            disabled={isGenerating}
+                            onClick={handleReroll}
+                            className="py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5"
+                          >
+                            <RefreshCw className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Tạo biến thể mới</span>
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

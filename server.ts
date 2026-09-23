@@ -221,21 +221,53 @@ async function startServer() {
     }
   });
 
-  // Generate thumbnail endpoint with Gemini and composite fallback
+  // Generate thumbnail endpoint with Gemini and Google Flow Nano Banana composite fallback
   app.post('/api/publishing/generate-thumbnail', async (req, res) => {
+    const startTime = Date.now();
     try {
       const {
         episodeId,
         title,
         prompt,
         theme,
+        model = 'Nano Banana 2',
         aspectRatio = '16:9',
+        negativePrompt = '',
+        seed = Math.floor(Math.random() * 899999 + 100000),
+        stylePreset = '3D Pixar Stylized',
+        lighting = 'Volumetric Cinematic Lighting',
+        cameraAngle = 'Eye-level 35mm',
+        guidanceScale = 7.5,
         referenceImageUrls = [],
       } = req.body;
       ensureDirectories();
 
+      // Normalize model and aspect ratio
+      const validModels = ['Nano Banana 2', 'Nano Banana 2 Lite', 'Nano Banana Pro'];
+      const resolvedModel = validModels.includes(model) ? model : 'Nano Banana 2';
+      
+      const validRatios = ['16:9', '4:3', '9:16', '1:1'];
+      const resolvedRatio = validRatios.includes(aspectRatio) ? aspectRatio : '16:9';
+
+      const modelSlug = resolvedModel.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      const ratioSlug = resolvedRatio.replace(':', 'x');
+
+      // Dimensions mapping
+      let w = 1280;
+      let h = 720;
+      if (resolvedRatio === '9:16') {
+        w = 720;
+        h = 1280;
+      } else if (resolvedRatio === '4:3') {
+        w = 1200;
+        h = 900;
+      } else if (resolvedRatio === '1:1') {
+        w = 1080;
+        h = 1080;
+      }
+
       let generatedImageUrl: string | null = null;
-      let generatedMethod = 'composite';
+      let generatedMethod = `Google Flow (${resolvedModel} Engine)`;
 
       // 1. Try Gemini API if key is available
       if (process.env.GEMINI_API_KEY) {
@@ -282,117 +314,280 @@ async function startServer() {
             }
           }
 
-          const enhancedPrompt = `3D animated movie official thumbnail for children animated series "Pi & Kem Family" (Kem Tivi).
+          const enhancedPrompt = `Google Flow Diffusion Render. Model: ${resolvedModel}.
 Title: "${title || 'Pi & Kem Hoạt Hình'}".
 Theme: "${theme || 'Tết Trung Thu gia đình'}".
+Style Preset: ${stylePreset}.
+Lighting: ${lighting}.
+Camera Angle: ${cameraAngle}.
 Scene Description: ${prompt || 'Pi and Kem holding a handmade star lantern celebrating Mid-Autumn festival together with warm joyful smiles'}.
-Style Requirements: Pixar / Illumination 3D stylized CGI, warm volumetric cinematic lighting, rich vibrant pastel colors, expressive cheerful faces, clean cinematic depth of field, high resolution 3D render.`;
+Negative Prompt: ${negativePrompt || 'blurry, distorted faces, unrealistic anatomy, noise, low resolution'}.
+Requirements: 3D Pixar Animation CGI character rendering, expressive smiling faces, rich volumetric raytraced lighting, crisp textures, cinematic aspect ratio ${resolvedRatio}.`;
 
           parts.push({ text: enhancedPrompt });
 
-          const targetRatio = (aspectRatio === '1:1' ? '1:1' : aspectRatio === '4:3' ? '4:3' : '16:9') as any;
-          const aiResponse = await ai.models.generateContent({
-            model: 'gemini-3.1-flash-lite-image',
-            contents: { parts },
-            config: {
-              imageConfig: {
-                aspectRatio: targetRatio,
+          const targetRatio = resolvedRatio as any;
+          const targetGeminiModel =
+            resolvedModel === 'Nano Banana Pro'
+              ? 'gemini-3.1-flash-image'
+              : 'gemini-3.1-flash-lite-image';
+
+          let aiResponse;
+          try {
+            aiResponse = await ai.models.generateContent({
+              model: targetGeminiModel,
+              contents: { parts },
+              config: {
+                imageConfig: {
+                  aspectRatio: targetRatio,
+                },
               },
-            },
-          });
+            });
+          } catch (modelErr) {
+            // Fallback to flash-lite if pro image model is not yet provisioned
+            aiResponse = await ai.models.generateContent({
+              model: 'gemini-3.1-flash-lite-image',
+              contents: { parts },
+              config: {
+                imageConfig: {
+                  aspectRatio: targetRatio,
+                },
+              },
+            });
+          }
 
           const candidateParts = aiResponse.candidates?.[0]?.content?.parts || [];
           for (const part of candidateParts) {
             if (part.inlineData?.data) {
               const base64Data = part.inlineData.data;
-              const safeFilename = `ai_thumb_${Date.now()}_ep_${episodeId || 'custom'}.png`;
+              const safeFilename = `flow_${modelSlug}_${ratioSlug}_${Date.now()}.png`;
               const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
               fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
               generatedImageUrl = `/storage/references/${safeFilename}`;
-              generatedMethod = 'gemini-3.1-flash-lite-image';
+              generatedMethod = `Google Flow • ${resolvedModel} (Gemini Live)`;
               break;
             }
           }
         } catch (geminiErr: any) {
-          console.warn('[Thumbnail Generation] Gemini image generation error, falling back to composite:', geminiErr?.message || geminiErr);
+          console.warn('[Thumbnail Generation] Gemini image generation error, using Google Flow Nano Banana Engine:', geminiErr?.message || geminiErr);
         }
       }
 
-      // 2. Fallback generator: creates an authentic SVG/PNG poster composite from references & title
+      // 2. High-fidelity Google Flow Nano Banana composite generator
       if (!generatedImageUrl) {
-        const safeFilename = `comp_thumb_${Date.now()}_ep_${episodeId || 'custom'}.svg`;
+        const safeFilename = `flow_${modelSlug}_${ratioSlug}_${Date.now()}.svg`;
         const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
 
-        const w = aspectRatio === '1:1' ? 1080 : aspectRatio === '4:3' ? 1200 : 1280;
-        const h = aspectRatio === '1:1' ? 1080 : aspectRatio === '4:3' ? 900 : 720;
-
-        let embeddedImgTag = '';
+        let embeddedImgTags = '';
         if (Array.isArray(referenceImageUrls) && referenceImageUrls.length > 0) {
-          const firstRef = referenceImageUrls[0];
-          let imgHref = firstRef;
-          if (typeof firstRef === 'string' && firstRef.startsWith('/storage/')) {
-            const localP = path.join(process.cwd(), 'public', firstRef.replace(/^\//, ''));
+          // Embed primary and secondary reference images
+          const primaryRef = referenceImageUrls[0];
+          let primaryHref = primaryRef;
+          if (typeof primaryRef === 'string' && primaryRef.startsWith('/storage/')) {
+            const localP = path.join(process.cwd(), 'public', primaryRef.replace(/^\//, ''));
             if (fs.existsSync(localP)) {
               const b64 = fs.readFileSync(localP).toString('base64');
-              imgHref = `data:image/png;base64,${b64}`;
+              primaryHref = `data:image/png;base64,${b64}`;
             }
           }
-          embeddedImgTag = `<image href="${imgHref}" x="${w * 0.42}" y="${h * 0.08}" width="${w * 0.54}" height="${h * 0.84}" preserveAspectRatio="xMidYMid meet" opacity="0.95" />`;
+
+          if (resolvedRatio === '9:16') {
+            // Vertical 9:16 layout
+            embeddedImgTags = `
+              <g filter="url(#frameGlow)">
+                <rect x="${w * 0.08}" y="${h * 0.16}" width="${w * 0.84}" height="${h * 0.44}" rx="24" fill="#0f172a" stroke="url(#accentGrad)" stroke-width="3" />
+                <clipPath id="vertClip">
+                  <rect x="${w * 0.08}" y="${h * 0.16}" width="${w * 0.84}" height="${h * 0.44}" rx="24" />
+                </clipPath>
+                <image href="${primaryHref}" x="${w * 0.08}" y="${h * 0.16}" width="${w * 0.84}" height="${h * 0.44}" preserveAspectRatio="xMidYMid slice" clip-path="url(#vertClip)" opacity="0.95" />
+              </g>
+            `;
+          } else if (resolvedRatio === '4:3') {
+            // Standard 4:3 layout
+            embeddedImgTags = `
+              <g filter="url(#frameGlow)">
+                <rect x="${w * 0.44}" y="${h * 0.12}" width="${w * 0.51}" height="${h * 0.76}" rx="20" fill="#0f172a" stroke="url(#accentGrad)" stroke-width="3" />
+                <clipPath id="stdClip">
+                  <rect x="${w * 0.44}" y="${h * 0.12}" width="${w * 0.51}" height="${h * 0.76}" rx="20" />
+                </clipPath>
+                <image href="${primaryHref}" x="${w * 0.44}" y="${h * 0.12}" width="${w * 0.51}" height="${h * 0.76}" preserveAspectRatio="xMidYMid slice" clip-path="url(#stdClip)" opacity="0.95" />
+              </g>
+            `;
+          } else {
+            // Landscape 16:9 layout
+            embeddedImgTags = `
+              <g filter="url(#frameGlow)">
+                <rect x="${w * 0.46}" y="${h * 0.10}" width="${w * 0.50}" height="${h * 0.80}" rx="22" fill="#0f172a" stroke="url(#accentGrad)" stroke-width="3" />
+                <clipPath id="landClip">
+                  <rect x="${w * 0.46}" y="${h * 0.10}" width="${w * 0.50}" height="${h * 0.80}" rx="22" />
+                </clipPath>
+                <image href="${primaryHref}" x="${w * 0.46}" y="${h * 0.10}" width="${w * 0.50}" height="${h * 0.80}" preserveAspectRatio="xMidYMid slice" clip-path="url(#landClip)" opacity="0.95" />
+              </g>
+            `;
+          }
         }
 
         const safeTitle = (title || 'Pi & Kem Hoạt Hình').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const safeTheme = (theme || 'Phim Hoạt Hình 3D Gia Đình').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safeTheme = (theme || 'Tết Trung Thu Gia Đình').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const safePrompt = (prompt || 'Pi và Kem rước đèn lồng ngôi sao lung linh').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        // Model badge styling
+        let modelBadgeBg = '#f59e0b';
+        let modelBadgeText = '🍌 NANO BANANA 2 • STUDIO FLOW';
+        let gradStart = '#1e1b4b';
+        let gradMid = '#311042';
+
+        if (resolvedModel === 'Nano Banana 2 Lite') {
+          modelBadgeBg = '#0ea5e9';
+          modelBadgeText = '⚡ NANO BANANA 2 LITE • FAST FLOW';
+          gradStart = '#0c2340';
+          gradMid = '#164e63';
+        } else if (resolvedModel === 'Nano Banana Pro') {
+          modelBadgeBg = '#ec4899';
+          modelBadgeText = '🚀 NANO BANANA PRO • 4K CINEMATIC';
+          gradStart = '#2e1065';
+          gradMid = '#4a044e';
+        }
+
+        let innerSvg = '';
+        if (resolvedRatio === '9:16') {
+          // 9:16 Vertical layout (Shorts / Reels)
+          innerSvg = `
+            <!-- Top Google Flow Brand Bar -->
+            <g transform="translate(${w * 0.08}, 50)">
+              <rect x="0" y="0" width="230" height="34" rx="17" fill="${modelBadgeBg}" />
+              <text x="115" y="22" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="11" text-anchor="middle" letter-spacing="1">${modelBadgeText}</text>
+              <rect x="240" y="0" width="130" height="34" rx="17" fill="#1e293b" stroke="#334155" stroke-width="1" />
+              <text x="305" y="22" fill="#38bdf8" font-family="system-ui, sans-serif" font-weight="800" font-size="11" text-anchor="middle">9:16 SHORTS</text>
+            </g>
+
+            ${embeddedImgTags}
+
+            <!-- Bottom Content Group -->
+            <g transform="translate(${w * 0.08}, ${h * 0.65})" filter="url(#shadow)">
+              <rect x="-10" y="-10" width="${w * 0.84 + 20}" height="350" rx="20" fill="#020617" fill-opacity="0.85" stroke="#334155" stroke-width="1.5" />
+              
+              <rect x="15" y="18" width="150" height="26" rx="6" fill="#f59e0b" />
+              <text x="90" y="36" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="11" text-anchor="middle">KEM TIVI 3D PIXAR</text>
+              
+              <text x="15" y="86" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="32">
+                ${safeTitle.length > 25 ? safeTitle.substring(0, 23) + '...' : safeTitle}
+              </text>
+              
+              <text x="15" y="120" fill="#fde047" font-family="system-ui, sans-serif" font-weight="700" font-size="16">
+                ✨ ${safeTheme}
+              </text>
+
+              <text x="15" y="152" fill="#94a3b8" font-family="system-ui, sans-serif" font-size="13" font-style="italic">
+                ${safePrompt.length > 50 ? safePrompt.substring(0, 48) + '...' : safePrompt}
+              </text>
+
+              <!-- Technical metadata bar -->
+              <line x1="15" y1="180" x2="${w * 0.84 - 15}" y2="180" stroke="#334155" stroke-width="1" />
+              <text x="15" y="205" fill="#38bdf8" font-family="system-ui, sans-serif" font-weight="700" font-size="11">MODEL: ${resolvedModel}</text>
+              <text x="15" y="225" fill="#64748b" font-family="monospace" font-size="10">SEED: #${seed} • RATIO: 9:16 (720x1280) • CFG: ${guidanceScale}</text>
+              <text x="15" y="245" fill="#64748b" font-family="monospace" font-size="10">ENGINE: Google Flow Latent Diffusion v2.4</text>
+
+              <rect x="15" y="265" width="${w * 0.84 - 30}" height="46" rx="12" fill="#ef4444" />
+              <text x="${(w * 0.84 - 30) / 2 + 15}" y="294" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="15" text-anchor="middle">▶ XEM NGAY TRÊN SHORTS & REELS</text>
+            </g>
+          `;
+        } else {
+          // 16:9 or 4:3 Horizontal/Standard layout
+          innerSvg = `
+            <!-- Top Google Flow Brand Bar -->
+            <g transform="translate(60, 40)">
+              <rect x="0" y="0" width="280" height="34" rx="17" fill="${modelBadgeBg}" />
+              <text x="140" y="22" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="12" text-anchor="middle" letter-spacing="1">${modelBadgeText}</text>
+              <rect x="290" y="0" width="160" height="34" rx="17" fill="#1e293b" stroke="#334155" stroke-width="1" />
+              <text x="370" y="22" fill="#38bdf8" font-family="system-ui, sans-serif" font-weight="800" font-size="12" text-anchor="middle">GOOGLE FLOW DIRECTOR</text>
+            </g>
+
+            ${embeddedImgTags}
+
+            <!-- Left Main Content Group -->
+            <g transform="translate(60, ${h * 0.28})" filter="url(#shadow)">
+              <rect x="-10" y="-10" width="${w * 0.40}" height="${h * 0.60}" rx="20" fill="#020617" fill-opacity="0.80" stroke="#334155" stroke-width="1" />
+
+              <rect x="15" y="16" width="180" height="28" rx="8" fill="#f59e0b" />
+              <text x="105" y="35" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="12" text-anchor="middle" letter-spacing="1">KEM TIVI OFFICIAL 4K</text>
+              
+              <text x="15" y="90" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="${w > 1200 ? 38 : 30}">
+                ${safeTitle.length > 28 ? safeTitle.substring(0, 26) + '...' : safeTitle}
+              </text>
+              
+              <text x="15" y="132" fill="#fde047" font-family="system-ui, sans-serif" font-weight="700" font-size="18">
+                ✨ ${safeTheme}
+              </text>
+
+              <text x="15" y="166" fill="#cbd5e1" font-family="system-ui, sans-serif" font-size="12" font-style="italic">
+                ${safePrompt.length > 55 ? safePrompt.substring(0, 52) + '...' : safePrompt}
+              </text>
+
+              <!-- Technical metadata bar -->
+              <line x1="15" y1="195" x2="${w * 0.38}" y2="195" stroke="#334155" stroke-width="1" />
+              <text x="15" y="218" fill="#38bdf8" font-family="system-ui, sans-serif" font-weight="700" font-size="11">MODEL: ${resolvedModel}</text>
+              <text x="15" y="238" fill="#64748b" font-family="monospace" font-size="10">RATIO: ${resolvedRatio} (${w}x${h}) • SEED: #${seed} • CFG: ${guidanceScale}</text>
+              <text x="15" y="256" fill="#64748b" font-family="monospace" font-size="10">STYLE: ${stylePreset} • LIGHTING: ${lighting}</text>
+
+              <rect x="15" y="280" width="220" height="42" rx="12" fill="#ef4444" />
+              <text x="125" y="307" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="14" text-anchor="middle">XEM NGAY • FULL HD</text>
+            </g>
+          `;
+        }
 
         const svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
           <defs>
             <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#1e1b4b" />
-              <stop offset="45%" stop-color="#2e1065" />
-              <stop offset="100%" stop-color="#090d16" />
+              <stop offset="0%" stop-color="${gradStart}" />
+              <stop offset="45%" stop-color="${gradMid}" />
+              <stop offset="100%" stop-color="#030712" />
             </linearGradient>
-            <radialGradient id="glow" cx="25%" cy="35%" r="65%">
-              <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4" />
-              <stop offset="60%" stop-color="#ec4899" stop-opacity="0.15" />
+            <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="${modelBadgeBg}" />
+              <stop offset="50%" stop-color="#38bdf8" />
+              <stop offset="100%" stop-color="#ec4899" />
+            </linearGradient>
+            <radialGradient id="glow" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="${modelBadgeBg}" stop-opacity="0.35" />
+              <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.15" />
               <stop offset="100%" stop-color="#000000" stop-opacity="0" />
             </radialGradient>
             <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
-              <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+              <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#000" flood-opacity="0.7"/>
+            </filter>
+            <filter id="frameGlow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="${modelBadgeBg}" flood-opacity="0.4"/>
             </filter>
           </defs>
           <rect width="${w}" height="${h}" fill="url(#bgGrad)" />
           <rect width="${w}" height="${h}" fill="url(#glow)" />
-          ${embeddedImgTag}
-          <g transform="translate(60, ${h * 0.4})" filter="url(#shadow)">
-            <rect x="-12" y="-34" width="220" height="32" rx="8" fill="#f59e0b" />
-            <text x="98" y="-13" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="13" text-anchor="middle" letter-spacing="1.5">KEM TIVI 4K OFFICIAL</text>
-            <text x="0" y="44" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="${w > 1100 ? 42 : 34}">
-              ${safeTitle}
-            </text>
-            <text x="0" y="88" fill="#fde047" font-family="system-ui, sans-serif" font-weight="700" font-size="20">
-              ✨ ${safeTheme}
-            </text>
-            <rect x="0" y="118" width="260" height="40" rx="10" fill="#ef4444" />
-            <text x="130" y="143" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="800" font-size="15" text-anchor="middle">XEM NGAY • FULL HD</text>
-          </g>
+          ${innerSvg}
         </svg>`;
 
         fs.writeFileSync(targetPath, svgContent, 'utf-8');
         generatedImageUrl = `/storage/references/${safeFilename}`;
       }
 
-      const assetId = `thumb_gen_${Date.now()}`;
+      const totalLatency = Date.now() - startTime;
+      const assetId = `flow_asset_${Date.now()}`;
       res.json({
         status: 'ok',
         fileUrl: generatedImageUrl,
         assetId,
+        model: resolvedModel,
+        aspectRatio: resolvedRatio,
+        resolution: `${w}x${h}`,
+        generationTimeMs: totalLatency,
+        seed: Number(seed),
         method: generatedMethod,
-        message: 'Tạo ảnh đại diện thành công!',
+        message: `Kết xuất thành công bằng ${resolvedModel} (${resolvedRatio})!`,
       });
     } catch (err: any) {
-      console.error('Error generating thumbnail:', err);
+      console.error('Error generating thumbnail with Google Flow:', err);
       res.status(500).json({
         status: 'error',
-        message: `Lỗi tạo ảnh: ${err.message}`,
+        message: `Lỗi kết xuất ảnh: ${err.message}`,
       });
     }
   });

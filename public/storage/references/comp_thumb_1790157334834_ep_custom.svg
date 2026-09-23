@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+          <defs>
+            <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#1e1b4b" />
+              <stop offset="45%" stop-color="#2e1065" />
+              <stop offset="100%" stop-color="#090d16" />
+            </linearGradient>
+            <radialGradient id="glow" cx="25%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.4" />
+              <stop offset="60%" stop-color="#ec4899" stop-opacity="0.15" />
+              <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+            </radialGradient>
+            <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+              <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+            </filter>
+          </defs>
+          <rect width="1280" height="720" fill="url(#bgGrad)" />
+          <rect width="1280" height="720" fill="url(#glow)" />
+          
+          <g transform="translate(60, 288)" filter="url(#shadow)">
+            <rect x="-12" y="-34" width="220" height="32" rx="8" fill="#f59e0b" />
+            <text x="98" y="-13" fill="#0f172a" font-family="system-ui, sans-serif" font-weight="900" font-size="13" text-anchor="middle" letter-spacing="1.5">KEM TIVI 4K OFFICIAL</text>
+            <text x="0" y="44" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="900" font-size="42">
+              Pi &amp; Kem Hoạt Hình
+            </text>
+            <text x="0" y="88" fill="#fde047" font-family="system-ui, sans-serif" font-weight="700" font-size="20">
+              ✨ 3D Animation Pixar
+            </text>
+            <rect x="0" y="118" width="260" height="40" rx="10" fill="#ef4444" />
+            <text x="130" y="143" fill="#ffffff" font-family="system-ui, sans-serif" font-weight="800" font-size="15" text-anchor="middle">XEM NGAY • FULL HD</text>
+          </g>
+        </svg>
