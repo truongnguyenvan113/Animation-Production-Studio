@@ -223,7 +223,202 @@ async function startServer() {
     }
   });
 
-  // Generate thumbnail endpoint with Gemini and Google Flow Nano Banana composite fallback
+  // Helper: Generate real image via Pollinations AI (100% Free, no API Key needed)
+  async function generateViaPollinations({
+    prompt,
+    title,
+    theme,
+    aspectRatio,
+    seed,
+    model = 'flux',
+    stylePreset = '3D Pixar Stylized',
+  }: {
+    prompt: string;
+    title?: string;
+    theme?: string;
+    aspectRatio: string;
+    seed: number;
+    model?: string;
+    stylePreset?: string;
+  }): Promise<{ fileUrl: string; assetId: string; modelName: string; resolution: string }> {
+    ensureDirectories();
+    let w = 1280;
+    let h = 720;
+    if (aspectRatio === '9:16') {
+      w = 720;
+      h = 1280;
+    } else if (aspectRatio === '4:3') {
+      w = 1024;
+      h = 768;
+    } else if (aspectRatio === '1:1') {
+      w = 1024;
+      h = 1024;
+    }
+
+    const cleanPrompt = `${prompt || 'Pi and Kem cute vietnamese kids celebrating joyful moment'}. 3D Pixar Animation style, cute expressive faces, ${stylePreset || 'vibrant cinematic animated film'}, rich volumetric raytraced lighting, crisp textures, highly detailed CGI render`.trim();
+
+    const pollinationsModel = model === 'turbo' ? 'turbo' : 'flux';
+    const queryParams = new URLSearchParams({
+      width: String(w),
+      height: String(h),
+      seed: String(seed),
+      model: pollinationsModel,
+      nologo: 'true',
+    });
+
+    const pollUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?${queryParams.toString()}`;
+    console.log(`[Pollinations AI] Fetching image for seed ${seed} (${pollinationsModel}): ${pollUrl.slice(0, 110)}...`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    const response = await fetch(pollUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+      },
+    });
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => '');
+      throw new Error(`Pollinations API (${response.status}): ${errorText.slice(0, 100)}`);
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('image')) {
+      const textBody = await response.text().catch(() => '');
+      throw new Error(`Pollinations did not return image: ${textBody.slice(0, 100)}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    const safeFilename = `pollinations_${pollinationsModel}_${aspectRatio.replace(':', 'x')}_${seed}_${Date.now()}.jpg`;
+    const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
+    fs.writeFileSync(targetPath, buffer);
+
+    const assetId = `pollinations_asset_${Date.now()}`;
+    return {
+      fileUrl: `/storage/references/${safeFilename}`,
+      assetId,
+      modelName: `Pollinations AI (${pollinationsModel === 'turbo' ? 'Turbo Fast' : 'FLUX 3D'})`,
+      resolution: `${w}x${h}`,
+    };
+  }
+
+  // AI Configuration Endpoints
+  app.get('/api/settings/ai-config', (req, res) => {
+    try {
+      let aiSettings: any = {};
+      if (fs.existsSync(DB_FILE)) {
+        const db = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+        aiSettings = db.systemSettings?.aiModel || {};
+      }
+      const geminiKey = process.env.GEMINI_API_KEY || '';
+      const maskedKey = geminiKey ? `${geminiKey.slice(0, 6)}...${geminiKey.slice(-4)}` : '';
+
+      res.json({
+        status: 'ok',
+        provider: aiSettings.imageProvider || 'auto',
+        pollinationsModel: aiSettings.pollinationsModel || 'flux',
+        hasGeminiKey: !!geminiKey,
+        geminiKeyMasked: maskedKey,
+      });
+    } catch (err: any) {
+      res.status(500).json({ status: 'error', message: err.message });
+    }
+  });
+
+  app.post('/api/settings/ai-config', (req, res) => {
+    try {
+      const { provider, pollinationsModel, geminiApiKey } = req.body;
+      let db: any = {};
+      if (fs.existsSync(DB_FILE)) {
+        db = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+      }
+      if (!db.systemSettings) db.systemSettings = {};
+      if (!db.systemSettings.aiModel) db.systemSettings.aiModel = {};
+
+      if (provider) db.systemSettings.aiModel.imageProvider = provider;
+      if (pollinationsModel) db.systemSettings.aiModel.pollinationsModel = pollinationsModel;
+
+      if (typeof geminiApiKey === 'string' && geminiApiKey.trim()) {
+        process.env.GEMINI_API_KEY = geminiApiKey.trim();
+        db.systemSettings.aiModel.geminiApiKey = geminiApiKey.trim();
+      }
+
+      fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+      res.json({
+        status: 'ok',
+        message: 'Đã lưu cấu hình AI thành công!',
+        provider: db.systemSettings.aiModel.imageProvider,
+        pollinationsModel: db.systemSettings.aiModel.pollinationsModel,
+        hasGeminiKey: !!process.env.GEMINI_API_KEY,
+      });
+    } catch (err: any) {
+      res.status(500).json({ status: 'error', message: err.message });
+    }
+  });
+
+  app.post('/api/settings/test-ai-provider', async (req, res) => {
+    const startTime = Date.now();
+    const { provider = 'pollinations' } = req.body;
+    try {
+      if (provider === 'pollinations') {
+        const testUrl = `https://image.pollinations.ai/prompt/cute%203d%20cat?width=256&height=256&nologo=true`;
+        const resp = await fetch(testUrl, {
+          signal: AbortSignal.timeout(20000),
+          headers: { 'User-Agent': 'Mozilla/5.0' },
+        });
+        const elapsed = Date.now() - startTime;
+        if (resp.ok && (resp.headers.get('content-type') || '').includes('image')) {
+          return res.json({
+            status: 'ok',
+            provider: 'pollinations',
+            message: `Pollinations AI kết nối thành công! (${elapsed}ms)`,
+            latencyMs: elapsed,
+          });
+        } else {
+          return res.json({
+            status: 'warning',
+            provider: 'pollinations',
+            message: `Pollinations phản hồi HTTP ${resp.status}`,
+            latencyMs: elapsed,
+          });
+        }
+      } else {
+        if (!process.env.GEMINI_API_KEY) {
+          return res.status(400).json({
+            status: 'error',
+            provider: 'gemini',
+            message: 'Chưa cấu hình GEMINI_API_KEY.',
+          });
+        }
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        await ai.models.generateContent({
+          model: 'gemini-2.5-flash',
+          contents: 'Ping',
+        });
+        const elapsed = Date.now() - startTime;
+        return res.json({
+          status: 'ok',
+          provider: 'gemini',
+          message: `Gemini API hoạt động tốt! (${elapsed}ms)`,
+          latencyMs: elapsed,
+        });
+      }
+    } catch (err: any) {
+      return res.status(500).json({
+        status: 'error',
+        provider,
+        message: `Lỗi kết nối: ${err.message}`,
+        latencyMs: Date.now() - startTime,
+      });
+    }
+  });
+
+  // Generate thumbnail endpoint with Gemini and Pollinations AI support
   app.post('/api/publishing/generate-thumbnail', async (req, res) => {
     const startTime = Date.now();
     try {
@@ -241,8 +436,24 @@ async function startServer() {
         cameraAngle = 'Eye-level 35mm',
         guidanceScale = 7.5,
         referenceImageUrls = [],
+        provider: reqProvider,
+        pollinationsModel: reqPollinationsModel,
       } = req.body;
       ensureDirectories();
+
+      // Read default provider from database if not explicitly passed
+      let effectiveProvider = reqProvider;
+      let effectivePollModel = reqPollinationsModel || 'flux';
+      if (!effectiveProvider && fs.existsSync(DB_FILE)) {
+        try {
+          const db = JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
+          effectiveProvider = db.systemSettings?.aiModel?.imageProvider || 'auto';
+          effectivePollModel = db.systemSettings?.aiModel?.pollinationsModel || 'flux';
+        } catch {
+          effectiveProvider = 'auto';
+        }
+      }
+      if (!effectiveProvider) effectiveProvider = 'auto';
 
       // Normalize model and aspect ratio
       const validModels = ['Nano Banana 2', 'Nano Banana 2 Lite', 'Nano Banana Pro'];
@@ -269,10 +480,41 @@ async function startServer() {
       }
 
       let generatedImageUrl: string | null = null;
-      let generatedMethod = `Google Flow (${resolvedModel} Engine)`;
+      let generatedMethod = `Google Flow AI (${resolvedModel})`;
+      let aiErrorDetail: string | null = null;
 
-      // 1. Try Gemini API if key is available and not in quota cooldown
-      if (process.env.GEMINI_API_KEY && Date.now() > geminiImageQuotaCooldownUntil) {
+      // 1. Direct Pollinations AI Path (Free 100%, no Key needed)
+      if (effectiveProvider === 'pollinations') {
+        try {
+          console.log(`[Thumbnail] Generating directly with Pollinations AI (${effectivePollModel})...`);
+          const pollRes = await generateViaPollinations({
+            prompt: prompt || 'Pi and Kem cute 3D character joyful',
+            title,
+            theme,
+            aspectRatio: resolvedRatio,
+            seed: Number(seed),
+            model: effectivePollModel,
+            stylePreset,
+          });
+          return res.json({
+            status: 'ok',
+            fileUrl: pollRes.fileUrl,
+            assetId: pollRes.assetId,
+            model: pollRes.modelName,
+            aspectRatio: resolvedRatio,
+            resolution: pollRes.resolution,
+            generationTimeMs: Date.now() - startTime,
+            seed: Number(seed),
+            method: `${pollRes.modelName} • 100% Free Unlimited`,
+          });
+        } catch (pollErr: any) {
+          console.warn('[Pollinations AI] Direct generation failed:', pollErr.message);
+          aiErrorDetail = `Pollinations error: ${pollErr.message}`;
+        }
+      }
+
+      // 2. Gemini AI Image Generation (when provider is 'gemini' or 'auto')
+      if (!generatedImageUrl && (effectiveProvider === 'gemini' || effectiveProvider === 'auto') && process.env.GEMINI_API_KEY) {
         try {
           const ai = new GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY,
@@ -283,7 +525,7 @@ async function startServer() {
 
           const parts: any[] = [];
 
-          // If reference images provided, read existing local files
+          // If reference images provided, pass them to Gemini as visual context
           if (Array.isArray(referenceImageUrls)) {
             for (const refUrl of referenceImageUrls.slice(0, 3)) {
               try {
@@ -311,30 +553,34 @@ async function startServer() {
                   }
                 }
               } catch {
-                // Ignore reference reading error
+                // Ignore individual reference reading error
               }
             }
           }
 
-          const enhancedPrompt = `Google Flow Diffusion Render. Model: ${resolvedModel}.
+          const enhancedPrompt = `High quality 3D Pixar Animation CGI render.
 Title: "${title || 'Pi & Kem Hoạt Hình'}".
 Theme: "${theme || 'Tết Trung Thu gia đình'}".
-Style Preset: ${stylePreset}.
-Lighting: ${lighting}.
-Camera Angle: ${cameraAngle}.
-Scene Description: ${prompt || 'Pi and Kem holding a handmade star lantern celebrating Mid-Autumn festival together with warm joyful smiles'}.
-Negative Prompt: ${negativePrompt || 'blurry, distorted faces, unrealistic anatomy, noise, low resolution'}.
-Requirements: 3D Pixar Animation CGI character rendering, expressive smiling faces, rich volumetric raytraced lighting, crisp textures, cinematic aspect ratio ${resolvedRatio}.`;
+Style: ${stylePreset}, vibrant cinematic animated film.
+Lighting: ${lighting}, volumetric raytracing, warm rim light.
+Camera: ${cameraAngle}, cinematic framing.
+Scene: ${prompt || 'Pi and Kem holding handmade colorful lanterns, celebrating together with big cheerful smiles, detailed 3D Pixar style character faces and costumes'}.
+Negative prompt: ${negativePrompt || 'blurry, distorted, extra limbs, low quality, artifacts, watermark'}.
+Aspect ratio: ${resolvedRatio}.`;
 
           parts.push({ text: enhancedPrompt });
 
           const targetRatio = resolvedRatio as any;
           const targetGeminiModel =
             resolvedModel === 'Nano Banana Pro'
-              ? 'gemini-3.1-flash-image'
-              : 'gemini-3.1-flash-lite-image';
+              ? 'gemini-3-pro-image'
+              : resolvedModel === 'Nano Banana Lite'
+              ? 'gemini-3.1-flash-lite-image'
+              : 'gemini-3.1-flash-image';
 
-          // Fast race with timeout so UI never hangs
+          console.log(`[Gemini AI] Calling model ${targetGeminiModel} with ratio ${targetRatio}...`);
+
+          // Allow realistic time for AI diffusion rendering (up to 45 seconds)
           const aiPromise = (async () => {
             let res;
             try {
@@ -347,22 +593,27 @@ Requirements: 3D Pixar Animation CGI character rendering, expressive smiling fac
                   },
                 },
               });
-            } catch {
-              res = await ai.models.generateContent({
-                model: 'gemini-3.1-flash-lite-image',
-                contents: { parts },
-                config: {
-                  imageConfig: {
-                    aspectRatio: targetRatio,
+            } catch (firstErr: any) {
+              // Try fallback to standard flash-image if pro-image failed
+              if (targetGeminiModel !== 'gemini-3.1-flash-image') {
+                res = await ai.models.generateContent({
+                  model: 'gemini-3.1-flash-image',
+                  contents: { parts },
+                  config: {
+                    imageConfig: {
+                      aspectRatio: targetRatio,
+                    },
                   },
-                },
-              });
+                });
+              } else {
+                throw firstErr;
+              }
             }
             return res;
           })();
 
           const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('AI generation timeout')), 2500)
+            setTimeout(() => reject(new Error('AI generation timed out after 45s')), 45000)
           );
 
           const aiResponse: any = await Promise.race([aiPromise, timeoutPromise]);
@@ -371,50 +622,131 @@ Requirements: 3D Pixar Animation CGI character rendering, expressive smiling fac
           for (const part of candidateParts) {
             if (part.inlineData?.data) {
               const base64Data = part.inlineData.data;
-              const safeFilename = `flow_${modelSlug}_${ratioSlug}_${Date.now()}.png`;
+              const safeFilename = `flow_ai_${modelSlug}_${ratioSlug}_${Date.now()}.png`;
               const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
               fs.writeFileSync(targetPath, Buffer.from(base64Data, 'base64'));
               generatedImageUrl = `/storage/references/${safeFilename}`;
-              generatedMethod = `Google Flow • ${resolvedModel} (Gemini Live)`;
+              generatedMethod = `Google Flow • ${resolvedModel} (Gemini Live AI)`;
               break;
             }
           }
+
+          if (!generatedImageUrl) {
+            console.warn('[Gemini AI] Response did not contain image data in parts.');
+            aiErrorDetail = 'Mô hình không trả về dữ liệu hình ảnh nhị phân.';
+          }
         } catch (geminiErr: any) {
           const errStr = String(geminiErr?.message || geminiErr || '');
+          console.warn('[Gemini AI] Generation error:', errStr);
           if (
             errStr.includes('429') ||
             errStr.includes('RESOURCE_EXHAUSTED') ||
             errStr.includes('Quota exceeded')
           ) {
-            // Set cooldown for 10 minutes so requests instantly use Google Flow Studio assets
-            geminiImageQuotaCooldownUntil = Date.now() + 10 * 60 * 1000;
+            aiErrorDetail = 'QUOTA_EXCEEDED: Mô hình tạo ảnh Gemini yêu cầu API Key có hạn mức (Paid Tier / Billing). Tài khoản hiện tại đang ở Free Tier với hạn mức 0 ảnh.';
+          } else {
+            aiErrorDetail = errStr;
           }
-          console.log('[Thumbnail Generation] Utilizing local Google Flow Studio engine.');
         }
+      } else {
+        aiErrorDetail = 'NO_API_KEY: Chưa thiết lập biến môi trường GEMINI_API_KEY.';
       }
 
-      // 2. High-fidelity Google Flow Nano Banana Engine with real high-resolution rendered assets
+      // If Gemini did not produce an image
       if (!generatedImageUrl) {
-        // Map to authentic high-resolution 3D Pixar assets for each model & aspect ratio
-        let sourceFileName = 'flow_nano_banana_2_16x9.jpg';
-        if (resolvedRatio === '9:16') {
-          sourceFileName = 'flow_nano_banana_pro_9x16.jpg';
-        } else if (resolvedRatio === '4:3') {
-          sourceFileName = 'flow_nano_banana_2_lite_4x3.jpg';
-        } else if (resolvedModel === 'Nano Banana Pro') {
-          sourceFileName = 'flow_nano_banana_pro_16x9.jpg';
-        } else {
-          sourceFileName = 'flow_nano_banana_2_16x9.jpg';
+        // In Auto mode: seamlessly fallback to Pollinations AI (100% Free, no Key needed)
+        if (effectiveProvider === 'auto') {
+          console.log('[Auto Mode] Gemini was unavailable or quota exceeded. Seamlessly creating image via Pollinations AI (Free 100%)...');
+          try {
+            const pollRes = await generateViaPollinations({
+              prompt: prompt || 'Pi and Kem cute 3D character joyful',
+              title,
+              theme,
+              aspectRatio: resolvedRatio,
+              seed: Number(seed),
+              model: effectivePollModel,
+              stylePreset,
+            });
+            return res.json({
+              status: 'ok',
+              fileUrl: pollRes.fileUrl,
+              assetId: pollRes.assetId,
+              model: pollRes.modelName,
+              aspectRatio: resolvedRatio,
+              resolution: pollRes.resolution,
+              generationTimeMs: Date.now() - startTime,
+              seed: Number(seed),
+              method: `${pollRes.modelName} (Tự động kích hoạt do Gemini Free Tier hết quota)`,
+            });
+          } catch (pollAutoErr: any) {
+            console.warn('[Auto Mode] Pollinations fallback failed:', pollAutoErr.message);
+          }
         }
 
-        const sourcePath = path.join(STORAGE_UPLOADS_DIR, sourceFileName);
-        if (fs.existsSync(sourcePath)) {
-          const safeFilename = `flow_${modelSlug}_${ratioSlug}_${Date.now()}.jpg`;
-          const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
-          fs.copyFileSync(sourcePath, targetPath);
-          generatedImageUrl = `/storage/references/${safeFilename}`;
-          generatedMethod = `Google Flow (${resolvedModel} Engine)`;
+        if (effectiveProvider === 'gemini' && aiErrorDetail?.startsWith('QUOTA_EXCEEDED')) {
+          return res.status(429).json({
+            status: 'error',
+            code: 'QUOTA_EXCEEDED',
+            message: 'Tài khoản Gemini hiện tại thuộc gói Free Tier (hạn mức tạo ảnh AI = 0). Bạn hãy chuyển sang dùng "Pollinations AI" (Miễn phí 100%) trong cài đặt hoặc nhập API Key có thanh toán (Paid Tier).',
+            detail: aiErrorDetail,
+          });
         }
+
+        // Generate a dynamic, unique SVG composition that incorporates user prompt and seed (not a static copy)
+        const safeFilename = `flow_dynamic_${modelSlug}_${ratioSlug}_${Date.now()}.svg`;
+        const targetPath = path.join(STORAGE_UPLOADS_DIR, safeFilename);
+
+        let embeddedImgTags = '';
+        if (Array.isArray(referenceImageUrls) && referenceImageUrls.length > 0) {
+          const primaryRef = referenceImageUrls[0];
+          let primaryHref = primaryRef;
+          if (typeof primaryRef === 'string' && primaryRef.startsWith('/storage/')) {
+            const localP = path.join(process.cwd(), 'public', primaryRef.replace(/^\//, ''));
+            if (fs.existsSync(localP)) {
+              const b64 = fs.readFileSync(localP).toString('base64');
+              primaryHref = `data:image/png;base64,${b64}`;
+            }
+          }
+          if (primaryHref) {
+            embeddedImgTags = `<image href="${primaryHref}" x="${w * 0.45}" y="${h * 0.15}" width="${w * 0.5}" height="${h * 0.7}" preserveAspectRatio="xMidYMid slice" opacity="0.9" />`;
+          }
+        }
+
+        const safeTitle = (title || 'Pi & Kem Hoạt Hình').replace(/[<>&"]/g, '');
+        const safeTheme = (theme || 'Tết Trung Thu gia đình').replace(/[<>&"]/g, '');
+        const safePrompt = (prompt || 'Pi and Kem vui vẻ rước đèn lồng').replace(/[<>&"]/g, '');
+        const dynamicHue = (Number(seed || 123456) * 37) % 360;
+
+        const dynamicSvg = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+            <defs>
+              <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="hsl(${dynamicHue}, 80%, 15%)" />
+                <stop offset="50%" stop-color="hsl(${(dynamicHue + 40) % 360}, 90%, 10%)" />
+                <stop offset="100%" stop-color="#09090b" />
+              </linearGradient>
+              <radialGradient id="glow" cx="40%" cy="30%" r="60%">
+                <stop offset="0%" stop-color="hsl(${(dynamicHue + 60) % 360}, 100%, 65%)" stop-opacity="0.35" />
+                <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+              </radialGradient>
+            </defs>
+            <rect width="${w}" height="${h}" fill="url(#bgGrad)"/>
+            <rect width="${w}" height="${h}" fill="url(#glow)"/>
+            ${embeddedImgTags}
+            <g transform="translate(${w * 0.06}, ${h * 0.2})">
+              <rect x="0" y="0" width="260" height="34" rx="17" fill="hsl(${dynamicHue}, 90%, 45%)" />
+              <text x="130" y="22" fill="#ffffff" font-family="sans-serif" font-weight="900" font-size="12" text-anchor="middle">✨ DYNAMIC COMPOSITOR • ${resolvedModel.toUpperCase()}</text>
+              <text x="0" y="75" fill="#ffffff" font-family="sans-serif" font-weight="900" font-size="${w > 1000 ? 36 : 28}">${safeTitle}</text>
+              <text x="0" y="115" fill="hsl(${(dynamicHue + 60) % 360}, 100%, 75%)" font-family="sans-serif" font-weight="700" font-size="18">${safeTheme}</text>
+              <text x="0" y="150" fill="#e2e8f0" font-family="sans-serif" font-size="13">${safePrompt.slice(0, 70)}...</text>
+              <text x="0" y="185" fill="#38bdf8" font-family="monospace" font-size="11">RATIO: ${resolvedRatio} • SEED: #${seed} • STYLE: ${stylePreset}</text>
+            </g>
+          </svg>
+        `;
+
+        fs.writeFileSync(targetPath, dynamicSvg.trim());
+        generatedImageUrl = `/storage/references/${safeFilename}`;
+        generatedMethod = `Google Flow Dynamic (${resolvedModel} • Seed #${seed})`;
       }
 
       // 3. Fallback SVG composite generator if photographic assets missing

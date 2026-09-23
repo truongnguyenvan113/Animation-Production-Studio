@@ -66,12 +66,39 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
   const [isMigrating, setIsMigrating] = useState(false);
   const [migrationReport, setMigrationReport] = useState<any | null>(null);
 
+  // AI Provider & API Key States
+  const [serverAiConfig, setServerAiConfig] = useState<{
+    hasGeminiKey: boolean;
+    geminiKeyMasked: string;
+    provider: string;
+    pollinationsModel: string;
+  } | null>(null);
+  const [inputGeminiKey, setInputGeminiKey] = useState('');
+  const [aiTestLoading, setAiTestLoading] = useState<string | null>(null);
+  const [aiTestResult, setAiTestResult] = useState<{
+    provider: string;
+    status: 'ok' | 'warning' | 'error';
+    message: string;
+    latencyMs?: number;
+  } | null>(null);
+
   useEffect(() => {
     setSettings(systemSettingsService.getSettings());
     const unsub = storageService.subscribe(() => {
       setDiskStatus(storageService.getDiskSyncStatus());
       setHasLocalStorage(storageService.hasLocalStorageData());
     });
+
+    // Load server AI config
+    fetch('/api/settings/ai-config')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.status === 'ok') {
+          setServerAiConfig(data);
+        }
+      })
+      .catch(() => {});
+
     return unsub;
   }, []);
 
@@ -160,10 +187,57 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     systemSettingsService.updateSettings(settings);
+
+    // Persist AI provider and optional key to server
+    try {
+      await fetch('/api/settings/ai-config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: settings.aiModel.imageProvider || 'auto',
+          pollinationsModel: settings.aiModel.pollinationsModel || 'flux',
+          geminiApiKey: inputGeminiKey.trim() || undefined,
+        }),
+      });
+      const res = await fetch('/api/settings/ai-config');
+      const data = await res.json();
+      if (data.status === 'ok') setServerAiConfig(data);
+      if (inputGeminiKey.trim()) setInputGeminiKey('');
+    } catch (err) {
+      console.warn('Could not sync ai-config to server:', err);
+    }
+
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 2500);
+  };
+
+  const handleTestAi = async (provider: 'pollinations' | 'gemini') => {
+    setAiTestLoading(provider);
+    setAiTestResult(null);
+    try {
+      const res = await fetch('/api/settings/test-ai-provider', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider }),
+      });
+      const data = await res.json();
+      setAiTestResult({
+        provider,
+        status: data.status === 'ok' ? 'ok' : data.status === 'warning' ? 'warning' : 'error',
+        message: data.message || 'Kiểm tra hoàn tất',
+        latencyMs: data.latencyMs,
+      });
+    } catch (err: any) {
+      setAiTestResult({
+        provider,
+        status: 'error',
+        message: `Lỗi kết nối: ${err.message}`,
+      });
+    } finally {
+      setAiTestLoading(null);
+    }
   };
 
   const handleResetSettings = () => {
@@ -881,13 +955,259 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
           {/* TAB 5: AI MODELS & COMPOSITION (CHỈNH SỬA ĐƯỢC) */}
           {/* ========================================================= */}
           {activeCategory === 'aiModel' && (
-            <div className="space-y-5">
+            <div className="space-y-6">
               <div className="border-b border-slate-800 pb-3">
-                <h3 className="text-base font-bold text-white">Mô Hình AI & Bố Cục Khung Hình (Chỉnh sửa được)</h3>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-amber-400" />
+                  <span>Bộ Chuyển Đổi Engine AI & Quản Lý API Key</span>
+                </h3>
                 <p className="text-xs text-slate-400 mt-1">
-                  Cấu hình các mô hình AI tạo sinh ảnh/video và các bộ lọc bố cục hiển thị.
+                  Linh hoạt chuyển đổi giữa Google Gemini API và Pollinations AI (Miễn phí 100%, không cần Key, phù hợp Mac mini 2018 / Local).
                 </p>
               </div>
+
+              {/* 1. Engine Provider Selection Cards */}
+              <div className="space-y-3">
+                <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
+                  <span>1. Chọn Engine Tạo Ảnh AI:</span>
+                  <span className="text-[11px] font-mono text-amber-400">
+                    Đang chọn: {settings.aiModel.imageProvider === 'pollinations' ? 'Pollinations AI (Free)' : settings.aiModel.imageProvider === 'gemini' ? 'Google Gemini API' : 'Tự Động (Auto Fallback)'}
+                  </span>
+                </label>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  {/* Option 1: Pollinations */}
+                  <div
+                    onClick={() =>
+                      setSettings({
+                        ...settings,
+                        aiModel: { ...settings.aiModel, imageProvider: 'pollinations' },
+                      })
+                    }
+                    className={`p-4 rounded-xl border cursor-pointer transition-all relative ${
+                      settings.aiModel.imageProvider === 'pollinations'
+                        ? 'bg-rose-950/30 border-rose-500 ring-2 ring-rose-500/40 shadow-lg shadow-rose-500/10'
+                        : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🌸</span>
+                        <div>
+                          <h4 className="text-xs font-bold text-white">Pollinations AI</h4>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold">100% Miễn Phí</span>
+                        </div>
+                      </div>
+                      {settings.aiModel.imageProvider === 'pollinations' && (
+                        <CheckCircle className="w-4 h-4 text-rose-400" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                      Không cần API key, không giới hạn lượt tạo, không bao giờ lo lỗi 429 Quota Exceeded. Tối ưu hoàn hảo cho Mac mini 2018 (Intel GPU).
+                    </p>
+                    <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-rose-300 font-mono">
+                      <span>FLUX 3D Engine</span>
+                      <span className="text-emerald-400">● Unlimited</span>
+                    </div>
+                  </div>
+
+                  {/* Option 2: Auto Fallback (Recommended) */}
+                  <div
+                    onClick={() =>
+                      setSettings({
+                        ...settings,
+                        aiModel: { ...settings.aiModel, imageProvider: 'auto' },
+                      })
+                    }
+                    className={`p-4 rounded-xl border cursor-pointer transition-all relative ${
+                      settings.aiModel.imageProvider === 'auto' || !settings.aiModel.imageProvider
+                        ? 'bg-amber-950/30 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
+                        : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">⚡</span>
+                        <div>
+                          <h4 className="text-xs font-bold text-white">Tự Động (Auto)</h4>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">Khuyên Dùng</span>
+                        </div>
+                      </div>
+                      {(settings.aiModel.imageProvider === 'auto' || !settings.aiModel.imageProvider) && (
+                        <CheckCircle className="w-4 h-4 text-amber-400" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                      Ưu tiên Gemini API; nếu hết quota (429) hoặc tài khoản ở Free Tier thì tự động chuyển sang Pollinations tạo ảnh mới độc bản!
+                    </p>
+                    <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-amber-300 font-mono">
+                      <span>Gemini ➔ Pollinations</span>
+                      <span className="text-emerald-400">● 100% Uptime</span>
+                    </div>
+                  </div>
+
+                  {/* Option 3: Gemini Cloud API */}
+                  <div
+                    onClick={() =>
+                      setSettings({
+                        ...settings,
+                        aiModel: { ...settings.aiModel, imageProvider: 'gemini' },
+                      })
+                    }
+                    className={`p-4 rounded-xl border cursor-pointer transition-all relative ${
+                      settings.aiModel.imageProvider === 'gemini'
+                        ? 'bg-sky-950/30 border-sky-400 ring-2 ring-sky-400/40 shadow-lg shadow-sky-500/10'
+                        : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">💎</span>
+                        <div>
+                          <h4 className="text-xs font-bold text-white">Google Gemini API</h4>
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 font-bold">Paid Key</span>
+                        </div>
+                      </div>
+                      {settings.aiModel.imageProvider === 'gemini' && (
+                        <CheckCircle className="w-4 h-4 text-sky-400" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed mt-1">
+                      Sử dụng trực tiếp Google GenAI SDK. Yêu cầu API Key thuộc dự án Google Cloud có kích hoạt Billing (Paid Tier) để tạo ảnh.
+                    </p>
+                    <div className="mt-3 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-sky-300 font-mono">
+                      <span>Google AI Studio</span>
+                      <span className={serverAiConfig?.hasGeminiKey ? 'text-emerald-400' : 'text-amber-400'}>
+                        {serverAiConfig?.hasGeminiKey ? '● Đã có Key' : '○ Chưa có Key'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Provider Detailed Config */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                    <Sliders className="w-4 h-4 text-amber-400" />
+                    <span>Cấu Hình Chi Tiết Engine & Thử Nghiệm Kết Nối</span>
+                  </h4>
+                  {/* Ping Test Buttons */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={aiTestLoading !== null}
+                      onClick={() => handleTestAi('pollinations')}
+                      className="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900/60 text-rose-300 border border-rose-800/80 text-[11px] font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                    >
+                      {aiTestLoading === 'pollinations' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <span>🌸</span>}
+                      Ping Pollinations
+                    </button>
+                    <button
+                      type="button"
+                      disabled={aiTestLoading !== null}
+                      onClick={() => handleTestAi('gemini')}
+                      className="px-2.5 py-1 rounded-lg bg-sky-950/60 hover:bg-sky-900/60 text-sky-300 border border-sky-800/80 text-[11px] font-bold flex items-center gap-1.5 transition-colors disabled:opacity-50"
+                    >
+                      {aiTestLoading === 'gemini' ? <RefreshCw className="w-3 h-3 animate-spin" /> : <span>💎</span>}
+                      Ping Gemini API
+                    </button>
+                  </div>
+                </div>
+
+                {/* Ping Test Result Alert */}
+                {aiTestResult && (
+                  <div
+                    className={`p-3 rounded-lg border text-xs flex items-start gap-2.5 ${
+                      aiTestResult.status === 'ok'
+                        ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200'
+                        : aiTestResult.status === 'warning'
+                        ? 'bg-amber-950/40 border-amber-500/50 text-amber-200'
+                        : 'bg-rose-950/40 border-rose-500/50 text-rose-200'
+                    }`}
+                  >
+                    <span className="text-base leading-none">
+                      {aiTestResult.status === 'ok' ? '✅' : aiTestResult.status === 'warning' ? '⚠️' : '❌'}
+                    </span>
+                    <div className="flex-1">
+                      <div className="font-bold flex items-center justify-between">
+                        <span>Kết quả kiểm tra {aiTestResult.provider === 'pollinations' ? 'Pollinations AI' : 'Gemini API'}:</span>
+                        {aiTestResult.latencyMs !== undefined && (
+                          <span className="font-mono text-[10px] opacity-80">{aiTestResult.latencyMs}ms</span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-[11px] opacity-90">{aiTestResult.message}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                  {/* Pollinations Model Setting */}
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-300 flex items-center gap-1.5">
+                      <span>🌸 Kiểu Mô Hình Pollinations:</span>
+                    </label>
+                    <select
+                      value={settings.aiModel.pollinationsModel || 'flux'}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          aiModel: {
+                            ...settings.aiModel,
+                            pollinationsModel: e.target.value as any,
+                          },
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white font-medium focus:border-amber-500 focus:outline-none"
+                    >
+                      <option value="flux">FLUX.1 3D Pixar Cinematic (Chuẩn đẹp nhất, chi tiết cao)</option>
+                      <option value="turbo">FLUX Turbo Fast (Siêu tốc độ 3 - 5 giây)</option>
+                      <option value="flux-realism">FLUX Realism (Ánh sáng tả thực)</option>
+                      <option value="flux-anime">FLUX Anime (Phong cách Anime sinh động)</option>
+                    </select>
+                    <p className="text-[10px] text-slate-400">
+                      Được tối ưu sẵn lời nhắc phong cách 3D Pixar hoạt hình cho Pi & Kem.
+                    </p>
+                  </div>
+
+                  {/* Gemini API Key Management */}
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-300 flex items-center justify-between">
+                      <span>💎 Google Gemini API Key:</span>
+                      {serverAiConfig?.hasGeminiKey && (
+                        <span className="text-[10px] font-mono text-emerald-400">
+                          Đã cấu hình: {serverAiConfig.geminiKeyMasked}
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      type="password"
+                      placeholder={serverAiConfig?.hasGeminiKey ? 'Đã có key. Nhập key mới nếu muốn đổi...' : 'Dán API Key (AIzaSy...) tại đây...'}
+                      value={inputGeminiKey}
+                      onChange={(e) => setInputGeminiKey(e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-white font-mono text-xs focus:border-sky-500 focus:outline-none"
+                    />
+                    <div className="flex items-center justify-between text-[10px] text-slate-400">
+                      <span>Tự động cập nhật vào biến môi trường khi bấm "Lưu cài đặt".</span>
+                      <a
+                        href="https://aistudio.google.com/app/apikey"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-sky-400 hover:underline inline-flex items-center gap-0.5"
+                      >
+                        Lấy API Key Google ↗
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Advanced Parameters */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-slate-300 flex items-center gap-2">
+                  <Cpu className="w-4 h-4 text-amber-400" />
+                  <span>2. Thông Số Kỹ Thuật Mô Hình & Khung Hình:</span>
+                </h4>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div className="space-y-1.5">
@@ -949,6 +1269,7 @@ export const SystemSettingsView: React.FC<SystemSettingsViewProps> = ({
                     className="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-950 text-white font-mono focus:border-amber-500 focus:outline-none"
                   />
                 </div>
+              </div>
               </div>
 
               <div className="space-y-3 pt-3 border-t border-slate-800 text-xs">

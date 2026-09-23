@@ -30,6 +30,9 @@ export const DEFAULT_SYSTEM_SETTINGS: SystemSettings = {
     showLanguageSwitcher: false,
   },
   aiModel: {
+    imageProvider: 'auto',
+    pollinationsModel: 'flux-3d',
+    geminiApiKey: '',
     defaultImageModel: 'imagen-3.0-generate-002',
     defaultVideoModel: 'veo-3.1-generate-preview',
     fallbackModel: 'imagen-3.0-fast-generate-001',

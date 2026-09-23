@@ -221,6 +221,9 @@ export interface SystemSettings {
     showLanguageSwitcher?: boolean;
   };
   aiModel: {
+    imageProvider?: 'gemini' | 'pollinations' | 'auto';
+    pollinationsModel?: 'flux' | 'flux-3d' | 'turbo' | 'flux-anime' | 'flux-realism';
+    geminiApiKey?: string;
     defaultImageModel: string;
     defaultVideoModel: string;
     fallbackModel: string;

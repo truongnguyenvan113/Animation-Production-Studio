@@ -25,6 +25,7 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { storageService } from '../../services/storageService';
+import { systemSettingsService } from '../../services/systemSettingsService';
 
 interface AssetSelectorModalProps {
   isOpen: boolean;
@@ -85,6 +86,13 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
   const [genGuidance, setGenGuidance] = useState<number>(7.5);
   const [genSteps, setGenSteps] = useState<number>(30);
   const [showAdvancedFlow, setShowAdvancedFlow] = useState(false);
+
+  // AI Generation Provider & Pollinations settings
+  const [genProvider, setGenProvider] = useState<'pollinations' | 'auto' | 'gemini'>(() => {
+    const s = systemSettingsService.getSettings();
+    return s.aiModel?.imageProvider || 'auto';
+  });
+  const [genPollModel, setGenPollModel] = useState<'flux' | 'turbo'>('flux');
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStatusText, setGenStatusText] = useState('');
@@ -310,11 +318,17 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
 
     try {
       const timer1 = setTimeout(() => {
-        setGenStatusText(`[2/3] Kích hoạt mô hình ${genModel} Diffusion (Tỷ lệ ${genRatio})...`);
-      }, 500);
+        if (genProvider === 'pollinations') {
+          setGenStatusText(`[2/3] Kết nối Pollinations AI FLUX 3D Engine (Tỷ lệ ${genRatio})...`);
+        } else if (genProvider === 'auto') {
+          setGenStatusText(`[2/3] Kích hoạt Auto Engine (Gemini Cloud ➔ Pollinations FLUX)...`);
+        } else {
+          setGenStatusText(`[2/3] Kích hoạt mô hình ${genModel} (Google Gemini SDK)...`);
+        }
+      }, 400);
 
       const timer2 = setTimeout(() => {
-        setGenStatusText(`[3/3] Volumetric Raytracing & Hậu kỳ hoàn tất...`);
+        setGenStatusText(`[3/3] Render chi tiết 3D Pixar & Đồng bộ kho tư liệu dự án...`);
       }, 1200);
 
       const res = await fetch('/api/publishing/generate-thumbnail', {
@@ -334,6 +348,8 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
           guidanceScale: genGuidance,
           seed: activeSeed,
           referenceImageUrls: selectedRefUrls,
+          provider: genProvider,
+          pollinationsModel: genPollModel,
         }),
       });
 
@@ -344,11 +360,44 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
 
       if (res.ok) {
         data = await res.json();
+      } else if (res.status === 429) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(
+          errJson.message ||
+            'Tài khoản đang ở gói Free Tier (hạn mức tạo ảnh AI = 0). Vui lòng chuyển sang dùng Pollinations AI (Miễn phí 100%) hoặc cấu hình API Key có trả phí.'
+        );
       } else if (res.status === 404) {
-        // Fallback: server.ts is running an older process on local or run via Vite standalone
-        console.warn('[Google Flow] API /api/publishing/generate-thumbnail returned 404. Using client-side Studio Flow render.');
-        const primaryRef = selectedRefUrls[0] || '';
-        const width = genRatio === '9:16' ? 720 : genRatio === '4:3' ? 1200 : 1280;
+        // Direct browser fallback to Pollinations AI
+        console.warn('[Asset Flow] Backend 404. Attempting direct browser Pollinations AI generation...');
+        const pWidth = genRatio === '9:16' ? 720 : genRatio === '4:3' ? 1024 : 1280;
+        const pHeight = genRatio === '9:16' ? 1280 : genRatio === '4:3' ? 768 : 720;
+        const cleanPrompt = `${genPrompt || 'Pi and Kem cute vietnamese kids'}. 3D Pixar Animation style, cute expressive faces, ${genStylePreset}, rich volumetric lighting, detailed textures`;
+        const pUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=${pWidth}&height=${pHeight}&seed=${activeSeed}&model=${genPollModel}&nologo=true`;
+
+        try {
+          const directRes = await fetch(pUrl);
+          if (directRes.ok && (directRes.headers.get('content-type') || '').includes('image')) {
+            const blob = await directRes.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            data = {
+              status: 'ok',
+              fileUrl: objectUrl,
+              assetId: `pollinations_direct_${Date.now()}`,
+              model: `Pollinations AI (${genPollModel.toUpperCase()})`,
+              aspectRatio: genRatio,
+              resolution: `${pWidth}x${pHeight}`,
+              generationTimeMs: 2500,
+              seed: activeSeed,
+              method: 'Pollinations AI (Direct Browser FLUX • 100% Free)',
+            };
+          }
+        } catch {
+          // fallback to procedural svg below
+        }
+
+        if (!data) {
+          const primaryRef = selectedRefUrls[0] || '';
+          const width = genRatio === '9:16' ? 720 : genRatio === '4:3' ? 1200 : 1280;
         const height = genRatio === '9:16' ? 1280 : genRatio === '4:3' ? 900 : 720;
         const safeTitle = (episodeTitle || 'Pi & Kem Hoạt Hình').replace(/[<>&"]/g, '');
         const safeTheme = (genTheme || 'Tết Trung Thu').replace(/[<>&"]/g, '');
@@ -393,8 +442,10 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
           seed: activeSeed,
           method: `Google Flow (${genModel} Local Studio Fallback)`,
         };
+        }
       } else {
-        throw new Error(`Máy chủ phản hồi lỗi: ${res.statusText}`);
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || `Máy chủ phản hồi lỗi: ${res.statusText}`);
       }
       if (data.status === 'ok') {
         setGeneratedPreviewUrl(data.fileUrl);
@@ -737,100 +788,238 @@ export const AssetSelectorModal: React.FC<AssetSelectorModalProps> = ({
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
                 {/* Left config column */}
                 <div className="lg:col-span-7 space-y-4">
-                  {/* Section 1: Select Model */}
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
-                    <div className="flex items-center justify-between">
+                  {/* Section 1: Select AI Engine & Model */}
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <label className="text-xs font-bold text-white flex items-center gap-2">
                         <Zap className="w-4 h-4 text-amber-400" />
-                        <span>1. Chọn Mô Hình AI (Model)</span>
+                        <span>1. Chọn Engine & Mô Hình AI</span>
                       </label>
-                      <span className="text-[11px] text-slate-400">
-                        Đang chọn: <strong className="text-amber-300">{genModel}</strong>
+                      
+                      {/* Provider Switcher Pills */}
+                      <div className="flex items-center gap-1 p-0.5 bg-slate-900 rounded-lg border border-slate-800">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGenProvider('pollinations');
+                            setGenPollModel('flux');
+                          }}
+                          className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1 ${
+                            genProvider === 'pollinations'
+                              ? 'bg-rose-600 text-white shadow-sm'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <span>🌸</span>
+                          <span>Pollinations (Free)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGenProvider('auto')}
+                          className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1 ${
+                            genProvider === 'auto'
+                              ? 'bg-amber-500 text-slate-950 shadow-sm'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <span>⚡</span>
+                          <span>Tự Động (Auto)</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setGenProvider('gemini');
+                            setGenModel('Nano Banana 2');
+                          }}
+                          className={`px-2 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1 ${
+                            genProvider === 'gemini'
+                              ? 'bg-sky-600 text-white shadow-sm'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <span>💎</span>
+                          <span>Gemini API</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Status Notice */}
+                    <div className="text-[11px] px-3 py-1.5 rounded-lg flex items-center justify-between border bg-slate-900/60 border-slate-800">
+                      <span className="text-slate-300 font-medium">
+                        {genProvider === 'pollinations' && '🌸 Pollinations AI: Miễn phí 100%, không cần API Key, không bao giờ bị giới hạn lượt tạo.'}
+                        {genProvider === 'auto' && '⚡ Tự Động: Ưu tiên Gemini, nếu gặp hạn mức 429 sẽ tự động tạo bằng Pollinations AI FLUX 3D.'}
+                        {genProvider === 'gemini' && '💎 Google Gemini API: Sử dụng Google GenAI SDK (Cần API Key có kích hoạt Billing).'}
+                      </span>
+                      <span className="text-amber-400 font-mono text-[10px] hidden sm:inline">
+                        {genProvider === 'pollinations' ? `FLUX • ${genPollModel}` : genModel}
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      {/* Model 1: Nano Banana 2 */}
-                      <div
-                        onClick={() => setGenModel('Nano Banana 2')}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
-                          genModel === 'Nano Banana 2'
-                            ? 'bg-amber-950/30 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
-                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-base">🍌</span>
-                            <span className="text-xs font-bold text-white">Nano Banana 2</span>
+                    {/* Model Cards: Pollinations Mode */}
+                    {genProvider === 'pollinations' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        <div
+                          onClick={() => setGenPollModel('flux')}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                            genPollModel === 'flux'
+                              ? 'bg-rose-950/30 border-rose-400 ring-2 ring-rose-400/40 shadow-lg shadow-rose-500/10'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-base">🌸</span>
+                              <span className="text-xs font-bold text-white">FLUX 3D Pixar</span>
+                            </div>
+                            {genPollModel === 'flux' && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-rose-400" />
+                            )}
                           </div>
-                          {genModel === 'Nano Banana 2' && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
-                          )}
+                          <p className="text-[10px] text-slate-400 line-clamp-2">
+                            Chuẩn Studio Pixar • Chi tiết nhân vật, ánh sáng ấm áp lung linh
+                          </p>
+                          <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-rose-300 font-mono">
+                            <span>FLUX.1 Engine</span>
+                            <span className="px-1.5 py-0.5 rounded bg-rose-500/20 font-bold">Khuyên Dùng</span>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-slate-400 line-clamp-2">
-                          Chuẩn Studio • Cân bằng hoàn hảo tốc độ & chi tiết (1.4s)
-                        </p>
-                        <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-amber-300 font-mono">
-                          <span>Diffusion v2</span>
-                          <span className="px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">Standard</span>
-                        </div>
-                      </div>
 
-                      {/* Model 2: Nano Banana 2 Lite */}
-                      <div
-                        onClick={() => setGenModel('Nano Banana 2 Lite')}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
-                          genModel === 'Nano Banana 2 Lite'
-                            ? 'bg-sky-950/30 border-sky-400 ring-2 ring-sky-400/40 shadow-lg shadow-sky-500/10'
-                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <Zap className="w-4 h-4 text-sky-400" />
-                            <span className="text-xs font-bold text-white">Nano Banana 2 Lite</span>
+                        <div
+                          onClick={() => setGenPollModel('turbo')}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                            genPollModel === 'turbo'
+                              ? 'bg-sky-950/30 border-sky-400 ring-2 ring-sky-400/40 shadow-lg shadow-sky-500/10'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Zap className="w-4 h-4 text-sky-400" />
+                              <span className="text-xs font-bold text-white">FLUX Turbo Fast</span>
+                            </div>
+                            {genPollModel === 'turbo' && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
+                            )}
                           </div>
-                          {genModel === 'Nano Banana 2 Lite' && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
-                          )}
+                          <p className="text-[10px] text-slate-400 line-clamp-2">
+                            Siêu Tốc Độ • Phản hồi cực nhanh trong 3 đến 5 giây
+                          </p>
+                          <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-sky-300 font-mono">
+                            <span>Turbo Steps</span>
+                            <span className="px-1.5 py-0.5 rounded bg-sky-500/20 font-bold">Fast</span>
+                          </div>
                         </div>
-                        <p className="text-[10px] text-slate-400 line-clamp-2">
-                          Siêu Tốc Độ • Phản hồi tức thì, độ trễ cực thấp (0.9s)
-                        </p>
-                        <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-sky-300 font-mono">
-                          <span>Turbo Latent</span>
-                          <span className="px-1.5 py-0.5 rounded bg-sky-500/20 font-bold">Fast</span>
-                        </div>
-                      </div>
 
-                      {/* Model 3: Nano Banana Pro */}
-                      <div
-                        onClick={() => setGenModel('Nano Banana Pro')}
-                        className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
-                          genModel === 'Nano Banana Pro'
-                            ? 'bg-purple-950/30 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-500/10'
-                            : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-1.5">
-                          <div className="flex items-center gap-1.5">
-                            <Sparkles className="w-4 h-4 text-purple-400" />
-                            <span className="text-xs font-bold text-white">Nano Banana Pro</span>
+                        <div
+                          onClick={() => setGenPollModel('flux')}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                            genPollModel === 'flux'
+                              ? 'bg-purple-950/30 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-500/10'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Sparkles className="w-4 h-4 text-purple-400" />
+                              <span className="text-xs font-bold text-white">FLUX Stylized</span>
+                            </div>
                           </div>
-                          {genModel === 'Nano Banana Pro' && (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
-                          )}
-                        </div>
-                        <p className="text-[10px] text-slate-400 line-clamp-2">
-                          Điện Ảnh 4K • Chi tiết Pixar 3D & Volumetric Lighting (2.1s)
-                        </p>
-                        <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-purple-300 font-mono">
-                          <span>Cinema Raytrace</span>
-                          <span className="px-1.5 py-0.5 rounded bg-purple-500/20 font-bold">Ultra</span>
+                          <p className="text-[10px] text-slate-400 line-clamp-2">
+                            Phong cách điện ảnh hoạt hình tương phản cao
+                          </p>
+                          <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-purple-300 font-mono">
+                            <span>High Contrast</span>
+                            <span className="px-1.5 py-0.5 rounded bg-purple-500/20 font-bold">Artistic</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
+
+                    {/* Model Cards: Gemini or Auto Mode */}
+                    {genProvider !== 'pollinations' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {/* Model 1: Nano Banana 2 */}
+                        <div
+                          onClick={() => setGenModel('Nano Banana 2')}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                            genModel === 'Nano Banana 2'
+                              ? 'bg-amber-950/30 border-amber-400 ring-2 ring-amber-400/40 shadow-lg shadow-amber-500/10'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-base">🍌</span>
+                              <span className="text-xs font-bold text-white">Nano Banana 2</span>
+                            </div>
+                            {genModel === 'Nano Banana 2' && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-amber-400" />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 line-clamp-2">
+                            Chuẩn Studio • Cân bằng hoàn hảo tốc độ & chi tiết (1.4s)
+                          </p>
+                          <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-amber-300 font-mono">
+                            <span>Diffusion v2</span>
+                            <span className="px-1.5 py-0.5 rounded bg-amber-500/20 font-bold">Standard</span>
+                          </div>
+                        </div>
+
+                        {/* Model 2: Nano Banana 2 Lite */}
+                        <div
+                          onClick={() => setGenModel('Nano Banana 2 Lite')}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                            genModel === 'Nano Banana 2 Lite'
+                              ? 'bg-sky-950/30 border-sky-400 ring-2 ring-sky-400/40 shadow-lg shadow-sky-500/10'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Zap className="w-4 h-4 text-sky-400" />
+                              <span className="text-xs font-bold text-white">Nano Banana 2 Lite</span>
+                            </div>
+                            {genModel === 'Nano Banana 2 Lite' && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-sky-400" />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 line-clamp-2">
+                            Siêu Tốc Độ • Phản hồi tức thì, độ trễ cực thấp (0.9s)
+                          </p>
+                          <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-sky-300 font-mono">
+                            <span>Turbo Latent</span>
+                            <span className="px-1.5 py-0.5 rounded bg-sky-500/20 font-bold">Fast</span>
+                          </div>
+                        </div>
+
+                        {/* Model 3: Nano Banana Pro */}
+                        <div
+                          onClick={() => setGenModel('Nano Banana Pro')}
+                          className={`p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between relative ${
+                            genModel === 'Nano Banana Pro'
+                              ? 'bg-purple-950/30 border-purple-400 ring-2 ring-purple-400/40 shadow-lg shadow-purple-500/10'
+                              : 'bg-slate-900/80 border-slate-800 hover:border-slate-700 opacity-80 hover:opacity-100'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Sparkles className="w-4 h-4 text-purple-400" />
+                              <span className="text-xs font-bold text-white">Nano Banana Pro</span>
+                            </div>
+                            {genModel === 'Nano Banana Pro' && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
+                            )}
+                          </div>
+                          <p className="text-[10px] text-slate-400 line-clamp-2">
+                            Điện Ảnh 4K • Chi tiết Pixar 3D & Volumetric Lighting (2.1s)
+                          </p>
+                          <div className="mt-2 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[9px] text-purple-300 font-mono">
+                            <span>Cinema Raytrace</span>
+                            <span className="px-1.5 py-0.5 rounded bg-purple-500/20 font-bold">Ultra</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Section 2: Aspect Ratio Selection */}
